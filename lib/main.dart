@@ -1,4 +1,6 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:zporter_board/app.dart';
@@ -17,7 +19,12 @@ void main() async{
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight
   ]).then((v){
-    runApp(const App());
+    runApp(DevicePreview(
+        enabled: false,
+      builder: (context) {
+        return const App();
+      }
+    ));
   });
 
 }

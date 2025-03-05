@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:zporter_board/core/common/components/timer_component.dart';
+import 'package:zporter_board/core/common/components/timer/timer_component.dart';
+import 'package:zporter_board/core/common/components/timer/timer_controller.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 
@@ -11,6 +12,7 @@ class ScoreBoardHeader extends StatefulWidget {
 }
 
 class _ScoreBoardHeaderState extends State<ScoreBoardHeader> {
+  TimerController _timerController = TimerController();
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -20,7 +22,7 @@ class _ScoreBoardHeaderState extends State<ScoreBoardHeader> {
         Text("HOME", style: Theme.of(context).textTheme.displayMedium!.copyWith(
           color: ColorManager.grey
         ),),
-        TimerComponent(startMinutes: 45, startSeconds: 30),
+        TimerComponent(startMinutes: 45, startSeconds: 30, controller: _timerController,),
         Text("AWAY", style: Theme.of(context).textTheme.displayMedium!.copyWith(
             color: ColorManager.grey
         ),),
