@@ -4,6 +4,7 @@ import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/route_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/scoreboard/presentation/view/scoreboard_screen.dart';
+import 'package:zporter_board/features/time/presentation/view/timeboard_screen.dart';
 
 class BoardScreenTablet extends StatefulWidget {
   const BoardScreenTablet({super.key});
@@ -19,7 +20,7 @@ class _BoardScreenTabletState extends State<BoardScreenTablet> with SingleTicker
   // List of tab names and content to display
   final List<Map<String, dynamic>> _tabs = [
     {'title': 'Scoreboard', 'content': ScoreBoardScreen()},
-    {'title': 'Time', 'content': 'Time Content'},
+    {'title': 'Time', 'content': TimeboardScreen()},
     {'title': 'Substitute', 'content': 'Substitute Content'},
     {'title': 'Tactic', 'content': 'Tactic Content'},
     {'title': 'Analytics', 'content': 'Analytics Content'},

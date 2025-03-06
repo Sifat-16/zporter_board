@@ -59,44 +59,6 @@ class _ScoreCardState extends State<ScoreCard> {
     });
   }
 
-  // Helper widget to create a custom transition for each digit
-  Widget _buildDigitColumn(int team, String digit) {
-    int digitValue = (team == 1)
-        ? (digit == 'first' ? _teamAFirstDigit : _teamASecondDigit)
-        : (digit == 'first' ? _teamBFirstDigit : _teamBSecondDigit);
-
-    return Padding(
-      padding:  EdgeInsets.symmetric(vertical: AppSize.s8, horizontal: AppSize.s24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedFlipCounter(
-            value: digitValue,
-            textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontSize: AppSize.s160,
-              fontWeight: FontWeight.bold,
-              color: ColorManager.white
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                child:  Icon(Icons.keyboard_arrow_up, color: Colors.grey, size: AppSize.s48,),
-                onTap: () => _incrementDigit(team, digit),
-              ),
-
-              GestureDetector(
-                child:  Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: AppSize.s48,),
-                onTap: () => _decrementDigit(team, digit),
-              ),
-
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +66,7 @@ class _ScoreCardState extends State<ScoreCard> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.black.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

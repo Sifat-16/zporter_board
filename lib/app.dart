@@ -1,4 +1,5 @@
 import 'package:bot_toast/bot_toast.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -28,9 +29,11 @@ class _AppState extends State<App> {
         builder: (_,child) {
           return MaterialApp.router(
             routerConfig: sl<GoRouter>(),
+            locale: DevicePreview.locale(context),
             builder: (context, child){
               final botToastBuilder = BotToastInit();
               child = botToastBuilder(context, child);
+              child = DevicePreview.appBuilder(context, child);
               return child;
             },
             debugShowCheckedModeBanner: false,
