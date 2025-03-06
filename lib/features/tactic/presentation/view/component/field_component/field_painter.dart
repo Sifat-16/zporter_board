@@ -8,11 +8,10 @@ import 'package:zporter_board/core/utils/player/PlayerDataModel.dart';
 import 'field_config.dart';
 
 class FieldPainter extends CustomPainter {
-  FieldPainter({required this.config, this.players=const[], this.isDraggingOver=false});
+  FieldPainter({required this.config,});
 
   FieldConfig config;
-  List<PlayerDataModel> players;
-  bool isDraggingOver;
+
 
   // We'll use just one paint for all the drawings
   final Paint fieldPaint = Paint();
@@ -41,14 +40,13 @@ class FieldPainter extends CustomPainter {
     drawPenaltyArea(canvas, field);
 
     // Draw players based on their offsets
-    drawPlayers(canvas, field);
+    // drawPlayers(canvas, field);
   }
 
   void drawBorders(Canvas canvas, Rect field) {
     Path path = Path();
     path.addRect(field);
 
-    debug(data: "Is dragging over here ${isDraggingOver}");
 
     canvas.drawPath(path, fieldPaint);
   }
@@ -160,27 +158,29 @@ class FieldPainter extends CustomPainter {
     return asin(height / config.midfieldCircleSize);
   }
 
-  // Draw players based on their offsets
-  void drawPlayers(Canvas canvas, Rect field) {
-    final Paint playerPaint = Paint()
-      ..color = ColorManager.green
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0; // Set the stroke width
-    for (var player in players) {
-      // Assuming PlayerDataModel has an `offset` property that returns the player's position
-      final playerOffset = player.offset;
 
-      // Ensure that the player's offset is within the field boundaries
-      if(playerOffset!=null){
-        if (field.contains(playerOffset)) {
-          // Draw player (a simple circle for now, you can replace with any custom drawing)
-          canvas.drawCircle(playerOffset, config.playersSize, playerPaint);
 
-        }
-      }
 
-    }
-  }
+  // // Draw players based on their offsets
+  // void drawPlayers(Canvas canvas, Rect field) {
+  //   final Paint playerPaint = Paint()
+  //     ..color = ColorManager.green
+  //     ..style = PaintingStyle.stroke
+  //     ..strokeWidth = 2.0; // Set the stroke width
+  //   for (var player in players) {
+  //     // Assuming PlayerDataModel has an `offset` property that returns the player's position
+  //     final playerOffset = player.offset;
+  //
+  //     // Ensure that the player's offset is within the field boundaries
+  //     if(playerOffset!=null){
+  //       if (field.contains(playerOffset)) {
+  //         // Draw player (a simple circle for now, you can replace with any custom drawing)
+  //         canvas.drawCircle(playerOffset, config.playersSize, playerPaint);
+  //
+  //       }
+  //     }
+  //   }
+  // }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;

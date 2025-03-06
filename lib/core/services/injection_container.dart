@@ -9,6 +9,7 @@ import 'package:zporter_board/features/auth/domain/repository/auth_repository.da
 import 'package:zporter_board/features/auth/domain/usecase/auth_status_usecase.dart';
 import 'package:zporter_board/features/auth/domain/usecase/sign_in_with_google_usecase.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
+import 'package:zporter_board/features/tactic/presentation/view_model/tactical_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -40,5 +41,7 @@ Future<void> init() async {
 
 
 
+  //tactical board
+  sl.registerLazySingleton<TacticalBloc>(()=>TacticalBloc());
 
 }

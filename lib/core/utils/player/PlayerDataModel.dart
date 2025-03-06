@@ -1,8 +1,19 @@
 import 'dart:ui';
 
-class PlayerDataModel{
+enum PlayerType{
+  HOME,
+  OTHER,
+  AWAY
+}
+
+class PlayerModel{
   String id;
-  String type;
+  String role;
+  int index;
   Offset? offset;
-  PlayerDataModel({required this.id, required this.type, this.offset});
+  String? imagePath;
+  double rotation;
+  PlayerType playerType;
+  PlayerModel({required this.id, required this.role, this.offset, required this.index, this.imagePath,
+    this.rotation = 0.0, required this.playerType});
 }

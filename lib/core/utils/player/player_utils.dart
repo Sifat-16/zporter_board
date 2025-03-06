@@ -6,13 +6,16 @@ class PlayerUtils{
     "GK", "RB", "LB", "CB", "CM", "AM", "AM", "S", "RW", "LW", "FW", "CAM", "CDM", "RM", "GK", "RB", "LB", "CB", "CB", "CM","AM","AM","S"
   ];
 
-  static List<PlayerDataModel> generatePlayerModelList(){
-    List<PlayerDataModel> generatedPlayers = [];
+  static List<PlayerModel> generatePlayerModelList({required PlayerType playerType}){
+    List<PlayerModel> generatedPlayers = [];
+    int index=1;
     for(String p in players){
       String id = Uuid().v4();
-      PlayerDataModel playerDataModel = PlayerDataModel(id: id, type: p);
+      PlayerModel playerDataModel = PlayerModel(id: id, role: p, index: index, playerType: playerType);
       generatedPlayers.add(playerDataModel);
+      index++;
     }
     return generatedPlayers;
   }
 }
+
