@@ -11,6 +11,7 @@ class ColorManager{
   static const Color yellowLight = Color(0xffFF9607);
   static const Color blue = Color(0xff4654EA);
   static const Color green = Color(0xff09E099);
-
+  static const Color red = Color(0xffFF1D00);
+  static const Color blueAccent = Color(0xff03C6FF);
   static const Color transparent = Colors.transparent;
 }

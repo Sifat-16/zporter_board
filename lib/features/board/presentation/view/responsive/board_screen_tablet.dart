@@ -4,6 +4,8 @@ import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/route_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/scoreboard/presentation/view/scoreboard_screen.dart';
+import 'package:zporter_board/features/substitute/presentation/view/substituteboard_screen.dart';
+import 'package:zporter_board/features/tactic/presentation/view/tacticboard_screen.dart';
 import 'package:zporter_board/features/time/presentation/view/timeboard_screen.dart';
 
 class BoardScreenTablet extends StatefulWidget {
@@ -21,8 +23,8 @@ class _BoardScreenTabletState extends State<BoardScreenTablet> with SingleTicker
   final List<Map<String, dynamic>> _tabs = [
     {'title': 'Scoreboard', 'content': ScoreBoardScreen()},
     {'title': 'Time', 'content': TimeboardScreen()},
-    {'title': 'Substitute', 'content': 'Substitute Content'},
-    {'title': 'Tactic', 'content': 'Tactic Content'},
+    {'title': 'Substitute', 'content': SubstituteboardScreen()},
+    {'title': 'Tactic', 'content': TacticboardScreen()},
     {'title': 'Analytics', 'content': 'Analytics Content'},
   ];
 
