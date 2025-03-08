@@ -93,6 +93,7 @@ class _BoardScreenTabletState extends State<BoardScreenTablet> with SingleTicker
       ),
       body: PageView(
         controller: _pageController,
+        physics: NeverScrollableScrollPhysics(),
         onPageChanged: (index) {
           _tabController.animateTo(index); // Sync TabBar with PageView
         },

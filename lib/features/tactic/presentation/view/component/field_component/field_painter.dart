@@ -3,16 +3,17 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
-import 'package:zporter_board/core/utils/player/PlayerDataModel.dart';
+import 'package:zporter_board/features/tactic/presentation/view/component/common/arrow_head.dart';
 
 import 'field_config.dart';
+import 'field_draggable_item.dart';
 
 class FieldPainter extends CustomPainter {
-  FieldPainter({required this.config, this.players=const[], this.isDraggingOver=false});
+  FieldPainter({required this.config, required this.items});
 
   FieldConfig config;
-  List<PlayerDataModel> players;
-  bool isDraggingOver;
+  List<FieldDraggableItem> items; // Add items list
+
 
   // We'll use just one paint for all the drawings
   final Paint fieldPaint = Paint();
@@ -41,14 +42,14 @@ class FieldPainter extends CustomPainter {
     drawPenaltyArea(canvas, field);
 
     // Draw players based on their offsets
-    drawPlayers(canvas, field);
+    // drawPlayers(canvas, field);
+    drawArrowHeadLines(canvas);
   }
 
   void drawBorders(Canvas canvas, Rect field) {
     Path path = Path();
     path.addRect(field);
 
-    debug(data: "Is dragging over here ${isDraggingOver}");
 
     canvas.drawPath(path, fieldPaint);
   }
@@ -160,27 +161,24 @@ class FieldPainter extends CustomPainter {
     return asin(height / config.midfieldCircleSize);
   }
 
-  // Draw players based on their offsets
-  void drawPlayers(Canvas canvas, Rect field) {
-    final Paint playerPaint = Paint()
-      ..color = ColorManager.green
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0; // Set the stroke width
-    for (var player in players) {
-      // Assuming PlayerDataModel has an `offset` property that returns the player's position
-      final playerOffset = player.offset;
 
-      // Ensure that the player's offset is within the field boundaries
-      if(playerOffset!=null){
-        if (field.contains(playerOffset)) {
-          // Draw player (a simple circle for now, you can replace with any custom drawing)
-          canvas.drawCircle(playerOffset, config.playersSize, playerPaint);
+  void drawArrowHeadLines(Canvas canvas) {
+    for (final item in items) {
+      if (item is ArrowHead) {
+        final parentOffset = item.parent.offset;
+        final arrowOffset = item.offset;
 
+        if (parentOffset != null && arrowOffset != null) {
+          final linePaint = Paint()
+            ..color = Colors.red // Customize line color
+            ..strokeWidth = 2; // Customize line width
+
+          canvas.drawLine(parentOffset, arrowOffset, linePaint);
         }
       }
-
     }
   }
+
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
