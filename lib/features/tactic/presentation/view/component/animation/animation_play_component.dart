@@ -57,7 +57,7 @@ class _AnimationPlayComponentState extends State<AnimationPlayComponent>
 
     for (final item in itemPosition) {
       if (item is ArrowHead) {
-        _animateItemToArrowHead(item, item.offset!);
+        _animateItemToArrowHead(item.parent, item.offset!);
       }
     }
   }
@@ -78,6 +78,9 @@ class _AnimationPlayComponentState extends State<AnimationPlayComponent>
     // Add listeners to update position and handle the animation lifecycle
     animation.addListener(() {
       setState(() {
+        List<FieldDraggableItem> itemPosition = itemsToAnimate[index];
+        int parentIndex = itemPosition.indexWhere((e)=>e.id==parent.id);
+        itemPosition[parentIndex].offset = animation.value;
         parent.offset = animation.value;
       });
     });
@@ -86,6 +89,8 @@ class _AnimationPlayComponentState extends State<AnimationPlayComponent>
       if (status == AnimationStatus.completed) {
         // Reset the controller after animation completion
         animationController.dispose();
+        debug(data: "Animation complete");
+        _handleAnimationComplete();
       }
     });
 
@@ -94,15 +99,11 @@ class _AnimationPlayComponentState extends State<AnimationPlayComponent>
   }
 
   void _handleAnimationComplete() {
-    _activeAnimations--; // Reduce active animations count
-    if (_activeAnimations == 0) {
-      // If all animations in current index are completed, move to the next one
-      if (index < itemsToAnimate.length - 1) {
-        setState(() {
-          index++; // Move to the next animation set
-        });
-        _startAnimation(); // Start the next animation
-      }
+    if (index < itemsToAnimate.length - 1) {
+      setState(() {
+        index++; // Move to the next animation set
+      });
+      _startAnimation(); // Start the next animation
     }
   }
 
@@ -166,17 +167,14 @@ class _AnimationPlayComponentState extends State<AnimationPlayComponent>
                 ],
               ),
 
-              TextButton(onPressed: (){
-                for (var item in itemPosition) {
-                  if(item is ArrowHead){
-                    _animateItemToArrowHead(item.parent, item.offset!, duration: Duration(seconds: 2));
-                  }
-
-                }
-
-
-
-              }, child: Text("Play"))
+              // TextButton(onPressed: (){
+              //   for (var item in itemPosition) {
+              //     if(item is ArrowHead){
+              //       _animateItemToArrowHead(item.parent, item.offset!, duration: Duration(seconds: 2));
+              //     }
+              //
+              //   }
+              // }, child: Text("Play"))
             ],
           ),
         );

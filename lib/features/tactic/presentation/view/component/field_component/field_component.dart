@@ -379,7 +379,6 @@ class _FieldComponentState extends State<FieldComponent> with AutomaticKeepAlive
                 CustomButton(
                   onTap: (){
                     context.read<AnimationBloc>().add(PlayAnimationEvent());
-
                   },
                   fillColor: ColorManager.green,
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -419,7 +418,7 @@ class _FieldComponentState extends State<FieldComponent> with AutomaticKeepAlive
           children: <Widget>[
             Expanded(
               flex: 5,
-              child: AnimationPlayComponent(animations: globalAnimations,),
+              child: AnimationPlayComponent(animations: globalAnimations),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
