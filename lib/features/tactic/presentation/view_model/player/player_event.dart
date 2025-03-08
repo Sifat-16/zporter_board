@@ -1,48 +1,48 @@
 import 'package:equatable/equatable.dart';
-import 'package:zporter_board/core/utils/player/PlayerDataModel.dart';
+import 'package:zporter_board/features/tactic/presentation/view/component/player/PlayerDataModel.dart';
 
-sealed class TacticalEvent extends Equatable{
+sealed class PlayerEvent extends Equatable{
 
   @override
   // TODO: implement props
   List<Object?> get props => [];
 }
 
-class TacticalBoardLoadEvent extends TacticalEvent{
+class PlayerLoadEvent extends PlayerEvent{
   final List<PlayerModel> home;
   final List<PlayerModel> other;
   final List<PlayerModel> away;
   final List<PlayerModel> playing;
 
-  TacticalBoardLoadEvent({required this.away, required this.home, required this.other, required this.playing});
+  PlayerLoadEvent({required this.away, required this.home, required this.other, required this.playing});
 
   @override
   // TODO: implement props
   List<Object?> get props => [home, away, other, playing];
 }
 
-class TacticalBoardLoadPlayerTypeEvent extends TacticalEvent{
+class PlayerTypeLoadEvent extends PlayerEvent{
   final PlayerType playerType;
 
-  TacticalBoardLoadPlayerTypeEvent({required this.playerType});
+  PlayerTypeLoadEvent({required this.playerType});
 
   @override
   // TODO: implement props
   List<Object?> get props => [playerType];
 }
 
-class TacticalBoardLoadPlayerPlayingEvent extends TacticalEvent{
+class PlayerPlayingLoadEvent extends PlayerEvent{
 
-  TacticalBoardLoadPlayerPlayingEvent();
+  PlayerPlayingLoadEvent();
 
   @override
   // TODO: implement props
   List<Object?> get props => [];
 }
 
-class TacticalBoardPlayerAddToPlayingEvent extends TacticalEvent{
+class PlayerAddToPlayingEvent extends PlayerEvent{
   final PlayerModel playerModel;
-  TacticalBoardPlayerAddToPlayingEvent({required this.playerModel});
+  PlayerAddToPlayingEvent({required this.playerModel});
   @override
   // TODO: implement props
   List<Object?> get props => [playerModel];

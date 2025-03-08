@@ -6,7 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zporter_board/core/theme/app_theme.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
-import 'package:zporter_board/features/tactic/presentation/view_model/tactical_bloc.dart';
+import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_bloc.dart';
+import 'package:zporter_board/features/tactic/presentation/view_model/equipment/equipment_bloc.dart';
+import 'package:zporter_board/features/tactic/presentation/view_model/form/form_bloc.dart';
+import 'package:zporter_board/features/tactic/presentation/view_model/player/player_bloc.dart';
 
 import 'core/services/injection_container.dart';
 
@@ -23,7 +26,10 @@ class _AppState extends State<App> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>(create: (context)=> sl<AuthBloc>()),
-        BlocProvider<TacticalBloc>(create: (context)=> sl<TacticalBloc>())
+        BlocProvider<PlayerBloc>(create: (context)=> sl<PlayerBloc>()),
+        BlocProvider<EquipmentBloc>(create: (context)=> sl<EquipmentBloc>()),
+        BlocProvider<FormBloc>(create: (context)=> sl<FormBloc>()),
+        BlocProvider<AnimationBloc>(create: (context)=>sl<AnimationBloc>())
       ],
       child: ScreenUtilInit(
           minTextAdapt: true,

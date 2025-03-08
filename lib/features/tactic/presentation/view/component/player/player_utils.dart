@@ -1,5 +1,6 @@
 import 'package:uuid/uuid.dart';
-import 'package:zporter_board/core/utils/player/PlayerDataModel.dart';
+
+import 'PlayerDataModel.dart';
 
 class PlayerUtils{
   static List<String> players = [

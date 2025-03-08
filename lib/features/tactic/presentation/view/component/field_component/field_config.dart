@@ -59,7 +59,7 @@ class FieldConfig {
 }
 
 final defaultFieldConfig = FieldConfig(
-    margins: 4.0,
+    margins: 14.0,
     strokeWidth: 2,
     cornerWidth: 20.0,
     penaltyAreaSize: const Size(210, 70),
@@ -69,6 +69,18 @@ final defaultFieldConfig = FieldConfig(
     pointsSize: 4,
     playersSize: 40,
     ballSize: 25);
+
+final defaultFieldMiniConfig = FieldConfig(
+    margins: 1.40,
+    strokeWidth: .2,
+    cornerWidth: 2.0,
+    penaltyAreaSize: const Size(21.0, 7.0),
+    penaltyY: 5.0,
+    keeperAreaSize: const Size(7.5, 2.5),
+    midfieldCircleSize: 5.00,
+    pointsSize: .4,
+    playersSize: 4.0,
+    ballSize: 2.5);
 
 FieldConfig getDefaultFieldConfig() {
   return FieldConfig.autosizedAreaFromHeight(

@@ -9,7 +9,10 @@ import 'package:zporter_board/features/auth/domain/repository/auth_repository.da
 import 'package:zporter_board/features/auth/domain/usecase/auth_status_usecase.dart';
 import 'package:zporter_board/features/auth/domain/usecase/sign_in_with_google_usecase.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
-import 'package:zporter_board/features/tactic/presentation/view_model/tactical_bloc.dart';
+import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_bloc.dart';
+import 'package:zporter_board/features/tactic/presentation/view_model/equipment/equipment_bloc.dart';
+import 'package:zporter_board/features/tactic/presentation/view_model/form/form_bloc.dart';
+import 'package:zporter_board/features/tactic/presentation/view_model/player/player_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -41,7 +44,16 @@ Future<void> init() async {
 
 
 
-  //tactical board
-  sl.registerLazySingleton<TacticalBloc>(()=>TacticalBloc());
+  //player
+  sl.registerLazySingleton<PlayerBloc>(()=>PlayerBloc());
+
+  //equipment
+  sl.registerLazySingleton<EquipmentBloc>(()=>EquipmentBloc());
+
+  //form
+  sl.registerLazySingleton<FormBloc>(()=>FormBloc());
+
+  //animation
+  sl.registerLazySingleton<AnimationBloc>(()=>AnimationBloc());
 
 }

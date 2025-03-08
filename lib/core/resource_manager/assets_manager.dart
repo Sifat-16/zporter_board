@@ -7,4 +7,6 @@ class AssetsManager {
 
   static const splashLogo = '$_baseImage/splash.svg';
   static const logo = '$_baseImage/logo.png';
+  static const football = '$_baseImage/football.png';
+  static const line = '$_baseImage/line.png';
 }
