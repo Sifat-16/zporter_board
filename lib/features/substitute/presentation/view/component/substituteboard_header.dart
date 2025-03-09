@@ -38,8 +38,7 @@ class _SubstituteboardHeaderState extends State<SubstituteboardHeader> {
         Align(
           alignment: Alignment.center,
           child: TimerComponent(
-            startMinutes: 45,
-            startSeconds: 30,
+            elapsedSeconds: 1025,
             controller: _timerController,
             textColor: ColorManager.grey,
           ),

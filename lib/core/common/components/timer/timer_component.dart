@@ -2,11 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/common/components/timer/timer_controller.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
-import 'package:zporter_board/core/utils/log/debugger.dart';
 
 class TimerComponent extends StatefulWidget {
-  final int startMinutes;
-  final int startSeconds;
+  final int elapsedSeconds;  // Pass elapsed time in seconds
+  final bool isRunning;  // Determine whether the timer should run
   final Color? textColor;
   final double? textSize;
   final double? letterSpacing;
@@ -14,13 +13,13 @@ class TimerComponent extends StatefulWidget {
   final VoidCallback? onStart;
   final VoidCallback? onStop;
   final VoidCallback? onPause;
-  final TimerController controller; // Add this
+  final TimerController controller; // Controller for the timer
 
   const TimerComponent({
     super.key,
-    required this.startMinutes,
-    required this.startSeconds,
-    required this.controller, // Add this
+    required this.elapsedSeconds,
+    this.isRunning = false,
+    required this.controller, // Pass the controller
     this.textColor,
     this.textSize,
     this.fontWeight,
@@ -34,43 +33,64 @@ class TimerComponent extends StatefulWidget {
   _TimerComponentState createState() => _TimerComponentState();
 }
 
-class _TimerComponentState extends State<TimerComponent> {
+class _TimerComponentState extends State<TimerComponent> with TickerProviderStateMixin {
+  late int _elapsedSeconds;
   late int _minutes;
   late int _seconds;
   Timer? _timer;
   bool _isRunning = false;
-  bool _isPaused = false;
 
   @override
   void initState() {
     super.initState();
-    _minutes = widget.startMinutes;
-    _seconds = widget.startSeconds;
+    _elapsedSeconds = widget.elapsedSeconds;
+    _minutes = _elapsedSeconds ~/ 60;
+    _seconds = _elapsedSeconds % 60;
 
-    // Attach the controller's methods
+
+    // Attach controller's methods
     widget.controller.attach(
       startTimer: startTimer,
       pauseTimer: pauseTimer,
       stopTimer: stopTimer,
     );
+
+    // Start the timer if it is running initially
+    if (widget.isRunning) {
+      startTimer();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant TimerComponent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update when widget parameters change
+    if (widget.isRunning) {
+      startTimer();
+    } else {
+      stopTimer();
+    }
+
+    if (widget.elapsedSeconds != _elapsedSeconds) {
+      setState(() {
+        _elapsedSeconds = widget.elapsedSeconds;
+        _minutes = _elapsedSeconds ~/ 60;
+        _seconds = _elapsedSeconds % 60;
+      });
+    }
   }
 
   void startTimer() {
-
-    if (!_isRunning || _isPaused) {
+    if (!_isRunning) {
       setState(() {
         _isRunning = true;
-        _isPaused = false;
       });
 
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         setState(() {
-          if (_seconds < 59) {
-            _seconds++;
-          } else {
-            _seconds = 0;
-            _minutes++;
-          }
+          _elapsedSeconds++;
+          _minutes = _elapsedSeconds ~/ 60;
+          _seconds = _elapsedSeconds % 60;
         });
       });
 
@@ -83,9 +103,6 @@ class _TimerComponentState extends State<TimerComponent> {
       _timer?.cancel();
       setState(() {
         _isRunning = false;
-        _isPaused = false;
-        _minutes = widget.startMinutes;
-        _seconds = widget.startSeconds;
       });
 
       widget.onStop?.call();
@@ -93,10 +110,10 @@ class _TimerComponentState extends State<TimerComponent> {
   }
 
   void pauseTimer() {
-    if (_isRunning && !_isPaused) {
+    if (_isRunning) {
       _timer?.cancel();
       setState(() {
-        _isPaused = true;
+        _isRunning = false;
       });
 
       widget.onPause?.call();
@@ -118,12 +135,16 @@ class _TimerComponentState extends State<TimerComponent> {
       letterSpacing: widget.letterSpacing,
     );
 
-
     return FittedBox(
       fit: BoxFit.fitWidth,
-      child: Text(
-        "${_minutes.toString().padLeft(2, '0')}:${_seconds.toString().padLeft(2, '0')}",
-        style: textStyle,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "${_minutes.toString().padLeft(2, '0')}:${_seconds.toString().padLeft(2, '0')}",
+            style: textStyle,
+          ),
+        ],
       ),
     );
   }

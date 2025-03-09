@@ -7,9 +7,11 @@ import 'package:zporter_board/core/common/components/pagination/pagination_compo
 import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
+import 'package:zporter_board/core/utils/log/debugger.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/presentation/view/component/match_pagination_component.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
+import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
 import 'package:zporter_board/features/scoreboard/presentation/view/component/score_board_header.dart';
 import 'package:zporter_board/features/scoreboard/presentation/view/component/score_card.dart';
@@ -29,6 +31,7 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet> with Au
   Widget build(BuildContext context) {
     super.build(context);
     return MultiBlocListener(
+
       listeners: [
         BlocListener<MatchBloc, MatchState>(
             listener: (BuildContext context, MatchState state){
@@ -38,17 +41,23 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet> with Au
                   footballMatch = matchBloc.selectedMatch;
                 });
               }
-
             }
         )
+
       ],
       child: BoardContainer(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            ScoreBoardHeader(),
+            ScoreBoardHeader(
+              matchTimes: footballMatch?.matchTime??[],
+            ),
 
-            ScoreCard(),
+            ScoreCard(matchScore: footballMatch?.matchScore, updateMatchScore: (matchScore){
+              if(footballMatch!=null){
+                context.read<MatchBloc>().add(MatchScoreUpdateEvent(newScore:matchScore, matchId:footballMatch!.id));
+              }
+            },),
 
             SizedBox(
               child: MatchPaginationComponent()

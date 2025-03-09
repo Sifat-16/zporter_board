@@ -2,19 +2,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
+import 'package:zporter_board/features/scoreboard/data/model/score.dart';
 
-class ScoreComponent extends StatelessWidget {
-  const ScoreComponent({super.key});
+class ScoreComponent extends StatefulWidget {
+  const ScoreComponent({super.key, required this.matchScore});
 
+  final MatchScore matchScore;
+
+  @override
+  State<ScoreComponent> createState() => _ScoreComponentState();
+}
+
+class _ScoreComponentState extends State<ScoreComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-
       child: Center(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("4", style: Theme.of(context).textTheme.titleLarge!.copyWith(
+            Text("${widget.matchScore.homeScore}", style: Theme.of(context).textTheme.titleLarge!.copyWith(
               color: ColorManager.green,
               fontWeight: FontWeight.bold,
               fontSize: AppSize.s56
@@ -24,7 +31,7 @@ class ScoreComponent extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 fontSize: AppSize.s56
             ),),
-            Text("3", style: Theme.of(context).textTheme.titleLarge!.copyWith(
+            Text("${widget.matchScore.awayScore}", style: Theme.of(context).textTheme.titleLarge!.copyWith(
                 color: ColorManager.green,
                 fontWeight: FontWeight.bold,
                 fontSize: AppSize.s56

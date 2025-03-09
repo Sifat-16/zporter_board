@@ -3,60 +3,124 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
+import 'package:zporter_board/features/match/data/model/football_match.dart';
+import 'package:zporter_board/features/scoreboard/data/model/score.dart';
 
 class ScoreCard extends StatefulWidget {
-  const ScoreCard({Key? key}) : super(key: key);
+  const ScoreCard({Key? key, required this.matchScore, required this.updateMatchScore}) : super(key: key);
+  final MatchScore? matchScore;
+  final Function(MatchScore matchScore) updateMatchScore;
 
   @override
   _ScoreCardState createState() => _ScoreCardState();
 }
 
 class _ScoreCardState extends State<ScoreCard> {
-  int _teamAFirstDigit = 4;
-  int _teamASecondDigit = 3;
 
-  int _teamBFirstDigit = 4;
-  int _teamBSecondDigit = 3;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _initiate();
 
+  }
+
+  @override
+  void didUpdateWidget(covariant ScoreCard oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    _initiate();
+  }
+
+
+
+
+  _initiate(){
+    MatchScore? matchScore = widget.matchScore;
+
+    if(matchScore!=null){
+      _teamHomeFirstDigit = (matchScore.homeScore/10).toInt();
+      _teamHomeSecondDigit = matchScore.homeScore%10;
+
+      _teamAwayFirstDigit = (matchScore.awayScore/10).toInt();
+      _teamAwaySecondDigit = matchScore.awayScore%10;
+    }
+
+  }
+
+  int _teamHomeFirstDigit = 0;
+  int _teamHomeSecondDigit = 0;
+
+  int _teamAwayFirstDigit = 0;
+  int _teamAwaySecondDigit = 0;
+
+
+  //duplicate for update
+  int _teamHomeFirstDigitDuplicate = 0;
+  int _teamHomeSecondDigitDuplicate = 0;
+
+  int _teamAwayFirstDigitDuplicate = 0;
+  int _teamAwaySecondDigitDuplicate = 0;
+
+
+  initiateDuplicates(){
+    _teamHomeFirstDigitDuplicate = _teamHomeFirstDigit;
+    _teamHomeSecondDigitDuplicate = _teamHomeSecondDigit;
+
+    _teamAwayFirstDigitDuplicate = _teamAwayFirstDigit;
+    _teamAwaySecondDigitDuplicate = _teamAwaySecondDigit;
+  }
 
   // Function to increment a digit
   void _incrementDigit(int team, String digit) {
-    setState(() {
 
-      if (team == 1) {
-        if (digit == 'first' && _teamAFirstDigit < 9) {
-          _teamAFirstDigit++;
-        } else if (digit == 'second' && _teamASecondDigit < 9) {
-          _teamASecondDigit++;
-        }
-      } else {
-        if (digit == 'first' && _teamBFirstDigit < 9) {
-          _teamBFirstDigit++;
-        } else if (digit == 'second' && _teamBSecondDigit < 9) {
-          _teamBSecondDigit++;
-        }
+    initiateDuplicates();
+
+    if (team == 1) {
+      if (digit == 'first' && _teamHomeFirstDigit < 9) {
+        _teamHomeFirstDigitDuplicate++;
+      } else if (digit == 'second' && _teamHomeSecondDigit < 9) {
+        _teamHomeSecondDigitDuplicate++;
       }
-    });
+    } else {
+      if (digit == 'first' && _teamAwayFirstDigit < 9) {
+        _teamAwayFirstDigitDuplicate++;
+      } else if (digit == 'second' && _teamAwaySecondDigit < 9) {
+        _teamAwaySecondDigitDuplicate++;
+      }
+    }
+
+    _updateMatchScore();
+
   }
 
   // Function to decrement a digit
   void _decrementDigit(int team, String digit) {
-    setState(() {
-
-      if (team == 1) {
-        if (digit == 'first' && _teamAFirstDigit > 0) {
-          _teamAFirstDigit--;
-        } else if (digit == 'second' && _teamASecondDigit > 0) {
-          _teamASecondDigit--;
-        }
-      } else {
-        if (digit == 'first' && _teamBFirstDigit > 0) {
-          _teamBFirstDigit--;
-        } else if (digit == 'second' && _teamBSecondDigit > 0) {
-          _teamBSecondDigit--;
-        }
+    initiateDuplicates();
+    if (team == 1) {
+      if (digit == 'first' && _teamHomeFirstDigit > 0) {
+        _teamHomeFirstDigitDuplicate--;
+      } else if (digit == 'second' && _teamHomeSecondDigit > 0) {
+        _teamHomeSecondDigitDuplicate--;
       }
-    });
+    } else {
+      if (digit == 'first' && _teamAwayFirstDigit > 0) {
+        _teamAwayFirstDigitDuplicate--;
+      } else if (digit == 'second' && _teamAwaySecondDigit > 0) {
+        _teamAwaySecondDigitDuplicate--;
+      }
+    }
+
+    _updateMatchScore();
+  }
+
+
+  _updateMatchScore(){
+    MatchScore matchScore = MatchScore(
+        homeScore: (_teamHomeFirstDigitDuplicate*10)+_teamHomeSecondDigitDuplicate,
+        awayScore: (_teamAwayFirstDigitDuplicate*10)+_teamAwaySecondDigitDuplicate
+    );
+    widget.updateMatchScore(matchScore);
   }
 
 
@@ -74,7 +138,6 @@ class _ScoreCardState extends State<ScoreCard> {
           children: [
             // Scores Row (Team A — Team B)
             Row(
-
               children: [
                 // Team A Score
                 Flexible(
@@ -84,7 +147,7 @@ class _ScoreCardState extends State<ScoreCard> {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       AnimatedFlipCounter(
-                        value: _teamAFirstDigit,
+                        value: _teamHomeFirstDigit,
                         textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
                           fontSize: AppSize.s160,
                           fontWeight: FontWeight.bold,
@@ -93,7 +156,7 @@ class _ScoreCardState extends State<ScoreCard> {
                       ),
                       const SizedBox(width: 10), // Space between digits
                       AnimatedFlipCounter(
-                        value: _teamASecondDigit,
+                        value: _teamHomeSecondDigit,
                         textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
                           fontSize: AppSize.s160,
                           fontWeight: FontWeight.bold,
@@ -125,7 +188,7 @@ class _ScoreCardState extends State<ScoreCard> {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       AnimatedFlipCounter(
-                        value: _teamBFirstDigit,
+                        value: _teamAwayFirstDigit,
                         textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
                           fontSize: AppSize.s160,
                           fontWeight: FontWeight.bold,
@@ -134,7 +197,7 @@ class _ScoreCardState extends State<ScoreCard> {
                       ),
                       const SizedBox(width: 10), // Space between digits
                       AnimatedFlipCounter(
-                        value: _teamBSecondDigit,
+                        value: _teamAwaySecondDigit,
                         textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
                           fontSize: AppSize.s160,
                           fontWeight: FontWeight.bold,

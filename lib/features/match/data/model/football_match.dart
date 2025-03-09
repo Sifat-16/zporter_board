@@ -7,7 +7,7 @@ import 'package:zporter_board/features/time/data/model/match_time.dart';
 class FootballMatch {
   final ObjectId id;
   final String name;
-  final MatchTime matchTime;
+   List<MatchTime> matchTime; // List of match time periods
   final String status;
   final Team homeTeam;
   final Team awayTeam;
@@ -29,9 +29,9 @@ class FootballMatch {
 
   factory FootballMatch.fromJson(Map<String, dynamic> json) {
     return FootballMatch(
-      id: json['_id'],
+      id: ObjectId.parse(json['_id']),
       name: json['name'],
-      matchTime: MatchTime.fromJson(json['matchTime']),
+      matchTime: (json['matchTime'] as List).map((e) => MatchTime.fromJson(e)).toList(),
       status: json['status'],
       homeTeam: Team.fromJson(json['homeTeam']),
       awayTeam: Team.fromJson(json['awayTeam']),
@@ -43,9 +43,9 @@ class FootballMatch {
 
   Map<String, dynamic> toJson() {
     return {
-      '_id': id,
+      '_id': id.oid,  // Converts ObjectId to string
       'name': name,
-      'matchTime': matchTime.toJson(),
+      'matchTime': matchTime.map((e) => e.toJson()).toList(),
       'status': status,
       'homeTeam': homeTeam.toJson(),
       'awayTeam': awayTeam.toJson(),
@@ -55,3 +55,4 @@ class FootballMatch {
     };
   }
 }
+
