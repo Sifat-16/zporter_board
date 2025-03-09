@@ -9,6 +9,12 @@ import 'package:zporter_board/features/auth/domain/repository/auth_repository.da
 import 'package:zporter_board/features/auth/domain/usecase/auth_status_usecase.dart';
 import 'package:zporter_board/features/auth/domain/usecase/sign_in_with_google_usecase.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
+import 'package:zporter_board/features/match/data/data_source/match_datasource.dart';
+import 'package:zporter_board/features/match/data/data_source/match_datasource_impl.dart';
+import 'package:zporter_board/features/match/data/repository/match_repository_impl.dart';
+import 'package:zporter_board/features/match/domain/repository/match_repository.dart';
+import 'package:zporter_board/features/match/domain/usecases/fetch_match_usecase.dart';
+import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/equipment/equipment_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/form/form_bloc.dart';
@@ -41,6 +47,14 @@ Future<void> init() async {
   sl.registerLazySingleton<SignInWithGoogleUseCase>(()=>SignInWithGoogleUseCase(authRepository: sl.get()));
   sl.registerLazySingleton<AuthStatusUsecase>(()=>AuthStatusUsecase(authRepository: sl.get()));
   sl.registerLazySingleton<AuthBloc>(()=>AuthBloc(signInWithGoogleUseCase: sl.get(), authStatusUsecase: sl.get()));
+
+
+  // match
+  sl.registerLazySingleton<MatchDataSource>(()=>MatchDataSourceImpl(mongoDB: sl.get()));
+  sl.registerLazySingleton<MatchRepository>(()=>MatchRepositoryImpl(matchDataSource: sl.get()));
+  sl.registerLazySingleton<FetchMatchUsecase>(()=>FetchMatchUsecase(matchRepository: sl.get()));
+  sl.registerLazySingleton<MatchBloc>(()=>MatchBloc(fetchMatchUsecase: sl.get()));
+
 
 
 

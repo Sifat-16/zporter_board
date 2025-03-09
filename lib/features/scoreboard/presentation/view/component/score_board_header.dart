@@ -3,9 +3,12 @@ import 'package:zporter_board/core/common/components/timer/timer_component.dart'
 import 'package:zporter_board/core/common/components/timer/timer_controller.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
+import 'package:zporter_board/features/match/data/model/football_match.dart';
 
 class ScoreBoardHeader extends StatefulWidget {
-  const ScoreBoardHeader({super.key});
+  const ScoreBoardHeader({super.key, required this.footballMatch});
+
+  final FootballMatch? footballMatch;
 
   @override
   State<ScoreBoardHeader> createState() => _ScoreBoardHeaderState();
@@ -29,4 +32,9 @@ class _ScoreBoardHeaderState extends State<ScoreBoardHeader> {
       ],
     );
   }
+
+  _extractTimeFromMatch(){
+
+  }
+
 }
