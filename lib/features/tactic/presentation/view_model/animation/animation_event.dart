@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/animation/animation_model.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/equiqment/equipment_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/animation_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/animation_model.dart';
+import 'package:zporter_board/features/tactic/data/model/equipment_data_model.dart';
 
 sealed class AnimationEvent extends Equatable{
 
@@ -30,6 +31,28 @@ class AnimationSaveEvent extends AnimationEvent{
 
 }
 
+class AnimationDatabaseSaveEvent extends AnimationEvent{
+  final AnimationDataModel animationDataModel;
+
+  AnimationDatabaseSaveEvent({required this.animationDataModel});
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [];
+
+}
+
+class LoadAnimationEvent extends AnimationEvent{
+
+
+  LoadAnimationEvent();
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [];
+
+}
+
 class PlayAnimationEvent extends AnimationEvent{
 
 
@@ -39,6 +62,19 @@ class PlayAnimationEvent extends AnimationEvent{
   @override
   // TODO: implement props
   List<Object?> get props => [];
+
+}
+
+class AnimationSelectEvent extends AnimationEvent{
+  final int index;
+  AnimationSelectEvent({required this.index});
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [index];
+}
+
+class AnimationUpdateEvent extends AnimationEvent{
 
 }
 

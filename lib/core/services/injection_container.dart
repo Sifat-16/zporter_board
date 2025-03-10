@@ -9,6 +9,20 @@ import 'package:zporter_board/features/auth/domain/repository/auth_repository.da
 import 'package:zporter_board/features/auth/domain/usecase/auth_status_usecase.dart';
 import 'package:zporter_board/features/auth/domain/usecase/sign_in_with_google_usecase.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
+import 'package:zporter_board/features/match/data/data_source/match_datasource.dart';
+import 'package:zporter_board/features/match/data/data_source/match_datasource_impl.dart';
+import 'package:zporter_board/features/match/data/repository/match_repository_impl.dart';
+import 'package:zporter_board/features/match/domain/repository/match_repository.dart';
+import 'package:zporter_board/features/match/domain/usecases/fetch_match_usecase.dart';
+import 'package:zporter_board/features/match/domain/usecases/update_match_score_usecase.dart';
+import 'package:zporter_board/features/match/domain/usecases/update_match_time_usecase.dart';
+import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
+import 'package:zporter_board/features/tactic/data/data_source/tactic_datasource.dart';
+import 'package:zporter_board/features/tactic/data/data_source/tactic_datasource_impl.dart';
+import 'package:zporter_board/features/tactic/data/repository/tactic_repository_impl.dart';
+import 'package:zporter_board/features/tactic/domain/repository/tactic_repository.dart';
+import 'package:zporter_board/features/tactic/domain/usecase/get_all_animation_usecase.dart';
+import 'package:zporter_board/features/tactic/domain/usecase/save_animation_usecase.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/equipment/equipment_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/form/form_bloc.dart';
@@ -43,6 +57,21 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthBloc>(()=>AuthBloc(signInWithGoogleUseCase: sl.get(), authStatusUsecase: sl.get()));
 
 
+  // match
+  sl.registerLazySingleton<MatchDataSource>(()=>MatchDataSourceImpl(mongoDB: sl.get()));
+  sl.registerLazySingleton<MatchRepository>(()=>MatchRepositoryImpl(matchDataSource: sl.get()));
+  sl.registerLazySingleton<FetchMatchUsecase>(()=>FetchMatchUsecase(matchRepository: sl.get()));
+  sl.registerLazySingleton<UpdateMatchScoreUsecase>(()=>UpdateMatchScoreUsecase(matchRepository: sl.get()));
+  sl.registerLazySingleton<UpdateMatchTimeUsecase>(()=>UpdateMatchTimeUsecase(matchRepository: sl.get()));
+  sl.registerLazySingleton<MatchBloc>(()=>MatchBloc(fetchMatchUsecase: sl.get(), updateMatchScoreUsecase: sl.get(), updateMatchTimeUsecase: sl.get()));
+
+
+  // tactic
+  sl.registerLazySingleton<TacticDatasource>(()=>TacticDatasourceImpl(mongoDB: sl.get()));
+  sl.registerLazySingleton<TacticRepository>(()=>TacticRepositoryImpl(tacticDatasource: sl.get()));
+  sl.registerLazySingleton<GetAllAnimationUsecase>(()=>GetAllAnimationUsecase(tacticRepository: sl.get()));
+  sl.registerLazySingleton<SaveAnimationUsecase>(()=>SaveAnimationUsecase(tacticRepository: sl.get()));
+
 
   //player
   sl.registerLazySingleton<PlayerBloc>(()=>PlayerBloc());
@@ -54,6 +83,9 @@ Future<void> init() async {
   sl.registerLazySingleton<FormBloc>(()=>FormBloc());
 
   //animation
-  sl.registerLazySingleton<AnimationBloc>(()=>AnimationBloc());
+  sl.registerLazySingleton<AnimationBloc>(()=>AnimationBloc(
+    getAllAnimationUsecase: sl.get(),
+    saveAnimationUsecase: sl.get()
+  ));
 
 }

@@ -1,6 +1,9 @@
+import 'dart:math';
+
+import 'package:mongo_dart/mongo_dart.dart';
 import 'package:uuid/uuid.dart';
 
-import 'PlayerDataModel.dart';
+import '../../../../data/model/PlayerDataModel.dart';
 
 class PlayerUtils{
   static List<String> players = [
@@ -11,8 +14,11 @@ class PlayerUtils{
     List<PlayerModel> generatedPlayers = [];
     int index=1;
     for(String p in players){
-      String id = Uuid().v4();
-      PlayerModel playerDataModel = PlayerModel(id: id, role: p, index: index, playerType: playerType);
+      ObjectId id = ObjectId();
+      PlayerModel playerDataModel = PlayerModel(id:id, role: p, index: index, playerType: playerType);
+      // if(playerType != PlayerType.HOME){
+      //   playerDataModel.rotation = pi;
+      // }
       generatedPlayers.add(playerDataModel);
       index++;
     }

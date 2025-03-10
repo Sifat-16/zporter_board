@@ -3,7 +3,7 @@ import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/common/focused_item_component.dart';
 
-import 'PlayerDataModel.dart';
+import '../../../../data/model/PlayerDataModel.dart';
 
 class PlayerComponent extends StatefulWidget {
   const PlayerComponent({super.key, required this.playerDataModel, this.activateFocus=false});

@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/common/arrow_head.dart';
+import 'package:zporter_board/features/tactic/data/model/arrow_head.dart';
 
 import 'field_config.dart';
-import 'field_draggable_item.dart';
+import '../../../../data/model/field_draggable_item.dart';
 
 class FieldPainter extends CustomPainter {
   FieldPainter({required this.config, required this.items});

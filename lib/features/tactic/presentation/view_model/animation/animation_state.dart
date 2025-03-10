@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/animation/animation_model.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/equiqment/equipment_data_model.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/player/PlayerDataModel.dart';
+import 'package:zporter_board/features/tactic/data/model/animation_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/animation_model.dart';
+import 'package:zporter_board/features/tactic/data/model/equipment_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/PlayerDataModel.dart';
 
 sealed class AnimationState extends Equatable{
   @override
@@ -21,6 +22,18 @@ class AnimationLoadedState extends AnimationState{
   @override
   // TODO: implement props
   List<Object?> get props => [DateTime.now().millisecondsSinceEpoch,animations];
+}
+
+
+class AnimationDataLoadedState extends AnimationState{
+  final List<AnimationDataModel> animations;
+  final String forceEmitKey;
+
+  AnimationDataLoadedState({required this.animations, String? forceEmitKey}):forceEmitKey=forceEmitKey??DateTime.now().toIso8601String();
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [forceEmitKey,animations];
 }
 
 class AnimationSavedState extends AnimationState{
@@ -45,6 +58,15 @@ class PlayAnimationState extends AnimationState{
   List<Object?> get props => [forceEmitKey,animations];
 }
 
+
+class AnimationUpdateState extends AnimationState{
+  final String forceEmitKey;
+  AnimationUpdateState({String? forceEmitKey}):forceEmitKey=forceEmitKey??DateTime.now().toIso8601String();
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [forceEmitKey];
+}
 
 
 

@@ -56,6 +56,13 @@ dependencies:
   multi_split_view: ^3.6.0
   uuid: ^4.5.1
   flutter_drawing_board: ^0.9.5
+  visibility_detector: ^0.4.0+2
+  intl: ^0.19.0
+  angle_utils: ^0.0.4
+  matrix_gesture_detector_pro: ^1.0.0
+  input_quantity: ^2.5.1
+  video_player: ^2.9.3
+  flutter_slidable: ^4.0.0
 
 
 dev_dependencies:

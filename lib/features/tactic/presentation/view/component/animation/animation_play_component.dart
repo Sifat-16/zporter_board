@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/animation/animation_model.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/common/arrow_head.dart';
+import 'package:zporter_board/features/tactic/data/model/animation_model.dart';
+import 'package:zporter_board/features/tactic/data/model/arrow_head.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/field_component/field_config.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/field_component/field_draggable_item.dart';
+import 'package:zporter_board/features/tactic/data/model/field_draggable_item.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/field_component/field_item_component.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/field_component/field_painter.dart';
 
@@ -152,14 +152,13 @@ class _AnimationPlayComponentState extends State<AnimationPlayComponent>
                   // Countdown Timer in the Center
                   if (_showCountdown)
                     Container(
-                      color: Colors.black.withOpacity(0.6),
                       child: Center(
                         child: Text(
                           '$_countdown',
                           style: TextStyle(
                             fontSize: 100,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Colors.green,
                           ),
                         ),
                       ),
@@ -167,14 +166,6 @@ class _AnimationPlayComponentState extends State<AnimationPlayComponent>
                 ],
               ),
 
-              // TextButton(onPressed: (){
-              //   for (var item in itemPosition) {
-              //     if(item is ArrowHead){
-              //       _animateItemToArrowHead(item.parent, item.offset!, duration: Duration(seconds: 2));
-              //     }
-              //
-              //   }
-              // }, child: Text("Play"))
             ],
           ),
         );

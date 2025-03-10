@@ -1,4 +1,4 @@
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' hide State;
 import 'package:zporter_board/core/env/env.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
 

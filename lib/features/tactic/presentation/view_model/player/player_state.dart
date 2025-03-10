@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/player/PlayerDataModel.dart';
+import 'package:zporter_board/features/tactic/data/model/PlayerDataModel.dart';
 
 sealed class PlayerState extends Equatable{
   @override

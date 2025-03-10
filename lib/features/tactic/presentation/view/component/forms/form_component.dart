@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/forms/form_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/form_data_model.dart';
 
 class FormComponent extends StatefulWidget {
   const FormComponent({super.key, required this.formDataModel});

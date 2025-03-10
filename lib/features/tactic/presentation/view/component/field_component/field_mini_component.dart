@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zporter_board/core/extension/size_extension.dart';
 
 import 'field_config.dart';
-import 'field_draggable_item.dart';
+import '../../../../data/model/field_draggable_item.dart';
 import 'field_item_component.dart';
 import 'field_painter.dart';
 

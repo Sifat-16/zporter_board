@@ -7,6 +7,7 @@ import 'package:zporter_board/features/tactic/presentation/view/component/leftto
 import 'package:zporter_board/features/tactic/presentation/view/component/lefttoolbar/players_toolbar_component.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/righttoolbar/animation_toolbar_component.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/righttoolbar/design_toolbar_component.dart';
+import 'package:zporter_board/features/tactic/presentation/view/component/righttoolbar/saved_animation_toolbar_component.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/righttoolbar/settings_toolbar_component.dart';
 
 class RighttoolbarComponent extends StatefulWidget {
@@ -25,7 +26,8 @@ class _RighttoolbarComponentState extends State<RighttoolbarComponent> with Sing
   final List<Map<String, dynamic>> _tabs = [
     {'title': 'Design', 'content': DesignToolbarComponent()},
     {'title': 'Animation', 'content': AnimationToolbarComponent()},
-    {'title': 'Settings', 'content': SettingsToolbarComponent()}
+    {'title': 'Settings', 'content': SettingsToolbarComponent()},
+    {'title': 'Saved Animation', 'content': SavedAnimationToolbarComponent()},
   ];
 
   @override

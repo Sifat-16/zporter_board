@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/equiqment/equipment_component.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/equiqment/equipment_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/equipment_data_model.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/equiqment/equipment_utils.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/equipment/equipment_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/equipment/equipment_event.dart';
