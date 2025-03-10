@@ -155,6 +155,107 @@ class Substitution {
 }
 ```
 
+Tactical Board object design needs more SOLID approach for drag & drop behaviour
+
+
+```dart
+abstract class FieldDraggableItem {
+  ObjectId id;
+  Offset? offset;
+  double rotation;
+}
+```
+
+
+```dart
+enum PlayerType { HOME, OTHER, AWAY }
+
+class PlayerModel extends FieldDraggableItem with EquatableMixin {
+  String role;
+  int index;
+  String? imagePath;
+  PlayerType playerType;
+
+  PlayerModel({
+    required super.id,
+    required this.role,
+    super.offset,
+    required this.index,
+    this.imagePath,
+    super.rotation = 0.0,
+    required this.playerType,
+  });
+}
+```
+
+```dart
+enum FormType { LINE, OTHER }
+
+class FormDataModel extends FieldDraggableItem with EquatableMixin {
+  String name;
+  String? imagePath;
+  FormType formType;
+
+  FormDataModel({
+    required super.id,
+    required this.name,
+    super.offset,
+    this.imagePath,
+    super.rotation = 0.0,
+    this.formType = FormType.OTHER,
+  });
+}
+```
+
+```dart
+class EquipmentDataModel extends FieldDraggableItem with EquatableMixin {
+  String name;
+  String? imagePath;
+
+  EquipmentDataModel({
+    required super.id,
+    required this.name,
+    super.offset,
+    this.imagePath,
+    super.rotation = 0.0,
+  });
+}
+```
+
+```dart
+class ArrowHead extends FieldDraggableItem with EquatableMixin {
+  FieldDraggableItem parent;
+  Offset? parentPoint;
+
+  ArrowHead({
+    required this.parent,
+    this.parentPoint,
+    required super.id,
+    required super.offset,
+    required super.rotation,
+  });
+}
+```
+
+
+```dart
+class AnimationModel {
+  ObjectId id;
+  List<FieldDraggableItem> items;
+  int index;
+}
+```
+
+```dart
+class AnimationDataModel {
+  ObjectId id;
+  List<AnimationModel> items;
+}
+```
+
+
+
+
 
 
 
