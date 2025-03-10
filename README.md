@@ -99,7 +99,9 @@ class User {
   String displayName;
   String photoURL;
 }
+```
 
+```dart
 class FootballMatch {
   final md.ObjectId id;
   final String name;
@@ -111,42 +113,47 @@ class FootballMatch {
   final MatchSubstitutions substitutions;
   final String venue;
 }
-
-
+```
+```dart
 class Team {
   final ObjectId id;
   final String name;
   final List<Player> players;
 }
+```
 
+```dart
 class Player {
   final ObjectId id;
   final String name;
   final String position;
   final int jerseyNumber;
 }
-
-
+```
+```dart
 class MatchTime {
    String id;         // Unique ID for this match time
    DateTime startTime;  // Start time of this period
    DateTime? endTime;   // End time (nullable if ongoing)
    String? nextId;    // Points to the next match time segment
 }
+```
 
+```dart
 class MatchScore {
   int homeScore;
   int awayScore;
 }
+```
 
-
+```dart
 class Substitution {
   final ObjectId teamId;
   final ObjectId playerOutId;
   final ObjectId playerInId;
   final int minute;
 }
-
+```
 
 
 
