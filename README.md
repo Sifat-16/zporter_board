@@ -99,3 +99,55 @@ class User {
   String displayName;
   String photoURL;
 }
+
+class FootballMatch {
+  final md.ObjectId id;
+  final String name;
+   List<MatchTime> matchTime; // List of match time periods
+  final String status;
+  final Team homeTeam;
+  final Team awayTeam;
+  final MatchScore matchScore;
+  final MatchSubstitutions substitutions;
+  final String venue;
+}
+
+
+class Team {
+  final ObjectId id;
+  final String name;
+  final List<Player> players;
+}
+
+class Player {
+  final ObjectId id;
+  final String name;
+  final String position;
+  final int jerseyNumber;
+}
+
+
+class MatchTime {
+   String id;         // Unique ID for this match time
+   DateTime startTime;  // Start time of this period
+   DateTime? endTime;   // End time (nullable if ongoing)
+   String? nextId;    // Points to the next match time segment
+}
+
+class MatchScore {
+  int homeScore;
+  int awayScore;
+}
+
+
+class Substitution {
+  final ObjectId teamId;
+  final ObjectId playerOutId;
+  final ObjectId playerInId;
+  final int minute;
+}
+
+
+
+
+
