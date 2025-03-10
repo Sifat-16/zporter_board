@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_drawing_board/flutter_drawing_board.dart';
+import 'package:mongo_dart/mongo_dart.dart' hide State, Size;
 import 'package:zporter_board/core/common/components/button/custom_button.dart';
 import 'package:zporter_board/core/common/components/pagination/pagination_component.dart';
 import 'package:zporter_board/core/extension/size_extension.dart';
@@ -10,15 +11,17 @@ import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
 import 'package:zporter_board/core/utils/random/random_utils.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/animation/animation_model.dart';
+import 'package:zporter_board/features/tactic/data/model/animation_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/animation_model.dart';
+import 'package:zporter_board/features/tactic/presentation/view/common/tactic_pagination_component.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/animation/animation_play_component.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/common/arrow_head.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/equiqment/equipment_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/arrow_head.dart';
+import 'package:zporter_board/features/tactic/data/model/equipment_data_model.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/field_component/field_config.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/field_component/field_draggable_item.dart';
+import 'package:zporter_board/features/tactic/data/model/field_draggable_item.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/field_component/field_item_component.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/forms/form_data_model.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/player/PlayerDataModel.dart';
+import 'package:zporter_board/features/tactic/data/model/form_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/PlayerDataModel.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/player/player_component.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_event.dart';
@@ -173,11 +176,11 @@ class _FieldComponentState extends State<FieldComponent> with AutomaticKeepAlive
                         context.read<PlayerBloc>().add(PlayerAddToPlayingEvent(playerModel: dragItem));
                       }else if(dragItem is EquipmentDataModel){
                         EquipmentDataModel eq = dragItem;
-                        eq.id = RandomUtils.randomString();
+                        eq.id = ObjectId();
                         context.read<EquipmentBloc>().add(EquipmentAddToFieldEvent(equipmentDataModel: eq));
                       }else if(dragItem is FormDataModel){
                         FormDataModel fr = dragItem;
-                        fr.id = RandomUtils.randomString();
+                        fr.id = ObjectId();
                         context.read<FormBloc>().add(FormAddToFieldEvent(formDataModel: fr));
                       }else if(dragItem is ArrowHead){
                         context.read<FormBloc>().add(ArrowHeadAddEvent(arrowHead: dragItem));
@@ -261,28 +264,9 @@ class _FieldComponentState extends State<FieldComponent> with AutomaticKeepAlive
                 },
               ),
 
-              // CustomButton(
-              //   fillColor: ColorManager.blue,
-              //   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              //   borderRadius: 3,
-              //   child: Text("Animate", style: Theme.of(context).textTheme.labelLarge!.copyWith(
-              //       color: ColorManager.white,
-              //       fontWeight: FontWeight.bold
-              //   ),),
-              //   onTap: () {
-              //     // Find an ArrowHead and its parent
-              //     for (final item in itemPosition) {
-              //       if (item is ArrowHead) {
-              //         _animateItemToArrowHead(item.parent, item.offset!);
-              //       }
-              //     }
-              //   },
-              // ),
-
-
 
               _buildFieldToolbar(),
-              PaginationComponent(),
+              TacticPaginationComponent(),
             ],
           ),
         ),
@@ -342,17 +326,8 @@ class _FieldComponentState extends State<FieldComponent> with AutomaticKeepAlive
 
                 CustomButton(
                   onTap: (){
-                    List<FieldDraggableItem> copiedItems = itemPosition.map(
-                            (e){
-                              if(e is ArrowHead){
-                                return e.copyWith(parent: e.parent.copyWith());
-                              }
-                              return e.copyWith();
-                            }
-                    ).toList();
-                    AnimationModel animationModel = AnimationModel(id: RandomUtils.randomString(), items: copiedItems, index: -1);
-                    globalAnimations.add(animationModel);
-                    context.read<AnimationBloc>().add(AnimationSaveEvent(animationModel: animationModel));
+                    AnimationDataModel animationDataModel = AnimationDataModel(id: ObjectId(), items: globalAnimations);
+                    context.read<AnimationBloc>().add(AnimationDatabaseSaveEvent(animationDataModel: animationDataModel));
                   },
                   fillColor: ColorManager.grey,
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -368,6 +343,19 @@ class _FieldComponentState extends State<FieldComponent> with AutomaticKeepAlive
 
                   fillColor: ColorManager.blue,
 
+                  onTap: (){
+                    List<FieldDraggableItem> copiedItems = itemPosition.map(
+                            (e){
+                          if(e is ArrowHead){
+                            return e.copyWith(parent: e.parent.copyWith());
+                          }
+                          return e.copyWith();
+                        }
+                    ).toList();
+                    AnimationModel animationModel = AnimationModel(id: ObjectId(), items: copiedItems, index: -1);
+                    globalAnimations.add(animationModel);
+                    context.read<AnimationBloc>().add(AnimationSaveEvent(animationModel: animationModel));
+                  },
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   borderRadius: 3,
                   child: Text("Save", style: Theme.of(context).textTheme.labelLarge!.copyWith(

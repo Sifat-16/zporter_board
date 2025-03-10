@@ -102,21 +102,6 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                 ),
               ),
 
-              // // Big Dash
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 20),
-              //   child: FittedBox(
-              //     fit: BoxFit.fitWidth,
-              //     child: Text(
-              //       '—',
-              //       style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              //         fontSize: AppSize.s160,
-              //         fontWeight: FontWeight.bold,
-              //         color: ColorManager.white,
-              //       ),
-              //     ),
-              //   ),
-              // ),
 
               // Team B Score
               Flexible(

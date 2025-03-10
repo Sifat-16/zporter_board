@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' hide State;
 import 'package:zporter_board/config/database/remote/mongodb.dart';
 import 'package:zporter_board/core/constant/mongo_constant.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';

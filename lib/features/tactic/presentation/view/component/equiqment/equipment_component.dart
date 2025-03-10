@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/common/focused_item_component.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/equiqment/equipment_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/equipment_data_model.dart';
 
 class EquipmentComponent extends StatefulWidget {
   const EquipmentComponent({super.key, required this.equipmentDataModel, this.activateFocus=false});
@@ -62,8 +62,8 @@ class _EquipmentComponentState extends State<EquipmentComponent> {
                 : null, // Add border if focused
           ),
           child: SizedBox(
-            height: AppSize.s20,
-            width: AppSize.s20,
+            height: AppSize.s32,
+            width: AppSize.s32,
             child: Image.asset(widget.equipmentDataModel.imagePath??"", color: ColorManager.white,)
           ),
         ),

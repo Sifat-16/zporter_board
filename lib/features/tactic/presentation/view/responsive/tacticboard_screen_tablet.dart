@@ -16,31 +16,30 @@ class _TacticboardScreenTabletState extends State<TacticboardScreenTablet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: MultiSplitView(initialAreas: [
-        Area(
-            flex: 1,
-            max: 1,
-            builder: (context, area) {
-              return LefttoolbarComponent();
-            }
-        ),
-        Area(
-            flex: 3,
-            max: 3,
-            builder: (context, area) {
-              return FieldComponent();
-            }
-        ),
-        Area(
-            flex: 1,
-            max: 1,
-            builder: (context, area) {
-              return RighttoolbarComponent();
-            }
+    return MultiSplitView(initialAreas: [
+      Area(
+          flex: 1,
+          max: 1,
+          builder: (context, area) {
+            return LefttoolbarComponent();
+          }
+      ),
+      Area(
+          flex: 3,
+          max: 3,
+          builder: (context, area) {
+            return FieldComponent();
+          }
+      ),
+      Area(
+          flex: 1,
+          max: 1,
+          builder: (context, area) {
+            return RighttoolbarComponent();
+          }
 
-        )
-      ]),
+      )
+    ]
     );
   }
 }

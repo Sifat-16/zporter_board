@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/animation/animation_model.dart';
+import 'package:zporter_board/features/tactic/data/model/animation_model.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/field_component/field_mini_component.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_state.dart';

@@ -3,4 +3,6 @@ class MongoConstant{
 
   static String MATCH_COLLECTION="matches";
 
+  static String MATCH_ANIMATION="animations";
+
 }

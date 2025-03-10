@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/common/arrow_head.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/equiqment/equipment_data_model.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/forms/form_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/arrow_head.dart';
+import 'package:zporter_board/features/tactic/data/model/equipment_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/form_data_model.dart';
 
 sealed class FormEvent extends Equatable{
 

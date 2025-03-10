@@ -96,6 +96,7 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet> with Auto
                   height: height*.1,
 
                   child: TimeManagerComponent(
+                    footballMatch: footballMatch,
                     onStart: (){
                       context.read<MatchBloc>().add(MatchTimeUpdateEvent(matchId: footballMatch?.id, matchTimeUpdateStatus: MatchTimeUpdateStatus.START));
                     },

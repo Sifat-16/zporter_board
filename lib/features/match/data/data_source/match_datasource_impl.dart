@@ -1,4 +1,4 @@
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' hide State;
 import 'package:zporter_board/config/database/remote/mongodb.dart';
 import 'package:zporter_board/core/constant/mongo_constant.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
@@ -16,7 +16,17 @@ class MatchDataSourceImpl implements MatchDataSource{
     try{
       DbCollection? matchCollection = mongoDB.db?.collection(MongoConstant.MATCH_COLLECTION);
       final matches = await matchCollection!.find().toList();
-      return matches.map((json) => FootballMatch.fromJson(json)).toList();
+      List<FootballMatch> footballMatches = [];
+
+      for(var m in matches){
+        try{
+          footballMatches.add(FootballMatch.fromJson(m));
+        }catch(e){
+          debug(data: "Error while extracting $e");
+        }
+      }
+
+      return footballMatches;
     }catch(e){
       throw Exception(e);
     }
@@ -43,17 +53,14 @@ class MatchDataSourceImpl implements MatchDataSource{
     try{
       DbCollection? matchCollection = mongoDB.db?.collection(MongoConstant.MATCH_COLLECTION);
 
-      // Ensure that matchId is an ObjectId. If it's a string, convert it.
-
-
       // Fetch the updated match object from the database
       final matchDocument = await matchCollection?.findOne(where.id(matchId));
-
 
       // If a match document is found, return it as a FootballMatch object
       if (matchDocument != null) {
         return FootballMatch.fromJson(matchDocument);  // Convert the MongoDB document to FootballMatch object
       }else{
+        debug(data: "Match id not found");
         throw Exception("Match id not found");
       }
     }catch(e){
@@ -74,11 +81,11 @@ class MatchDataSourceImpl implements MatchDataSource{
       }).toList();
 
       // Update the matchTime field in the MongoDB document
-      await matchCollection?.updateOne(
+      var dt = await matchCollection?.updateOne(
         where.id(objectId),
         modify.set('matchTime', matchTimeJsonList),  // Set the updated list
       );
-      debug(data: "Match time updated");
+      debug(data: "Match time updated ${dt?.id} - ${dt?.isFailure}");
       return getMatchById(objectId);
     } catch(e){
     throw Exception(e);

@@ -1,11 +1,11 @@
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_dart/mongo_dart.dart' as md;
 import 'package:zporter_board/features/match/data/model/team.dart';
 import 'package:zporter_board/features/scoreboard/data/model/score.dart';
 import 'package:zporter_board/features/substitute/data/model/substitution.dart';
 import 'package:zporter_board/features/time/data/model/match_time.dart';
 
 class FootballMatch {
-  final ObjectId id;
+  final md.ObjectId id;
   final String name;
    List<MatchTime> matchTime; // List of match time periods
   final String status;
@@ -16,7 +16,7 @@ class FootballMatch {
   final String venue;
 
   FootballMatch({
-    ObjectId? id,
+    required this.id,
     required this.name,
     required this.matchTime,
     required this.status,
@@ -25,11 +25,11 @@ class FootballMatch {
     required this.matchScore,
     required this.substitutions,
     required this.venue,
-  }) : id = id ?? ObjectId();
+  });
 
   factory FootballMatch.fromJson(Map<String, dynamic> json) {
     return FootballMatch(
-      id: ObjectId.parse(json['_id']),
+      id: json['_id'],
       name: json['name'],
       matchTime: (json['matchTime'] as List).map((e) => MatchTime.fromJson(e)).toList(),
       status: json['status'],
@@ -43,7 +43,7 @@ class FootballMatch {
 
   Map<String, dynamic> toJson() {
     return {
-      '_id': id.oid,  // Converts ObjectId to string
+      '_id': id,  // Converts ObjectId to string
       'name': name,
       'matchTime': matchTime.map((e) => e.toJson()).toList(),
       'status': status,

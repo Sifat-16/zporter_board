@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:number_paginator/number_paginator.dart';
 import 'package:zporter_board/core/common/components/board_container.dart';
 import 'package:zporter_board/core/common/components/pagination/pagination_component.dart';
+import 'package:zporter_board/core/common/components/rotatable/rotatable_component.dart';
+import 'package:zporter_board/core/common/components/rotatable/rotatable_overlay.dart';
 import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
@@ -58,6 +60,11 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet> with Au
                 context.read<MatchBloc>().add(MatchScoreUpdateEvent(newScore:matchScore, matchId:footballMatch!.id));
               }
             },),
+
+
+
+            // Expanded(child: RotatableComponent()),
+
 
             SizedBox(
               child: MatchPaginationComponent()

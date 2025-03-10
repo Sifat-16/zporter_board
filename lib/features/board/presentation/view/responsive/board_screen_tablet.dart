@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:mongo_dart/mongo_dart.dart' as md;
+import 'package:mongo_dart/mongo_dart.dart' as md hide State;
 import 'package:uuid/uuid.dart';
 import 'package:zporter_board/config/database/remote/mongodb.dart';
 
@@ -11,6 +11,8 @@ import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/route_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/core/services/injection_container.dart';
+import 'package:zporter_board/core/utils/log/debugger.dart';
+import 'package:zporter_board/features/analytics/presentation/view/analytics_screen.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/data/model/team.dart';
 import 'package:zporter_board/features/scoreboard/data/model/score.dart';
@@ -38,7 +40,7 @@ class _BoardScreenTabletState extends State<BoardScreenTablet> with SingleTicker
     {'title': 'Time', 'content': TimeboardScreen()},
     {'title': 'Substitute', 'content': SubstituteboardScreen()},
     {'title': 'Tactic', 'content': TacticboardScreen()},
-    {'title': 'Analytics', 'content': Analytics()},
+    {'title': 'Analytics', 'content': AnalyticsScreen()},
   ];
 
   @override
@@ -218,7 +220,7 @@ class _AnalyticsState extends State<Analytics> {
           awayScore: Random().nextInt(5),
         ),
         substitutions: MatchSubstitutions(),
-        venue: "Stadium ${(i + 1)}",
+        venue: "Stadium ${(i + 1)}", id: md.ObjectId(),
       ));
     }
     return matches;
@@ -236,7 +238,11 @@ class _AnalyticsState extends State<Analytics> {
 
     // Insert new matches
     List<Map<String, dynamic>> bulkData = matches.map((match) => match.toJson()).toList();
-    await matchCollection.insertMany(bulkData);
+    await matchCollection.insertAll(bulkData);
+
+    final insertedMatches = await matchCollection.find().toList();
+
+    debug(data: "Inserted Matches IDs: ${insertedMatches.map((m) => m['_id']).toList()}");
 
     print("20 matches inserted successfully!");
   }

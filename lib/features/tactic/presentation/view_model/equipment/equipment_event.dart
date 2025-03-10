@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/equiqment/equipment_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/equipment_data_model.dart';
 
 sealed class EquipmentEvent extends Equatable{
 

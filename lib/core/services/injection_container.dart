@@ -17,6 +17,12 @@ import 'package:zporter_board/features/match/domain/usecases/fetch_match_usecase
 import 'package:zporter_board/features/match/domain/usecases/update_match_score_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_match_time_usecase.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
+import 'package:zporter_board/features/tactic/data/data_source/tactic_datasource.dart';
+import 'package:zporter_board/features/tactic/data/data_source/tactic_datasource_impl.dart';
+import 'package:zporter_board/features/tactic/data/repository/tactic_repository_impl.dart';
+import 'package:zporter_board/features/tactic/domain/repository/tactic_repository.dart';
+import 'package:zporter_board/features/tactic/domain/usecase/get_all_animation_usecase.dart';
+import 'package:zporter_board/features/tactic/domain/usecase/save_animation_usecase.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/equipment/equipment_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/form/form_bloc.dart';
@@ -60,6 +66,11 @@ Future<void> init() async {
   sl.registerLazySingleton<MatchBloc>(()=>MatchBloc(fetchMatchUsecase: sl.get(), updateMatchScoreUsecase: sl.get(), updateMatchTimeUsecase: sl.get()));
 
 
+  // tactic
+  sl.registerLazySingleton<TacticDatasource>(()=>TacticDatasourceImpl(mongoDB: sl.get()));
+  sl.registerLazySingleton<TacticRepository>(()=>TacticRepositoryImpl(tacticDatasource: sl.get()));
+  sl.registerLazySingleton<GetAllAnimationUsecase>(()=>GetAllAnimationUsecase(tacticRepository: sl.get()));
+  sl.registerLazySingleton<SaveAnimationUsecase>(()=>SaveAnimationUsecase(tacticRepository: sl.get()));
 
 
   //player
@@ -72,6 +83,9 @@ Future<void> init() async {
   sl.registerLazySingleton<FormBloc>(()=>FormBloc());
 
   //animation
-  sl.registerLazySingleton<AnimationBloc>(()=>AnimationBloc());
+  sl.registerLazySingleton<AnimationBloc>(()=>AnimationBloc(
+    getAllAnimationUsecase: sl.get(),
+    saveAnimationUsecase: sl.get()
+  ));
 
 }

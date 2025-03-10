@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/forms/form_component.dart';
-import 'package:zporter_board/features/tactic/presentation/view/component/forms/form_data_model.dart';
+import 'package:zporter_board/features/tactic/data/model/form_data_model.dart';
 import 'package:zporter_board/features/tactic/presentation/view/component/forms/form_utils.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/form/form_bloc.dart';
 import 'package:zporter_board/features/tactic/presentation/view_model/form/form_event.dart';

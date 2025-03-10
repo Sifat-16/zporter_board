@@ -1,3 +1,5 @@
+import 'package:zporter_board/core/utils/log/debugger.dart';
+import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/domain/entity/match_time_status.dart';
 import 'package:zporter_board/features/time/data/model/match_time.dart';
 
@@ -44,5 +46,19 @@ class MatchUtils{
       return MatchTimeStatus(elapsedSeconds: 0, isRunning: false);
     }
 
+  }
+
+  static DateTime? findInitialTime({required FootballMatch? footballMatch}) {
+    try{
+      List<MatchTime> matches = footballMatch?.matchTime??[];
+
+      DateTime? earliestStartTime = matches.isNotEmpty
+          ? matches.map((m) => m.startTime).reduce((a, b) => a.isBefore(b) ? a : b)
+          : null;
+      return earliestStartTime;
+    }catch(e){
+
+    }
+    return null;
   }
 }
