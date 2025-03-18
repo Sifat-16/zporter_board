@@ -32,16 +32,17 @@
   
   
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+  <meta name="google-signin-client_id" content="623338569626-0h6cvv0lvr85i2te7f7hc1puqrftpbk3.apps.googleusercontent.com">
+
+
+
+
+
+
+
+
   <style id="splash-screen-style">
     html {
       height: 100%
@@ -120,6 +121,31 @@
   
   
   <script src="flutter_bootstrap.js" async=""></script>
+
+
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyAmOXkLV7nc59JTbJ03EcSWFVw5OGyr4PY",
+      authDomain: "zporter-board.firebaseapp.com",
+      projectId: "zporter-board",
+      storageBucket: "zporter-board.firebasestorage.app",
+      messagingSenderId: "623338569626",
+      appId: "1:623338569626:web:24496d400257efa6120423",
+      measurementId: "G-RNFGQC4KPB"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
 
 
 </body></html>

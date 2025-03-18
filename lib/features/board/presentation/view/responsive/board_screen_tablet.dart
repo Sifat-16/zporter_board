@@ -20,6 +20,7 @@ import 'package:zporter_board/features/scoreboard/presentation/view/scoreboard_s
 import 'package:zporter_board/features/substitute/data/model/substitution.dart';
 import 'package:zporter_board/features/substitute/presentation/view/substituteboard_screen.dart';
 import 'package:zporter_board/features/tactic/presentation/view/tacticboard_screen.dart';
+import 'package:zporter_board/features/tacticV2/presentation/view/tacticboard_screen_v2.dart';
 import 'package:zporter_board/features/time/data/model/match_time.dart';
 import 'package:zporter_board/features/time/presentation/view/timeboard_screen.dart';
 
@@ -39,7 +40,7 @@ class _BoardScreenTabletState extends State<BoardScreenTablet> with SingleTicker
     {'title': 'Scoreboard', 'content': ScoreBoardScreen()},
     {'title': 'Time', 'content': TimeboardScreen()},
     {'title': 'Substitute', 'content': SubstituteboardScreen()},
-    {'title': 'Tactic', 'content': TacticboardScreen()},
+    {'title': 'Tactic', 'content': TacticboardScreenV2()},
     {'title': 'Analytics', 'content': AnalyticsScreen()},
   ];
 
