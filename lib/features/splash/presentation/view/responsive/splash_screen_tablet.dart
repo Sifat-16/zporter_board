@@ -30,8 +30,8 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
           listener: (context, state) {
             if (state is AuthStatusFailure) {
               Future.delayed(Duration(seconds: 2), () {
-                _navigateToBoard();
-                // _navigateToAuth();
+                // _navigateToBoard();
+                _navigateToAuth();
               });
             } else if (state is AuthStatusSuccess) {
               Future.delayed(Duration(seconds: 1), () {

@@ -1,95 +1,306 @@
-import 'package:mongo_dart/mongo_dart.dart' hide State;
-import 'package:zporter_board/config/database/remote/mongodb.dart';
-import 'package:zporter_board/core/constant/mongo_constant.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:zporter_board/core/constant/firestore_constant.dart'; // Ensure this path is correct
 import 'package:zporter_board/core/utils/log/debugger.dart';
 import 'package:zporter_board/features/match/data/data_source/match_datasource.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
+// Import models needed for default match creation
+import 'package:zporter_board/features/match/data/model/team.dart';
+// Import request objects
 import 'package:zporter_board/features/match/domain/requests/update_match_score_request.dart';
 import 'package:zporter_board/features/match/domain/requests/update_match_time_request.dart';
+import 'package:zporter_board/features/scoreboard/data/model/score.dart';
+import 'package:zporter_board/features/substitute/data/model/substitution.dart';
+import 'package:zporter_board/features/time/data/model/match_time.dart';
 
-class MatchDataSourceImpl implements MatchDataSource{
-  MongoDB mongoDB;
-  MatchDataSourceImpl({required this.mongoDB});
+class MatchDataSourceImpl implements MatchDataSource {
+  final FirebaseFirestore firestore;
+  final FirebaseAuth firebaseAuth;
+
+  MatchDataSourceImpl({required this.firestore, required this.firebaseAuth});
+
+  String _getCurrentUserId() {
+    final currentUser = firebaseAuth.currentUser;
+    if (currentUser == null) {
+      throw Exception("User not authenticated.");
+    }
+    return currentUser.uid;
+  }
+
+  /// --- Helper Function to Create a Default Match ---
+  FootballMatch _buildDefaultMatch(String userId) {
+    // Define default values (customize as needed)
+    final defaultHomeTeam = Team(
+      id: null, // Firestore will generate ID if stored separately, null if embedded
+      name: "Home Team",
+      players: [], // Start with empty players list
+    );
+    final defaultAwayTeam = Team(id: null, name: "Away Team", players: []);
+    final defaultScore = MatchScore(homeScore: 0, awayScore: 0);
+    final defaultSubstitutions = MatchSubstitutions(substitutions: []);
+    final defaultMatchTime = <MatchTime>[]; // Start with empty time list
+
+    return FootballMatch(
+      id: null, // ID will be assigned by Firestore on creation
+      userId: userId, // Assign the current user's ID
+      name: "My First Match", // Default name
+      matchTime: defaultMatchTime,
+      status: "SCHEDULED", // Default status
+      homeTeam: defaultHomeTeam,
+      awayTeam: defaultAwayTeam,
+      matchScore: defaultScore,
+      substitutions: defaultSubstitutions,
+      venue: "Default Venue", // Default venue
+    );
+  }
 
   @override
-  Future<List<FootballMatch>> getAllMatches() async{
-    try{
-      DbCollection? matchCollection = mongoDB.db?.collection(MongoConstant.MATCH_COLLECTION);
-      final matches = await matchCollection!.find().toList();
-      List<FootballMatch> footballMatches = [];
+  Future<List<FootballMatch>> getAllMatches() async {
+    final userId = _getCurrentUserId(); // Get current user ID early
+    final CollectionReference matchCollection = firestore.collection(
+      FirestoreConstants.matches,
+    ); // Get collection reference
 
-      for(var m in matches){
-        try{
-          footballMatches.add(FootballMatch.fromJson(m));
-        }catch(e){
-          debug(data: "Error while extracting $e");
+    try {
+      debug(data: "Fetching matches for user: $userId");
+
+      // Query for documents where 'userId' field matches the current user's ID
+      final QuerySnapshot querySnapshot =
+          await matchCollection.where('userId', isEqualTo: userId).get();
+
+      // --- Check if matches were found ---
+      if (querySnapshot.docs.isEmpty) {
+        debug(
+          data: "No matches found for user $userId. Creating default match.",
+        );
+
+        // 1. Build the default match object (without ID)
+        final FootballMatch defaultMatch = _buildDefaultMatch(userId);
+
+        // 2. Add the default match to Firestore
+        final DocumentReference newDocRef = await matchCollection.add(
+          defaultMatch.toJson(), // Convert model to Map for Firestore
+        );
+        debug(data: "Default match created with ID: ${newDocRef.id}");
+
+        // 3. Create the final match object *with* the Firestore-generated ID
+        //    (Using copyWith if available, otherwise reconstruct)
+        final FootballMatch createdMatchWithId = defaultMatch.copyWith(
+          id: newDocRef.id,
+        ); // Assumes FootballMatch has copyWith
+
+        // 4. Return a list containing only the newly created match
+        return [createdMatchWithId];
+      } else {
+        // --- Matches found, process them as before ---
+        List<FootballMatch> footballMatches = [];
+        for (var doc in querySnapshot.docs) {
+          try {
+            footballMatches.add(
+              FootballMatch.fromJson(
+                doc.data() as Map<String, dynamic>,
+                doc.id,
+              ),
+            );
+          } catch (e) {
+            debug(data: "Error parsing match document ${doc.id}: $e");
+            // Optionally skip corrupted documents
+          }
         }
+        debug(data: "Found ${footballMatches.length} matches for user $userId");
+        return footballMatches.reversed.toList();
       }
+    } on FirebaseException catch (e) {
+      debug(
+        data:
+            "FirebaseException during getAllMatches: ${e.message} code: ${e.code}",
+      );
+      // Check if the error occurred during the 'add' operation
+      if (e.code == 'permission-denied') {
+        throw Exception(
+          "Permission denied when trying to access or create matches.",
+        );
+      }
+      throw Exception("Error fetching or creating matches: ${e.message}");
+    } catch (e) {
+      debug(data: "Generic Exception during getAllMatches: $e");
+      throw Exception("An unexpected error occurred: $e");
+    }
+  }
 
-      return footballMatches;
-    }catch(e){
-      throw Exception(e);
+  // --- updateMatchScore remains the same ---
+  @override
+  Future<FootballMatch> updateMatchScore(
+    UpdateMatchScoreRequest updateMatchScoreRequest,
+  ) async {
+    // ... (implementation remains unchanged)
+    try {
+      final userId = _getCurrentUserId();
+      final String matchId = updateMatchScoreRequest.matchId;
+      if (matchId.isEmpty) throw ArgumentError("Match ID cannot be empty.");
+      debug(data: "Updating score for match: $matchId for user: $userId");
+      final DocumentReference matchDocRef = firestore
+          .collection(FirestoreConstants.matches)
+          .doc(matchId);
+      final Map<String, dynamic> updateData = {
+        'matchScore': updateMatchScoreRequest.newScore.toJson(),
+      };
+      await matchDocRef.update(updateData);
+      final DocumentSnapshot updatedDoc = await matchDocRef.get();
+      if (!updatedDoc.exists)
+        throw Exception("Match document $matchId not found after update.");
+      debug(data: "Match score updated successfully for $matchId");
+      return FootballMatch.fromJson(
+        updatedDoc.data() as Map<String, dynamic>,
+        updatedDoc.id,
+      );
+    } on FirebaseException catch (e) {
+      debug(
+        data:
+            "FirebaseException during updateMatchScore: ${e.message} code: ${e.code}",
+      );
+      throw Exception("Error updating match score: ${e.message}");
+    } catch (e) {
+      debug(data: "Generic Exception during updateMatchScore: $e");
+      throw Exception("An unexpected error occurred: $e");
+    }
+  }
+
+  // --- updateMatchTime remains the same ---
+  @override
+  Future<FootballMatch> updateMatchTime(
+    UpdateMatchTimeRequest updateMatchTimeRequest,
+  ) async {
+    // ... (implementation remains unchanged)
+    try {
+      final userId = _getCurrentUserId();
+      final String matchId = updateMatchTimeRequest.matchId;
+      if (matchId.isEmpty) throw ArgumentError("Match ID cannot be empty.");
+      debug(
+        data:
+            "Updating time for match: $matchId for user: $userId with status: ${updateMatchTimeRequest.matchTimeUpdateStatus}",
+      );
+      final DocumentReference matchDocRef = firestore
+          .collection(FirestoreConstants.matches)
+          .doc(matchId);
+      final List<MatchTime> newMatchTimeList =
+          updateMatchTimeRequest.footballMatch.matchTime;
+      List<Map<String, dynamic>> matchTimeJsonList =
+          newMatchTimeList.map((matchTime) => matchTime.toJson()).toList();
+      final Map<String, dynamic> updateData = {'matchTime': matchTimeJsonList};
+      await matchDocRef.update(updateData);
+      final DocumentSnapshot updatedDoc = await matchDocRef.get();
+      if (!updatedDoc.exists)
+        throw Exception(
+          "Match document $matchId not found after update attempt.",
+        );
+      debug(data: "Match time updated successfully for $matchId");
+      return FootballMatch.fromJson(
+        updatedDoc.data() as Map<String, dynamic>,
+        updatedDoc.id,
+      );
+    } on FirebaseException catch (e) {
+      debug(
+        data:
+            "FirebaseException during updateMatchTime: ${e.message} code: ${e.code}",
+      );
+      throw Exception("Error updating match time: ${e.message}");
+    } catch (e) {
+      debug(data: "Generic Exception during updateMatchTime: $e");
+      throw Exception(
+        "An unexpected error occurred while updating match time: $e",
+      );
     }
   }
 
   @override
-  Future<FootballMatch> updateMatchScore(UpdateMatchScoreRequest updateMatchScoreRequest) async{
-    try{
-      DbCollection? matchCollection = mongoDB.db?.collection(MongoConstant.MATCH_COLLECTION);
-      final ObjectId objectId = updateMatchScoreRequest.matchId;
-      await matchCollection?.updateOne(
-        where.id(objectId),
-        modify.set('matchScore', updateMatchScoreRequest.newScore.toJson()),
+  Future<FootballMatch> createMatch() async {
+    final userId = _getCurrentUserId(); // Get current user ID
+    final CollectionReference matchCollection = firestore.collection(
+      FirestoreConstants.matches,
+    );
+
+    try {
+      // Ensure the match data is associated with the correct user ID
+      // and does not contain an ID before creation.
+      final matchToCreate = _buildDefaultMatch(
+        userId,
+      ); // Assumes copyWith exists
+
+      debug(
+        data:
+            "Creating new match for user: $userId with name: ${matchToCreate.name}",
       );
-      debug(data: "Match score updated");
-      return getMatchById(objectId);
-    }catch(e){
-      throw Exception(e);
+
+      // Add the document to Firestore, which generates an ID
+      final DocumentReference newDocRef = await matchCollection.add(
+        matchToCreate.toJson(), // Convert to Map for Firestore
+      );
+
+      debug(data: "New match created successfully with ID: ${newDocRef.id}");
+
+      // Return the created match object with the new ID populated
+      return matchToCreate.copyWith(id: newDocRef.id);
+    } on FirebaseException catch (e) {
+      debug(
+        data:
+            "FirebaseException during createMatch: ${e.message} code: ${e.code}",
+      );
+      throw Exception("Error creating match: ${e.message}");
+    } catch (e) {
+      debug(data: "Generic Exception during createMatch: $e");
+      throw Exception(
+        "An unexpected error occurred while creating the match: $e",
+      );
     }
   }
 
-
-  Future<FootballMatch> getMatchById(ObjectId matchId)async{
-    try{
-      DbCollection? matchCollection = mongoDB.db?.collection(MongoConstant.MATCH_COLLECTION);
-
-      // Fetch the updated match object from the database
-      final matchDocument = await matchCollection?.findOne(where.id(matchId));
-
-      // If a match document is found, return it as a FootballMatch object
-      if (matchDocument != null) {
-        return FootballMatch.fromJson(matchDocument);  // Convert the MongoDB document to FootballMatch object
-      }else{
-        debug(data: "Match id not found");
-        throw Exception("Match id not found");
-      }
-    }catch(e){
-      throw Exception(e);
-    }
-
-  }
-
+  // --- NEW: deleteMatch Implementation ---
   @override
-  Future<FootballMatch> updateMatchTime(UpdateMatchTimeRequest updateMatchTimeRequest) async{
-    try{
-      DbCollection? matchCollection = mongoDB.db?.collection(MongoConstant.MATCH_COLLECTION);
-      final ObjectId objectId = updateMatchTimeRequest.matchId;
+  Future<bool> deleteMatch(String matchId) async {
+    final userId =
+        _getCurrentUserId(); // Get user ID (for logging/potential checks)
 
-      // Convert the list of MatchTime objects to a list of JSON maps
-      List<Map<String, dynamic>> matchTimeJsonList = updateMatchTimeRequest.footballMatch.matchTime.map((matchTime) {
-        return matchTime.toJson();  // Convert each MatchTime object to JSON
-      }).toList();
+    if (matchId.isEmpty) {
+      throw ArgumentError("Match ID cannot be empty for deletion.");
+    }
 
-      // Update the matchTime field in the MongoDB document
-      var dt = await matchCollection?.updateOne(
-        where.id(objectId),
-        modify.set('matchTime', matchTimeJsonList),  // Set the updated list
+    final DocumentReference matchDocRef = firestore
+        .collection(FirestoreConstants.matches)
+        .doc(matchId); // Get reference to the document
+
+    try {
+      debug(data: "Attempting to delete match: $matchId for user: $userId");
+
+      // Delete the document.
+      // Security is primarily handled by Firestore Security Rules
+      // ensuring request.auth.uid == resource.data.userId
+      await matchDocRef.delete();
+
+      debug(data: "Match deleted successfully: $matchId");
+
+      return true;
+    } on FirebaseException catch (e) {
+      debug(
+        data:
+            "FirebaseException during deleteMatch: ${e.message} code: ${e.code}",
       );
-      debug(data: "Match time updated ${dt?.id} - ${dt?.isFailure}");
-      return getMatchById(objectId);
-    } catch(e){
-    throw Exception(e);
+      if (e.code == 'permission-denied') {
+        throw Exception("Permission denied to delete match $matchId.");
+      } else if (e.code == 'not-found') {
+        // Consider if this should be an error or just logged
+        debug(
+          data: "Match $matchId not found for deletion (already deleted?).",
+        );
+        // Optionally re-throw: throw Exception("Match not found for deletion.");
+        return false; // Or simply return successfully if not-found is acceptable
+      }
+      throw Exception("Error deleting match: ${e.message}");
+    } catch (e) {
+      debug(data: "Generic Exception during deleteMatch: $e");
+      throw Exception(
+        "An unexpected error occurred while deleting the match: $e",
+      );
     }
   }
-
 }

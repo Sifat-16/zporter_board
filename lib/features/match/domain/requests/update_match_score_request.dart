@@ -1,9 +1,7 @@
-import 'package:mongo_dart/mongo_dart.dart' hide State;
 import 'package:zporter_board/features/scoreboard/data/model/score.dart';
 
-class UpdateMatchScoreRequest{
-  ObjectId matchId;
+class UpdateMatchScoreRequest {
+  String matchId;
   MatchScore newScore;
   UpdateMatchScoreRequest({required this.matchId, required this.newScore});
-
 }

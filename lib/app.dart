@@ -7,10 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:zporter_board/core/theme/app_theme.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
-import 'package:zporter_board/features/tactic/presentation/view_model/animation/animation_bloc.dart';
-import 'package:zporter_board/features/tactic/presentation/view_model/equipment/equipment_bloc.dart';
-import 'package:zporter_board/features/tactic/presentation/view_model/form/form_bloc.dart';
-import 'package:zporter_board/features/tactic/presentation/view_model/player/player_bloc.dart';
 
 import 'core/services/injection_container.dart';
 
@@ -26,21 +22,17 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(create: (context)=> sl<AuthBloc>()),
-        BlocProvider<PlayerBloc>(create: (context)=> sl<PlayerBloc>()),
-        BlocProvider<EquipmentBloc>(create: (context)=> sl<EquipmentBloc>()),
-        BlocProvider<FormBloc>(create: (context)=> sl<FormBloc>()),
-        BlocProvider<AnimationBloc>(create: (context)=>sl<AnimationBloc>()),
-        BlocProvider<MatchBloc>(create: (context)=>sl<MatchBloc>())
+        BlocProvider<AuthBloc>(create: (context) => sl<AuthBloc>()),
+        BlocProvider<MatchBloc>(create: (context) => sl<MatchBloc>()),
       ],
       child: ScreenUtilInit(
-          minTextAdapt: true,
-          splitScreenMode: true,
-        builder: (_,child) {
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (_, child) {
           return MaterialApp.router(
             routerConfig: sl<GoRouter>(),
             locale: DevicePreview.locale(context),
-            builder: (context, child){
+            builder: (context, child) {
               final botToastBuilder = BotToastInit();
               child = botToastBuilder(context, child);
               child = DevicePreview.appBuilder(context, child);
@@ -52,7 +44,7 @@ class _AppState extends State<App> {
             darkTheme: AppTheme.lightTheme,
             themeMode: ThemeMode.system,
           );
-        }
+        },
       ),
     );
   }

@@ -13,10 +13,12 @@ class MatchPaginationComponent extends StatefulWidget {
   const MatchPaginationComponent({super.key});
 
   @override
-  State<MatchPaginationComponent> createState() => _MatchPaginationComponentState();
+  State<MatchPaginationComponent> createState() =>
+      _MatchPaginationComponentState();
 }
 
-class _MatchPaginationComponentState extends State<MatchPaginationComponent> with AutomaticKeepAliveClientMixin {
+class _MatchPaginationComponentState extends State<MatchPaginationComponent>
+    with AutomaticKeepAliveClientMixin {
   List<FootballMatch> footBallMatch = [];
   int selectedIndex = 0;
   bool isVisibilityTriggered = false; // Track visibility state
@@ -49,7 +51,8 @@ class _MatchPaginationComponentState extends State<MatchPaginationComponent> wit
           key: UniqueKey(),
           onVisibilityChanged: (visibilityInfo) {
             // Only trigger if visibility has changed significantly
-            if (!isVisibilityTriggered && visibilityInfo.visibleFraction > 0.1) {
+            if (!isVisibilityTriggered &&
+                visibilityInfo.visibleFraction > 0.1) {
               setState(() {
                 isVisibilityTriggered = true;
               });
@@ -58,39 +61,79 @@ class _MatchPaginationComponentState extends State<MatchPaginationComponent> wit
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            child: footBallMatch.isEmpty
-                ? SizedBox.shrink()
-                : NumberPaginator(
-              numberPages: footBallMatch.length,
-              initialPage: selectedIndex,
-              onPageChange: (int index) {
-                context.read<MatchBloc>().add(MatchSelectEvent(index: index));
-              },
-              prevButtonContent: Icon(
-                Icons.chevron_left,
-                color: ColorManager.grey,
-                size: AppSize.s32,
-              ),
-              nextButtonContent: Icon(
-                Icons.chevron_right,
-                color: ColorManager.grey,
-                size: AppSize.s32,
-              ),
-              config: NumberPaginatorUIConfig(
-                buttonShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                buttonPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                buttonSelectedForegroundColor: ColorManager.yellow,
-                buttonSelectedBackgroundColor: Colors.black,
-                buttonUnselectedForegroundColor: ColorManager.grey,
-                buttonUnselectedBackgroundColor: Colors.transparent,
-                buttonTextStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: AppSize.s28,
-                ),
-              ),
-            ),
+            child:
+                footBallMatch.isEmpty
+                    ? SizedBox.shrink()
+                    : Row(
+                      children: [
+                        Expanded(
+                          child: NumberPaginator(
+                            numberPages: footBallMatch.length,
+                            initialPage: selectedIndex,
+                            onPageChange: (int index) {
+                              context.read<MatchBloc>().add(
+                                MatchSelectEvent(index: index),
+                              );
+                            },
+                            prevButtonContent: Icon(
+                              Icons.chevron_left,
+                              color: ColorManager.grey,
+                              size: AppSize.s32,
+                            ),
+                            nextButtonContent: Icon(
+                              Icons.chevron_right,
+                              color: ColorManager.grey,
+                              size: AppSize.s32,
+                            ),
+                            config: NumberPaginatorUIConfig(
+                              buttonShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              buttonPadding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              buttonSelectedForegroundColor:
+                                  ColorManager.yellow,
+                              buttonSelectedBackgroundColor: Colors.black,
+                              buttonUnselectedForegroundColor:
+                                  ColorManager.grey,
+                              buttonUnselectedBackgroundColor:
+                                  Colors.transparent,
+                              buttonTextStyle: Theme.of(
+                                context,
+                              ).textTheme.labelLarge!.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: AppSize.s28,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        IconButton(
+                          onPressed: () {
+                            context.read<MatchBloc>().add(
+                              CreateNewMatchEvent(),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.add_circle_outline,
+                            color: ColorManager.white,
+                          ),
+                        ),
+
+                        IconButton(
+                          onPressed: () {
+                            context.read<MatchBloc>().add(
+                              DeleteMatchEvent(
+                                matchId: footBallMatch[selectedIndex].id ?? "",
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.delete, color: ColorManager.white),
+                        ),
+                      ],
+                    ),
           ),
         );
       },
