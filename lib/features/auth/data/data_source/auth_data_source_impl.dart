@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -37,6 +38,9 @@ class AuthDataSourceImpl extends AuthDataSource {
           await googleUser.authentication;
       // Handle potential null googleAuth
       if (googleAuth?.accessToken == null || googleAuth?.idToken == null) {
+        BotToast.showText(
+          text: "Google authentication failed to retrieve tokens.",
+        );
         debug(data: "Google authentication failed to retrieve tokens.");
         return null;
       }
@@ -44,6 +48,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
+      BotToast.showText(text: "Credential token acquired.");
       debug(
         data:
             "Credential token acquired.", // Avoid logging sensitive tokens directly
@@ -54,6 +59,10 @@ class AuthDataSourceImpl extends AuthDataSource {
       return userCredential;
       // --- End of unchanged part ---
     } on FirebaseAuthException catch (e) {
+      BotToast.showText(
+        text:
+            "FirebaseAuthException during Google Sign-In: ${e.message} code: ${e.code}",
+      );
       debug(
         data:
             "FirebaseAuthException during Google Sign-In: ${e.message} code: ${e.code}",
@@ -61,6 +70,7 @@ class AuthDataSourceImpl extends AuthDataSource {
       // Handle specific Firebase auth errors (e.g., account-exists-with-different-credential)
       return null;
     } on Exception catch (e) {
+      BotToast.showText(text: "Generic Exception during Google Sign-In: $e");
       debug(data: "Generic Exception during Google Sign-In: $e");
       return null;
     }
