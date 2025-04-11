@@ -70,6 +70,8 @@ dependencies:
       url: https://github.com/Sifat-16/zporter_tactical_board.git
       ref: app
 
+  flutter_launcher_icons: ^0.14.3
+
 
 dev_dependencies:
   flutter_test:
@@ -133,5 +135,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/image/logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+
 
 

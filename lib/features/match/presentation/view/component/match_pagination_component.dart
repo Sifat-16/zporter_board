@@ -8,6 +8,7 @@ import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
+import 'package:zporter_tactical_board/app/core/dialogs/confirmation_dialog.dart';
 
 class MatchPaginationComponent extends StatefulWidget {
   const MatchPaginationComponent({super.key});
@@ -123,12 +124,21 @@ class _MatchPaginationComponentState extends State<MatchPaginationComponent>
                         ),
 
                         IconButton(
-                          onPressed: () {
-                            context.read<MatchBloc>().add(
-                              DeleteMatchEvent(
-                                matchId: footBallMatch[selectedIndex].id ?? "",
-                              ),
+                          onPressed: () async {
+                            bool? confirmed = await showConfirmationDialog(
+                              context: context,
+                              title: "Delete Match?",
+                              content:
+                                  "This operation will delete the match data (score, time, substitution)",
                             );
+                            if (confirmed == true) {
+                              context.read<MatchBloc>().add(
+                                DeleteMatchEvent(
+                                  matchId:
+                                      footBallMatch[selectedIndex].id ?? "",
+                                ),
+                              );
+                            }
                           },
                           icon: Icon(Icons.delete, color: ColorManager.white),
                         ),

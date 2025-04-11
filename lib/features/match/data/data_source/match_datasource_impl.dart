@@ -51,6 +51,8 @@ class MatchDataSourceImpl implements MatchDataSource {
       matchScore: defaultScore,
       substitutions: defaultSubstitutions,
       venue: "Default Venue", // Default venue
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
   }
 
@@ -107,8 +109,27 @@ class MatchDataSourceImpl implements MatchDataSource {
             // Optionally skip corrupted documents
           }
         }
+
         debug(data: "Found ${footballMatches.length} matches for user $userId");
-        return footballMatches.reversed.toList();
+
+        // --- ADD CLIENT-SIDE SORTING ---
+        footballMatches.sort((matchA, matchB) {
+          final dateA = matchA.createdAt;
+          final dateB = matchB.createdAt;
+
+          // Handle cases where createdAt might be null
+          // Treat nulls as the oldest (coming first in ascending sort)
+          if (dateA == null && dateB == null) return 0; // Equal if both null
+          if (dateA == null)
+            return -1; // Null dateA comes before non-null dateB
+          if (dateB == null) return 1; // Non-null dateA comes after null dateB
+
+          // Compare non-null dates
+          return dateA.compareTo(dateB); // Ascending order (older first)
+        });
+        // --- END CLIENT-SIDE SORTING ---
+
+        return footballMatches;
       }
     } on FirebaseException catch (e) {
       debug(
