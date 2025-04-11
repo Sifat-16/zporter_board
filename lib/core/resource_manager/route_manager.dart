@@ -6,7 +6,6 @@ import 'package:zporter_board/features/auth/presentation/view/auth_screen.dart';
 import 'package:zporter_board/features/board/presentation/view/board_screen.dart';
 import 'package:zporter_board/features/splash/presentation/view/splash_screen.dart';
 
-
 class Routes {
   // AUTH ROUTES
   static const String auth = 'auth';
@@ -15,28 +14,25 @@ class Routes {
 }
 
 class RouteGenerator {
-  final GlobalKey<NavigatorState> _rootNavigatorKey =
-  GlobalKey<NavigatorState>(debugLabel: 'root');
+  final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
+    debugLabel: 'root',
+  );
   late final GoRouter router;
 
   RouteGenerator() {
     router = GoRouter(
       navigatorKey: _rootNavigatorKey,
-      observers: [
-
-      ],
-      // initialLocation: '/draft-posts',
+      observers: [],
+      initialLocation: '/',
       errorBuilder: (context, state) {
-        return PageUnderConstructionScreen(
-          error: state.error.toString(),
-        );
+        return PageUnderConstructionScreen(error: state.error.toString());
       },
       routes: [
         GoRoute(
           path: '/',
-          pageBuilder: (context, state) => NoTransitionPage(
-            child: SplashScreen(key: state.pageKey),
-          ),
+          pageBuilder:
+              (context, state) =>
+                  NoTransitionPage(child: SplashScreen(key: state.pageKey)),
         ),
 
         GoRoute(
@@ -50,15 +46,12 @@ class RouteGenerator {
           path: '/board',
           builder: (context, state) => const BoardScreen(),
         ),
-
       ],
     );
   }
 
   // return router;
-  Future<void> handleDeepLink(Uri uri) async {
-
-  }
+  Future<void> handleDeepLink(Uri uri) async {}
 
   // Getter for navigator key if needed elsewhere
   GlobalKey<NavigatorState> get rootNavigatorKey => _rootNavigatorKey;

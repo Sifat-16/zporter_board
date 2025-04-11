@@ -1,53 +1,89 @@
-import 'package:mongo_dart/mongo_dart.dart' hide State;
-
 class Team {
-  final ObjectId id;
+  final String? id; // Changed from ObjectId to String?
   final String name;
   final List<Player> players;
 
-  Team({ObjectId? id, required this.name, required this.players}) : id = id ?? ObjectId();
+  // Removed default ObjectId generation
+  Team({this.id, required this.name, required this.players});
 
   factory Team.fromJson(Map<String, dynamic> json) {
     return Team(
-      id: json['_id'],
-      name: json['name'],
-      players: (json['players'] as List).map((p) => Player.fromJson(p)).toList(),
+      // Assuming 'id' might be present if nested object has an ID, otherwise null
+      id: json['id'] as String?, // Changed key from '_id' and type
+      name: json['name'] as String,
+      players:
+          (json['players'] as List<dynamic>? ??
+                  []) // Handle potential null list
+              .map((p) => Player.fromJson(p as Map<String, dynamic>))
+              .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      '_id': id,
+      'id': id, // Changed key from '_id'
       'name': name,
       'players': players.map((p) => p.toJson()).toList(),
     };
   }
+
+  // Optional: copyWith
+  Team copyWith({String? id, String? name, List<Player>? players}) {
+    return Team(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      players: players ?? this.players,
+    );
+  }
 }
 
+// Removed mongo_dart import
+
 class Player {
-  final ObjectId id;
+  final String? id; // Changed from ObjectId to String?
   final String name;
   final String position;
   final int jerseyNumber;
 
-  Player({ObjectId? id, required this.name, required this.position, required this.jerseyNumber})
-      : id = id ?? ObjectId();
+  // Removed default ObjectId generation
+  Player({
+    this.id,
+    required this.name,
+    required this.position,
+    required this.jerseyNumber,
+  });
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
-      id: json['_id'],
-      name: json['name'],
-      position: json['position'],
-      jerseyNumber: json['jerseyNumber'],
+      id: json['id'] as String?, // Changed key from '_id' and type
+      name: json['name'] as String,
+      position: json['position'] as String,
+      // Ensure jerseyNumber is parsed correctly (might be double from JSON)
+      jerseyNumber: (json['jerseyNumber'] as num).toInt(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      '_id': id,
+      'id': id, // Changed key from '_id'
       'name': name,
       'position': position,
       'jerseyNumber': jerseyNumber,
     };
+  }
+
+  // Optional: copyWith
+  Player copyWith({
+    String? id,
+    String? name,
+    String? position,
+    int? jerseyNumber,
+  }) {
+    return Player(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      position: position ?? this.position,
+      jerseyNumber: jerseyNumber ?? this.jerseyNumber,
+    );
   }
 }

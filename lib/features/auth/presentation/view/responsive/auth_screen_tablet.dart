@@ -1,4 +1,3 @@
-
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,38 +25,33 @@ class _AuthScreenTabletState extends State<AuthScreenTablet> {
       backgroundColor: ColorManager.black,
       body: Center(
         child: GestureDetector(
-          onTap: (){
+          onTap: () {
             context.read<AuthBloc>().add(GoogleSignInEvent());
-
           },
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: AppMargin.h12, vertical: AppMargin.v8),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppMargin.h12,
+              vertical: AppMargin.v8,
+            ),
             decoration: BoxDecoration(
               color: ColorManager.yellow.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(AppRadius.r4)
+              borderRadius: BorderRadius.circular(AppRadius.r4),
             ),
             child: BlocConsumer<AuthBloc, AuthState>(
               listener: (BuildContext context, AuthState state) {
-
-
-
-                if(state is GoogleSignInSuccess){
+                if (state is AuthStatusSuccess) {
                   _onSuccessFulSignIn();
                 }
 
-                if(state is GoogleSignInFailure){
+                if (state is GoogleSignInFailure) {
                   debug(data: "Google Signin error ${state.message}");
                 }
-
-
-
               },
               builder: (context, state) {
-
-                if(state is GoogleSignInProgress){
+                if (state is GoogleSignInProgress) {
                   return SizedBox(
                     height: AppSize.s24, // Set proper height
-                    width: AppSize.s24,  // Set proper width
+                    width: AppSize.s24, // Set proper width
                     child: CircularProgressIndicator(
                       color: ColorManager.white,
                       strokeWidth: 2, // Adjust thickness
@@ -68,11 +62,19 @@ class _AuthScreenTabletState extends State<AuthScreenTablet> {
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(AssetsManager.logo, height: AppSize.s24, width: AppSize.s24, color: ColorManager.white,),
-                    SizedBox(width: AppSize.s14,),
-                    Text("Login with Zporter", style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      fontWeight: FontWeight.bold
-                    ))
+                    Image.asset(
+                      AssetsManager.logo,
+                      height: AppSize.s24,
+                      width: AppSize.s24,
+                      color: ColorManager.white,
+                    ),
+                    SizedBox(width: AppSize.s14),
+                    Text(
+                      "Login with Zporter",
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 );
               },
@@ -80,7 +82,6 @@ class _AuthScreenTabletState extends State<AuthScreenTablet> {
           ),
         ),
       ),
-
     );
   }
 
@@ -88,5 +89,4 @@ class _AuthScreenTabletState extends State<AuthScreenTablet> {
     BotToast.showText(text: "Sign In Successful!");
     GoRouter.of(context).pushReplacementNamed(Routes.board);
   }
-
 }

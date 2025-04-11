@@ -20,7 +20,6 @@ class SplashScreenTablet extends StatefulWidget {
 }
 
 class _SplashScreenTabletState extends State<SplashScreenTablet> {
-
   final String _zporter_url = "https://onelink.to/zporter";
 
   @override
@@ -28,18 +27,19 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthBloc, AuthState>(
-            listener: (context, state){
-              if(state is AuthStatusFailure){
-                Future.delayed(Duration(seconds: 2), (){
-                  _navigateToAuth();
-                });
-              }else if(state is AuthStatusSuccess){
-                Future.delayed(Duration(seconds: 1), (){
-                  _navigateToBoard();
-                });
-              }
+          listener: (context, state) {
+            if (state is AuthStatusFailure) {
+              Future.delayed(Duration(seconds: 2), () {
+                // _navigateToBoard();
+                _navigateToAuth();
+              });
+            } else if (state is AuthStatusSuccess) {
+              Future.delayed(Duration(seconds: 1), () {
+                _navigateToBoard();
+              });
             }
-        )
+          },
+        ),
       ],
       child: Scaffold(
         backgroundColor: ColorManager.black,
@@ -57,11 +57,11 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
               Align(
                 alignment: Alignment.bottomRight,
                 child: QrImageView(
-                    data: _zporter_url,
+                  data: _zporter_url,
                   size: AppSize.s96,
                   backgroundColor: ColorManager.white,
-                )
-              )
+                ),
+              ),
             ],
           ),
         ),
