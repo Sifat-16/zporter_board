@@ -53,58 +53,60 @@ class _SubstituteboardScreenTabletState
         child: Builder(
           builder: (context) {
             double height = getBoardHeightLeft(context);
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    height: height * .9,
-                    child: Stack(
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              flex: 1,
-                              child: Container(
-                                height: height * .9,
-                                color: ColorManager.red,
-                              ),
-                            ),
-                            Flexible(
-                              flex: 1,
-                              child: Container(
-                                height: height * .9,
-                                color: ColorManager.green,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(top: AppSize.s20),
-                          child: Column(
+            return Container(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      height: height * .9,
+                      child: Stack(
+                        children: [
+                          Row(
                             children: [
-                              SubstituteboardHeader(
-                                matchTimes: footballMatch?.matchTime ?? [],
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  height: height * .9,
+                                  color: ColorManager.red,
+                                ),
                               ),
-                              SubstituteComponent(),
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  height: height * .9,
+                                  color: ColorManager.green,
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                      ],
+                          Container(
+                            padding: EdgeInsets.only(top: AppSize.s20),
+                            child: Column(
+                              children: [
+                                SubstituteboardHeader(
+                                  matchTimes: footballMatch?.matchTime ?? [],
+                                ),
+                                SubstituteComponent(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    height: height * .1,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Flexible(flex: 2, child: MatchPaginationComponent()),
-                        // Flexible(
-                        //   flex: 1,
-                        //     child: IconButton(onPressed: (){}, icon: Icon(Icons.delete)))
-                      ],
+                    Container(
+                      height: height * .1,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Flexible(flex: 2, child: MatchPaginationComponent()),
+                          // Flexible(
+                          //   flex: 1,
+                          //     child: IconButton(onPressed: (){}, icon: Icon(Icons.delete)))
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },

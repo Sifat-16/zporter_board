@@ -37,30 +37,28 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet>
         ),
       ],
       child: BoardContainer(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ScoreBoardHeader(matchTimes: footballMatch?.matchTime ?? []),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ScoreBoardHeader(matchTimes: footballMatch?.matchTime ?? []),
 
-              ScoreCard(
-                matchScore: footballMatch?.matchScore,
-                updateMatchScore: (matchScore) {
-                  if (footballMatch != null) {
-                    context.read<MatchBloc>().add(
-                      MatchScoreUpdateEvent(
-                        newScore: matchScore,
-                        matchId: footballMatch?.id ?? "",
-                      ),
-                    );
-                  }
-                },
-              ),
+            ScoreCard(
+              matchScore: footballMatch?.matchScore,
+              updateMatchScore: (matchScore) {
+                if (footballMatch != null) {
+                  context.read<MatchBloc>().add(
+                    MatchScoreUpdateEvent(
+                      newScore: matchScore,
+                      matchId: footballMatch?.id ?? "",
+                    ),
+                  );
+                }
+              },
+            ),
 
-              // Expanded(child: RotatableComponent()),
-              SizedBox(child: MatchPaginationComponent()),
-            ],
-          ),
+            // Expanded(child: RotatableComponent()),
+            SizedBox(child: MatchPaginationComponent()),
+          ],
         ),
       ),
     );
