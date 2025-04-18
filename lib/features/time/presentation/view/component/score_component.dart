@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
@@ -18,24 +17,44 @@ class _ScoreComponentState extends State<ScoreComponent> {
   Widget build(BuildContext context) {
     return Container(
       child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+        child: Column(
           children: [
-            Text("${widget.matchScore.homeScore}", style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              color: ColorManager.green,
-              fontWeight: FontWeight.bold,
-              fontSize: AppSize.s56
-            ),),
-            Text("-", style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                color: ColorManager.green,
+            Text(
+              "Score",
+              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                color: ColorManager.grey,
                 fontWeight: FontWeight.bold,
-                fontSize: AppSize.s56
-            ),),
-            Text("${widget.matchScore.awayScore}", style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                color: ColorManager.green,
-                fontWeight: FontWeight.bold,
-                fontSize: AppSize.s56
-            ),),
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "${widget.matchScore.homeScore}",
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: ColorManager.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: AppSize.s56,
+                  ),
+                ),
+                Text(
+                  "-",
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: ColorManager.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: AppSize.s56,
+                  ),
+                ),
+                Text(
+                  "${widget.matchScore.awayScore}",
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: ColorManager.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: AppSize.s56,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

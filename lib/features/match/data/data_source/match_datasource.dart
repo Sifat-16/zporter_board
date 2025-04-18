@@ -10,6 +10,6 @@ abstract class MatchDataSource {
   Future<FootballMatch> updateMatchTime(
     UpdateMatchTimeRequest updateMatchTimeRequest,
   );
-  Future<FootballMatch> createMatch();
+  Future<FootballMatch> createMatch({FootballMatch? footballMatch});
   Future<bool> deleteMatch(String matchId);
 }

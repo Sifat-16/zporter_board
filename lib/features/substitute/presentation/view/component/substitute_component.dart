@@ -59,11 +59,10 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 50),
+      padding: EdgeInsets.only(top: 30),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-
           // Scores Row (Team A — Team B)
           Row(
             children: [
@@ -73,7 +72,7 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                 child: Container(
                   width: context.widthPercent(50),
                   height: context.heightPercent(50),
-                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 5),
                   child: FittedBox(
                     fit: BoxFit.fitWidth,
                     child: Row(
@@ -81,17 +80,24 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                       children: [
                         AnimatedFlipCounter(
                           value: _teamAFirstDigit,
-                          textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                            fontSize: AppSize.s160,
+                          textStyle: Theme.of(
+                            context,
+                          ).textTheme.titleLarge!.copyWith(
+                            fontSize: AppSize.s128,
                             fontWeight: FontWeight.bold,
-                            color: ColorManager.white,
+                            color:
+                                _teamAFirstDigit == 0
+                                    ? ColorManager.transparent
+                                    : ColorManager.white,
                           ),
                         ),
                         const SizedBox(width: 10), // Space between digits
                         AnimatedFlipCounter(
                           value: _teamASecondDigit,
-                          textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                            fontSize: AppSize.s160,
+                          textStyle: Theme.of(
+                            context,
+                          ).textTheme.titleLarge!.copyWith(
+                            fontSize: AppSize.s128,
                             fontWeight: FontWeight.bold,
                             color: ColorManager.white,
                           ),
@@ -101,7 +107,6 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                   ),
                 ),
               ),
-
 
               // Team B Score
               Flexible(
@@ -117,17 +122,24 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                       children: [
                         AnimatedFlipCounter(
                           value: _teamBFirstDigit,
-                          textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                            fontSize: AppSize.s160,
+                          textStyle: Theme.of(
+                            context,
+                          ).textTheme.titleLarge!.copyWith(
+                            fontSize: AppSize.s128,
                             fontWeight: FontWeight.bold,
-                            color: ColorManager.white,
+                            color:
+                                _teamBFirstDigit == 0
+                                    ? ColorManager.transparent
+                                    : ColorManager.white,
                           ),
                         ),
                         const SizedBox(width: 10), // Space between digits
                         AnimatedFlipCounter(
                           value: _teamBSecondDigit,
-                          textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                            fontSize: AppSize.s160,
+                          textStyle: Theme.of(
+                            context,
+                          ).textTheme.titleLarge!.copyWith(
+                            fontSize: AppSize.s128,
                             fontWeight: FontWeight.bold,
                             color: ColorManager.white,
                           ),
@@ -149,7 +161,6 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
               const SizedBox(width: 30), // Space between buttons
               _buildButtonColumn(1, 'second'),
               const SizedBox(width: 120), // Space between teams
-
               // Team B Buttons
               _buildButtonColumn(2, 'first'),
               const SizedBox(width: 30), // Space between buttons
@@ -167,11 +178,19 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          child: Icon(Icons.keyboard_arrow_up, color: Colors.grey, size: AppSize.s48),
+          child: Icon(
+            Icons.keyboard_arrow_up,
+            color: ColorManager.grey,
+            size: AppSize.s48,
+          ),
           onTap: () => _incrementDigit(team, digit),
         ),
         GestureDetector(
-          child: Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: AppSize.s48),
+          child: Icon(
+            Icons.keyboard_arrow_down,
+            color: ColorManager.grey,
+            size: AppSize.s48,
+          ),
           onTap: () => _decrementDigit(team, digit),
         ),
       ],

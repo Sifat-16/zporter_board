@@ -1,15 +1,16 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/common/components/timer/timer_controller.dart';
-import 'package:zporter_board/core/resource_manager/color_manager.dart';
 
 class TimerComponent extends StatefulWidget {
-  final int elapsedSeconds;  // Pass elapsed time in seconds
-  final bool isRunning;  // Determine whether the timer should run
+  final int elapsedSeconds; // Pass elapsed time in seconds
+  final bool isRunning; // Determine whether the timer should run
   final Color? textColor;
   final double? textSize;
   final double? letterSpacing;
   final FontWeight? fontWeight;
+  final double periodDivider;
   final VoidCallback? onStart;
   final VoidCallback? onStop;
   final VoidCallback? onPause;
@@ -22,6 +23,7 @@ class TimerComponent extends StatefulWidget {
     required this.controller, // Pass the controller
     this.textColor,
     this.textSize,
+    this.periodDivider = 4,
     this.fontWeight,
     this.onStart,
     this.onStop,
@@ -33,7 +35,8 @@ class TimerComponent extends StatefulWidget {
   _TimerComponentState createState() => _TimerComponentState();
 }
 
-class _TimerComponentState extends State<TimerComponent> with TickerProviderStateMixin {
+class _TimerComponentState extends State<TimerComponent>
+    with TickerProviderStateMixin {
   late int _elapsedSeconds;
   late int _minutes;
   late int _seconds;
@@ -46,7 +49,6 @@ class _TimerComponentState extends State<TimerComponent> with TickerProviderStat
     _elapsedSeconds = widget.elapsedSeconds;
     _minutes = _elapsedSeconds ~/ 60;
     _seconds = _elapsedSeconds % 60;
-
 
     // Attach controller's methods
     widget.controller.attach(
@@ -137,13 +139,17 @@ class _TimerComponentState extends State<TimerComponent> with TickerProviderStat
 
     return FittedBox(
       fit: BoxFit.fitWidth,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Text("${_minutes.toString().padLeft(2, '0')}", style: textStyle),
           Text(
-            "${_minutes.toString().padLeft(2, '0')}:${_seconds.toString().padLeft(2, '0')}",
-            style: textStyle,
+            ":",
+            style: textStyle.copyWith(
+              fontSize: (widget.textSize ?? 48) / widget.periodDivider,
+            ),
           ),
+          Text("${_seconds.toString().padLeft(2, '0')}", style: textStyle),
         ],
       ),
     );

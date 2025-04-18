@@ -71,6 +71,12 @@ dependencies:
       ref: app
 
   flutter_launcher_icons: ^0.14.3
+  flutter_slider_drawer: ^3.0.2
+  font_awesome_flutter: ^10.8.0
+  sembast: ^3.8.3
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.3
+
 
 
 dev_dependencies:
@@ -132,6 +138,10 @@ flutter:
         - asset: assets/fonts/gilroy/Gilroy-Regular.ttf
         - asset: assets/fonts/gilroy/Gilroy-RegularItalic.ttf
           style: italic
+        - asset: assets/fonts/gilroy/Gilroy-Bold.ttf
+          weight: 700
+
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

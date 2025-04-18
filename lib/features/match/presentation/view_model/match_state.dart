@@ -1,52 +1,60 @@
-import 'package:equatable/equatable.dart';
-import 'package:zporter_board/features/match/data/model/football_match.dart';
+import 'package:zporter_board/features/match/data/model/football_match.dart'; // Assuming this import is correct
 
-class MatchState extends Equatable{
-  @override
-  // TODO: implement props
-  List<Object?> get props => [];
+// Define the status enum (re-added for completeness)
+// Sentinel object used to detect if a parameter was provided to copyWith
+const Object _sentinel = Object();
+
+class MatchState {
+  final List<FootballMatch>? matches;
+  final int? selectedIndex; // Index of the selected match in the 'matches' list
+  final FootballMatch? selectedMatch; // The actual selected match object
+  final String? failureMessage;
+  final bool isLoading;
+
+  // Constructor with required status and optional data fields
+  const MatchState({
+    this.matches,
+    this.selectedIndex,
+    this.selectedMatch,
+    this.failureMessage,
+    this.isLoading = false,
+  });
+
+  // Factory constructor for the initial state
+  factory MatchState.initial() {
+    return const MatchState(
+      matches: [],
+      selectedIndex: null,
+      selectedMatch: null,
+      failureMessage: null,
+      isLoading: false,
+    );
+  }
+
+  // copyWith method using the sentinel pattern for nullable fields
+  MatchState copyWith({
+    Object? matches = _sentinel,
+    Object? selectedIndex = _sentinel,
+    Object? selectedMatch = _sentinel,
+    Object? failureMessage = _sentinel,
+    bool? isLoading,
+  }) {
+    return MatchState(
+      matches:
+          matches == _sentinel ? this.matches : matches as List<FootballMatch>?,
+      selectedIndex:
+          selectedIndex == _sentinel
+              ? this.selectedIndex
+              : selectedIndex as int?,
+      selectedMatch:
+          selectedMatch == _sentinel
+              ? this.selectedMatch
+              : selectedMatch as FootballMatch?,
+      failureMessage:
+          failureMessage == _sentinel
+              ? this.failureMessage
+              : failureMessage as String?,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
 }
-
-class MatchInitialState extends MatchState{
-
-}
-
-class MatchUpdateState extends MatchState{
-  final String forceEmitKey;
-  MatchUpdateState({String? forceEmitKey}):forceEmitKey=forceEmitKey??DateTime.now().toIso8601String();
-
-  @override
-  // TODO: implement props
-  List<Object?> get props => [forceEmitKey];
-}
-
-class MatchLoadInProgressState extends MatchState{
-
-}
-
-class MatchLoadSuccessState extends MatchState{
-  final List<FootballMatch> matches;
-  MatchLoadSuccessState({required this.matches});
-
-  @override
-  // TODO: implement props
-  List<Object?> get props => [matches];
-}
-
-class MatchLoadFailureState extends MatchState{
-  final String failureMessage;
-  MatchLoadFailureState({required this.failureMessage});
-  @override
-  // TODO: implement props
-  List<Object?> get props => [failureMessage];
-}
-
-class MatchSelectedState extends MatchState{
-  final FootballMatch match;
-  MatchSelectedState({required this.match});
-
-  @override
-  // TODO: implement props
-  List<Object?> get props => [match];
-}
-

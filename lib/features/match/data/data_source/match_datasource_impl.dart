@@ -235,11 +235,23 @@ class MatchDataSourceImpl implements MatchDataSource {
   }
 
   @override
-  Future<FootballMatch> createMatch() async {
+  Future<FootballMatch> createMatch({FootballMatch? footballMatch}) async {
     final userId = _getCurrentUserId(); // Get current user ID
     final CollectionReference matchCollection = firestore.collection(
       FirestoreConstants.matches,
     );
+
+    if (footballMatch != null) {
+      footballMatch = footballMatch.copyWith(userId: userId);
+      // Add the document to Firestore, which generates an ID
+      final DocumentReference newDocRef = await matchCollection.add(
+        footballMatch.toJson(), // Convert to Map for Firestore
+      );
+
+      debug(data: "New match created successfully with ID: ${newDocRef.id}");
+      // Return the created match object with the new ID populated
+      return footballMatch.copyWith(id: newDocRef.id);
+    }
 
     try {
       // Ensure the match data is associated with the correct user ID

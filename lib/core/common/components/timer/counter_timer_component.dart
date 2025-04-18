@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class CounterTimerComponent extends StatefulWidget {
@@ -33,7 +34,10 @@ class _TimerWidgetState extends State<CounterTimerComponent> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    try {
+      _timer.cancel();
+    } catch (e) {}
+
     super.dispose();
   }
 

@@ -13,6 +13,7 @@ import 'package:zporter_board/features/match/domain/usecases/update_match_score_
 import 'package:zporter_board/features/match/domain/usecases/update_match_time_usecase.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class MatchBloc extends Bloc<MatchEvent, MatchState> {
   FetchMatchUsecase _fetchMatchUsecase;
@@ -31,7 +32,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
        _updateMatchTimeUsecase = updateMatchTimeUsecase,
        _createNewMatchUseCase = createNewMatchUseCase,
        _deleteMatchUseCase = deleteMatchUseCase,
-       super(MatchInitialState()) {
+       super(MatchState.initial()) {
     on<MatchLoadEvent>(_onLoadMatches);
     on<MatchSelectEvent>(_onMatchSelected);
     on<MatchScoreUpdateEvent>(_onMatchScoreUpdate);
@@ -39,23 +40,33 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     on<MatchTimeUpdateEvent>(_onMatchTimeUpdate);
     on<CreateNewMatchEvent>(_createNewMatch);
     on<DeleteMatchEvent>(_deleteMatch);
+    on<UpdateMatchEvent>(_updateMatch);
   }
 
-  List<FootballMatch>? matches;
-  FootballMatch? selectedMatch;
-  int selectedIndex = 0;
+  // List<FootballMatch>? matches;
+  // FootballMatch? selectedMatch;
+  // int selectedIndex = 0;
 
   FutureOr<void> _onLoadMatches(
     MatchLoadEvent event,
     Emitter<MatchState> emit,
   ) async {
-    emit(MatchLoadInProgressState());
+    emit(state.copyWith(isLoading: true));
+
     try {
-      matches = await _fetchMatchUsecase.call(null);
-      selectedMatch = matches!.first;
-      emit(MatchUpdateState());
+      List<FootballMatch>? matches = await _fetchMatchUsecase.call(null);
+      FootballMatch? selectedMatch = matches.first;
+      zlog(data: "match loading is called ${matches}");
+
+      emit(
+        state.copyWith(
+          matches: matches,
+          selectedMatch: selectedMatch,
+          isLoading: false,
+        ),
+      );
     } catch (e) {
-      emit(MatchLoadFailureState(failureMessage: e.toString()));
+      emit(state.copyWith(failureMessage: e.toString(), isLoading: false));
     }
   }
 
@@ -64,9 +75,14 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     Emitter<MatchState> emit,
   ) async {
     try {
-      selectedMatch = matches![event.index];
-      selectedIndex = event.index;
-      emit(MatchUpdateState());
+      FootballMatch? selectedMatch = state.matches?[event.index];
+      int selectedIndex = event.index;
+      emit(
+        state.copyWith(
+          selectedMatch: selectedMatch,
+          selectedIndex: selectedIndex,
+        ),
+      );
     } catch (e) {}
   }
 
@@ -81,8 +97,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
           newScore: event.newScore,
         ),
       );
-      _updateMatch(updatedMatch);
-      emit(MatchUpdateState());
+      add(UpdateMatchEvent(footballMatch: updatedMatch));
     } catch (e) {}
   }
 
@@ -90,7 +105,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     MatchUpdateEvent event,
     Emitter<MatchState> emit,
   ) {
-    emit(MatchUpdateState());
+    emit(state.copyWith());
   }
 
   FutureOr<void> _onMatchTimeUpdate(
@@ -98,7 +113,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     Emitter<MatchState> emit,
   ) async {
     try {
-      FootballMatch? footballMatch = matches?.firstWhere(
+      FootballMatch? footballMatch = state.matches?.firstWhere(
         (t) => t.id == event.matchId,
       );
       FootballMatch updatedMatch = await _updateMatchTimeUsecase.call(
@@ -108,20 +123,34 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
           matchTimeUpdateStatus: event.matchTimeUpdateStatus,
         ),
       );
-      _updateMatch(updatedMatch);
-      emit(MatchUpdateState());
+      add(UpdateMatchEvent(footballMatch: updatedMatch));
     } catch (e) {
       debug(data: "Error while updating time ${e.toString()}");
     }
   }
 
-  _updateMatch(FootballMatch updatedMatch) {
-    int index = matches?.indexWhere((m) => m.id == updatedMatch.id) ?? -1;
+  FutureOr<void> _updateMatch(
+    UpdateMatchEvent event,
+    Emitter<MatchState> emit,
+  ) {
+    List<FootballMatch>? matches = state.matches;
+    int index =
+        matches?.indexWhere((m) => m.id == event.footballMatch.id) ?? -1;
     if (index != -1) {
-      matches?[index] = updatedMatch;
-      selectedMatch = matches?[selectedIndex];
+      matches?[index] = event.footballMatch;
+      // FootballMatch? selectedMatch = matches?[selectedIndex];
     }
+    emit(state.copyWith(matches: matches));
   }
+
+  // _updateMatch(FootballMatch updatedMatch) {
+  //   int index = matches?.indexWhere((m) => m.id == updatedMatch.id) ?? -1;
+  //   if (index != -1) {
+  //     matches?[index] = updatedMatch;
+  //     selectedMatch = matches?[selectedIndex];
+  //   }
+  //   emit(MatchUpdateState());
+  // }
 
   FutureOr<void> _createNewMatch(
     CreateNewMatchEvent event,
@@ -129,12 +158,22 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
   ) async {
     BotToast.showLoading();
     try {
+      List<FootballMatch>? matches = state.matches;
+      FootballMatch? selectedMatch = state.selectedMatch;
+      int? selectedIndex = state.selectedIndex;
       FootballMatch newMatch = await _createNewMatchUseCase.call(null);
       matches?.add(newMatch);
       selectedMatch = matches?.lastOrNull;
       selectedIndex =
           matches?.indexWhere((m) => m.id == selectedMatch?.id) ?? -1;
-      emit(MatchUpdateState());
+
+      emit(
+        state.copyWith(
+          matches: matches,
+          selectedMatch: selectedMatch,
+          selectedIndex: selectedIndex,
+        ),
+      );
     } catch (e) {
       BotToast.showText(text: "Something went wrong $e");
     }
@@ -147,13 +186,17 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
   ) async {
     BotToast.showLoading();
     try {
-      int index = matches?.indexWhere((t) => t.id == event.matchId) ?? -1;
+      int index = state.matches?.indexWhere((t) => t.id == event.matchId) ?? -1;
 
       if (index == -1) {
         BotToast.showText(text: "Invalid match id!!!");
       } else {
         bool isDeleted = await _deleteMatchUseCase.call(event.matchId);
         if (isDeleted) {
+          List<FootballMatch>? matches = state.matches;
+          FootballMatch? selectedMatch = state.selectedMatch;
+          int? selectedIndex = state.selectedIndex;
+
           selectedIndex = index;
           matches?.removeAt(index);
           if ((matches ?? []).isEmpty) {
@@ -164,7 +207,13 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
               selectedIndex = index - 1;
             }
             selectedMatch = matches?.elementAt(selectedIndex);
-            emit(MatchUpdateState());
+            emit(
+              state.copyWith(
+                matches: matches,
+                selectedMatch: selectedMatch,
+                selectedIndex: selectedIndex,
+              ),
+            );
           }
         } else {
           BotToast.showText(text: "Something went wrong!");

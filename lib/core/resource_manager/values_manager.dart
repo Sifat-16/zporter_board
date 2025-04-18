@@ -200,6 +200,7 @@ class AppSize {
   static const double s128 = 128;
   static const double s140 = 140;
   static const double s160 = 160;
+  static const double s180 = 180;
   static double toolbarHeight = 56.h;
   static double bottomNavBarHeight = 56.h;
 }

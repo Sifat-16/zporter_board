@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/scoreboard/data/model/score.dart';
 
 enum MatchTimeUpdateStatus { START, PAUSE, STOP }
@@ -45,6 +46,15 @@ class MatchTimeUpdateEvent extends MatchEvent {
 }
 
 class MatchUpdateEvent extends MatchEvent {}
+
+class UpdateMatchEvent extends MatchEvent {
+  final FootballMatch footballMatch;
+  UpdateMatchEvent({required this.footballMatch});
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [footballMatch];
+}
 
 class CreateNewMatchEvent extends MatchEvent {}
 

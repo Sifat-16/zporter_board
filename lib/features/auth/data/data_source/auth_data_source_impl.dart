@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:zporter_board/core/constant/firestore_constant.dart';
+import 'package:zporter_board/core/services/user_id_service.dart';
 // Remove MongoDB related imports
 // import 'package:mongo_dart/mongo_dart.dart' hide State;
 // import 'package:zporter_board/config/database/remote/mongodb.dart';
@@ -17,11 +18,13 @@ class AuthDataSourceImpl extends AuthDataSource {
   final FirebaseAuth
   firebaseAuth; // Keep FirebaseAuth if needed elsewhere or pass it
   final GoogleSignIn googleSignIn; // Keep GoogleSignIn
+  final UserIdService userIdService;
 
   AuthDataSourceImpl({
     required this.firestore,
     required this.firebaseAuth,
     required this.googleSignIn,
+    required this.userIdService,
   }); // Updated constructor
 
   @override
@@ -165,5 +168,10 @@ class AuthDataSourceImpl extends AuthDataSource {
         "An unexpected error occurred while creating the user: $e",
       );
     }
+  }
+
+  @override
+  Future<String> guestLogin() async {
+    return userIdService.getCurrentUserId();
   }
 }

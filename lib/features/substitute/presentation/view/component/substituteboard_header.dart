@@ -15,7 +15,6 @@ class SubstituteboardHeader extends StatefulWidget {
 }
 
 class _SubstituteboardHeaderState extends State<SubstituteboardHeader> {
-
   TimerController _timerController = TimerController();
 
   @override
@@ -26,33 +25,48 @@ class _SubstituteboardHeaderState extends State<SubstituteboardHeader> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text("OUT", style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                color: ColorManager.grey
-            ),),
-
-            Container(
-
+            Text(
+              "OUT",
+              style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                color: ColorManager.grey,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Gilroy',
+              ),
             ),
 
-            Text("IN", style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                color: ColorManager.grey
-            ),),
+            Container(),
+
+            Text(
+              "IN",
+              style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                color: ColorManager.grey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         Align(
           alignment: Alignment.center,
-          // child: TimerComponent(
-          //   elapsedSeconds: 1025,
-          //   controller: _timerController,
-          //   textColor: ColorManager.grey,
-          // ),
-          child: TimerComponent(
-            elapsedSeconds: MatchUtils.getMatchTime(widget.matchTimes).elapsedSeconds,
-            isRunning: MatchUtils.getMatchTime(widget.matchTimes).isRunning,
-            controller: _timerController,
-            textColor: ColorManager.grey,
+          child: Column(
+            children: [
+              Text(
+                "Time",
+                style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                  color: ColorManager.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TimerComponent(
+                periodDivider: 1,
+                elapsedSeconds:
+                    MatchUtils.getMatchTime(widget.matchTimes).elapsedSeconds,
+                isRunning: MatchUtils.getMatchTime(widget.matchTimes).isRunning,
+                controller: _timerController,
+                textColor: ColorManager.grey,
+              ),
+            ],
           ),
-        )
+        ),
       ],
     );
   }

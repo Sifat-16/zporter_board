@@ -4,26 +4,36 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
 import 'package:zporter_board/features/auth/domain/entity/user_entity.dart';
 import 'package:zporter_board/features/auth/domain/usecase/auth_status_usecase.dart';
+import 'package:zporter_board/features/auth/domain/usecase/guest_login_usecase.dart';
 import 'package:zporter_board/features/auth/domain/usecase/sign_in_with_google_usecase.dart';
 import 'package:zporter_board/features/auth/domain/usecase/sign_out_usecase.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_event.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_state.dart';
+import 'package:zporter_board/features/match/domain/usecases/fetch_and_sync_match_usecase.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInWithGoogleUseCase _signInWithGoogleUseCase;
   final AuthStatusUsecase _authStatusUsecase;
   final SignOutUseCase _signOutUseCase;
+  final FetchAndSyncLocalMatchesUseCaseImpl _fetchAndSyncLocalMatchesUseCase;
+  final GuestLoginUseCase _guestLoginUseCase;
   AuthBloc({
     required SignInWithGoogleUseCase signInWithGoogleUseCase,
     required AuthStatusUsecase authStatusUsecase,
     required SignOutUseCase signOutUseCase,
+    required FetchAndSyncLocalMatchesUseCaseImpl
+    fetchAndSyncLocalMatchesUseCase,
+    required GuestLoginUseCase guestLoginUseCase,
   }) : _signInWithGoogleUseCase = signInWithGoogleUseCase,
        _authStatusUsecase = authStatusUsecase,
        _signOutUseCase = signOutUseCase,
+       _fetchAndSyncLocalMatchesUseCase = fetchAndSyncLocalMatchesUseCase,
+       _guestLoginUseCase = guestLoginUseCase,
        super(AuthStateInitial()) {
     on<GoogleSignInEvent>(_signInWithGoogle);
     on<AuthStatusEvent>(_fetchAuthStatus);
     on<LogoutEvent>(_logout);
+    on<GuestLoginEvent>(_guestLogin);
   }
 
   FutureOr<void> _signInWithGoogle(
@@ -36,6 +46,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (userEntity == null) {
         emit(GoogleSignInFailure(message: "Something went wrong!"));
       } else {
+        _fetchAndSyncLocalMatchesUseCase.call(null);
         emit(AuthStatusSuccess(userEntity: userEntity));
       }
     } catch (e) {
@@ -66,5 +77,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (signedOut) {
       emit(AuthStatusFailure(message: "Logged out"));
     }
+  }
+
+  FutureOr<void> _guestLogin(
+    GuestLoginEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    String id = await _guestLoginUseCase.call(null);
+    UserEntity userEntity = UserEntity(uid: id);
+    emit(AuthStatusSuccess(userEntity: userEntity));
   }
 }

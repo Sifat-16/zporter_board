@@ -10,6 +10,7 @@ import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/route_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
+import 'package:zporter_board/features/auth/presentation/view_model/auth_event.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_state.dart';
 
 class SplashScreenTablet extends StatefulWidget {
@@ -31,7 +32,8 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
             if (state is AuthStatusFailure) {
               Future.delayed(Duration(seconds: 2), () {
                 // _navigateToBoard();
-                _navigateToAuth();
+                // _navigateToAuth();
+                _guestLogin();
               });
             } else if (state is AuthStatusSuccess) {
               Future.delayed(Duration(seconds: 1), () {
@@ -50,7 +52,7 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
               Center(
                 child: SvgPicture.asset(
                   AssetsManager.splashLogo,
-                  width: context.widthPercent(80),
+                  width: context.widthPercent(50),
                 ),
               ),
 
@@ -91,5 +93,9 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
         GoRouter.of(context).pushReplacementNamed(Routes.board);
       }
     }
+  }
+
+  void _guestLogin() {
+    context.read<AuthBloc>().add(GuestLoginEvent());
   }
 }

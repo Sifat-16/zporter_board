@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:number_paginator/number_paginator.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:zporter_board/core/common/components/pagination/compact_paginator.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
-import 'package:zporter_board/core/resource_manager/values_manager.dart';
-import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
-import 'package:zporter_tactical_board/app/core/dialogs/confirmation_dialog.dart';
+import 'package:zporter_tactical_board/app/manager/values_manager.dart';
 
 class MatchPaginationComponent extends StatefulWidget {
   const MatchPaginationComponent({super.key});
@@ -20,8 +18,8 @@ class MatchPaginationComponent extends StatefulWidget {
 
 class _MatchPaginationComponentState extends State<MatchPaginationComponent>
     with AutomaticKeepAliveClientMixin {
-  List<FootballMatch> footBallMatch = [];
-  int selectedIndex = 0;
+  // List<FootballMatch> footBallMatch = [];
+  // int selectedIndex = 0;
   bool isVisibilityTriggered = false; // Track visibility state
 
   @override
@@ -35,16 +33,18 @@ class _MatchPaginationComponentState extends State<MatchPaginationComponent>
     super.build(context);
     return BlocConsumer<MatchBloc, MatchState>(
       listener: (BuildContext context, MatchState state) {
-        if (state is MatchUpdateState) {
-          MatchBloc matchBloc = context.read<MatchBloc>();
-          setState(() {
-            footBallMatch = matchBloc.matches ?? [];
-            selectedIndex = matchBloc.selectedIndex;
-          });
-        }
+        // if (state is MatchUpdateState) {
+        //   WidgetsBinding.instance.addPostFrameCallback((t) {
+        //     MatchBloc matchBloc = context.read<MatchBloc>();
+        //     setState(() {
+        //       footBallMatch = matchBloc.matches ?? [];
+        //       selectedIndex = matchBloc.selectedIndex;
+        //     });
+        //   });
+        // }
       },
       builder: (context, state) {
-        if (state is! MatchUpdateState) {
+        if (state.isLoading) {
           return Center(child: CircularProgressIndicator());
         }
 
@@ -63,86 +63,34 @@ class _MatchPaginationComponentState extends State<MatchPaginationComponent>
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
             child:
-                footBallMatch.isEmpty
+                (state.matches ?? []).isEmpty
                     ? SizedBox.shrink()
-                    : Row(
-                      children: [
-                        Expanded(
-                          child: NumberPaginator(
-                            numberPages: footBallMatch.length,
-                            initialPage: selectedIndex,
-                            onPageChange: (int index) {
+                    : Container(
+                      child: Column(
+                        children: [
+                          Text(
+                            "Period",
+                            style: Theme.of(context).textTheme.labelSmall!
+                                .copyWith(color: ColorManager.grey),
+                          ),
+                          CompactPaginator(
+                            initialPage: state.selectedIndex ?? 0,
+                            maxPagesToShow: 6,
+                            config: CompactPaginatorUiConfig(
+                              navButtonPadding: EdgeInsets.zero,
+                              pageNumberPadding: EdgeInsets.zero,
+                              navIconSize: AppSize.s32,
+                              pageNumberFontSize: AppSize.s18,
+                            ),
+                            totalPages: (state.matches ?? []).length,
+                            onPageChanged: (int index) {
                               context.read<MatchBloc>().add(
                                 MatchSelectEvent(index: index),
                               );
                             },
-                            prevButtonContent: Icon(
-                              Icons.chevron_left,
-                              color: ColorManager.grey,
-                              size: AppSize.s32,
-                            ),
-                            nextButtonContent: Icon(
-                              Icons.chevron_right,
-                              color: ColorManager.grey,
-                              size: AppSize.s32,
-                            ),
-                            config: NumberPaginatorUIConfig(
-                              buttonShape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              buttonPadding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              buttonSelectedForegroundColor:
-                                  ColorManager.yellow,
-                              buttonSelectedBackgroundColor: Colors.black,
-                              buttonUnselectedForegroundColor:
-                                  ColorManager.grey,
-                              buttonUnselectedBackgroundColor:
-                                  Colors.transparent,
-                              buttonTextStyle: Theme.of(
-                                context,
-                              ).textTheme.labelLarge!.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: AppSize.s28,
-                              ),
-                            ),
                           ),
-                        ),
-
-                        IconButton(
-                          onPressed: () {
-                            context.read<MatchBloc>().add(
-                              CreateNewMatchEvent(),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.add_circle_outline,
-                            color: ColorManager.white,
-                          ),
-                        ),
-
-                        IconButton(
-                          onPressed: () async {
-                            bool? confirmed = await showConfirmationDialog(
-                              context: context,
-                              title: "Delete Match?",
-                              content:
-                                  "This operation will delete the match data (score, time, substitution)",
-                            );
-                            if (confirmed == true) {
-                              context.read<MatchBloc>().add(
-                                DeleteMatchEvent(
-                                  matchId:
-                                      footBallMatch[selectedIndex].id ?? "",
-                                ),
-                              );
-                            }
-                          },
-                          icon: Icon(Icons.delete, color: ColorManager.white),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
           ),
         );
