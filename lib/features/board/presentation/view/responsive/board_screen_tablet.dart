@@ -25,6 +25,8 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
   Screens selectedScreen = Screens.TACTICS;
   String? userId;
 
+  bool isFullScreenTactics = false;
+
   _resetApp() {
     setState(() {
       selectedScreen = Screens.TACTICS;
@@ -71,19 +73,29 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
           child: Stack(
             children: [
               Positioned.fill(child: _buildScreens(selectedScreen)),
-              Align(
-                alignment: Alignment.topLeft,
-                child: Column(
-                  children: [
-                    Image.asset(
-                      AssetsManager.logo,
-                      height: AppSize.s56,
-                      width: AppSize.s56,
-                    ),
-                    BoardMenuComponent(),
-                  ],
+              if (!isFullScreenTactics)
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        AssetsManager.logo,
+                        height: AppSize.s56,
+                        width: AppSize.s56,
+                      ),
+
+                      Padding(
+                        padding:
+                            selectedScreen == Screens.TACTICS
+                                ? EdgeInsets.only(
+                                  top: MediaQuery.paddingOf(context).top,
+                                )
+                                : EdgeInsets.zero,
+                        child: BoardMenuComponent(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -93,7 +105,14 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
 
   Widget _buildScreens(Screens selectedScreen) {
     if (selectedScreen == Screens.TACTICS) {
-      return TacticboardScreen(userId: userId ?? "TEST-MY_EDIT");
+      return TacticboardScreen(
+        userId: userId ?? "TEST-MY_EDIT",
+        onFullScreenChanged: (s) {
+          setState(() {
+            isFullScreenTactics = s;
+          });
+        },
+      );
     } else if (selectedScreen == Screens.TIME) {
       return TimeboardScreen();
     } else if (selectedScreen == Screens.SCOREBOARD) {

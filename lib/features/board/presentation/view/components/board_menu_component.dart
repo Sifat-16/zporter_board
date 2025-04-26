@@ -9,6 +9,8 @@ import 'package:zporter_tactical_board/app/manager/values_manager.dart';
 
 enum Screens { TACTICS, TIME, SCOREBOARD, SUBSTITUTION, ANALYTICS }
 
+bool? _isMenuOpen;
+
 // Simple data class for menu items
 class MenuItemData {
   final Screens screen;
@@ -36,7 +38,6 @@ class BoardMenuComponent extends StatefulWidget {
 class _BoardMenuComponentState extends State<BoardMenuComponent> {
   final GlobalKey _buttonKey = GlobalKey();
   OverlayEntry? _overlayEntry;
-  bool _isMenuOpen = false;
 
   // --- Sample Menu Item Data ---
   final List<MenuItemData> _menuItems = [
@@ -82,14 +83,16 @@ class _BoardMenuComponentState extends State<BoardMenuComponent> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((t) {
       Future.delayed(Duration.zero, () {
-        _openMenu();
+        if (_isMenuOpen == null) {
+          _openMenu();
+        }
       });
     });
   }
 
   void _toggleMenu() {
     // This function remains the same, toggling between open and close
-    if (_isMenuOpen) {
+    if (_isMenuOpen == true) {
       _closeMenu();
     } else {
       _openMenu();
@@ -235,11 +238,14 @@ class _BoardMenuComponentState extends State<BoardMenuComponent> {
     return IconButton(
       key: _buttonKey,
       icon: Icon(
-        _isMenuOpen ? Icons.close : Icons.menu, // <<< CHANGE: Conditional icon
+        _isMenuOpen == true
+            ? Icons.close
+            : Icons.menu, // <<< CHANGE: Conditional icon
         color: ColorManager.white, // Use ColorManager for consistency
         size: AppSize.s32,
       ),
-      tooltip: _isMenuOpen ? 'Close Menu' : 'Board Menu', // Dynamic tooltip
+      tooltip:
+          _isMenuOpen == true ? 'Close Menu' : 'Board Menu', // Dynamic tooltip
       onPressed: _toggleMenu,
     );
   }
