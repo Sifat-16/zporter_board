@@ -4,14 +4,17 @@ import 'package:zporter_board/core/common/components/board_container.dart';
 import 'package:zporter_board/core/helper/board_container_space_helper.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
+import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/presentation/view/component/match_add_delete_component.dart';
-import 'package:zporter_board/features/match/presentation/view/component/match_pagination_component.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
+import 'package:zporter_board/features/substitute/data/model/substitution.dart';
 import 'package:zporter_board/features/substitute/presentation/view/component/home_away_component.dart';
 import 'package:zporter_board/features/substitute/presentation/view/component/substitute_component.dart';
+import 'package:zporter_board/features/substitute/presentation/view/component/substitute_pagination_component.dart';
 import 'package:zporter_board/features/substitute/presentation/view/component/substituteboard_header.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class SubstituteboardScreenTablet extends StatefulWidget {
   const SubstituteboardScreenTablet({super.key});
@@ -26,6 +29,10 @@ class _SubstituteboardScreenTabletState
     with AutomaticKeepAliveClientMixin {
   // FootballMatch? footballMatch;
 
+  bool isHome = true;
+  // Substitution? selectedSub;
+  int _selectedIndex = 0;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -33,11 +40,37 @@ class _SubstituteboardScreenTabletState
     context.read<MatchBloc>().add(MatchUpdateEvent());
   }
 
+  _updateSelectedIndex(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return BlocConsumer<MatchBloc, MatchState>(
       builder: (context, state) {
+        final FootballMatch? selectedMatch = state.selectedMatch;
+
+        MatchSubstitutions? matchSubstitutions = selectedMatch?.substitutions;
+
+        zlog(data: "Match subs are ${matchSubstitutions}");
+        List<Substitution> subs =
+            isHome
+                ? (matchSubstitutions?.homeSubs ?? [])
+                : (matchSubstitutions?.awaySubs ?? []);
+
+        // if (selectedSub == null) {
+        //   if (subs.isNotEmpty) {
+        //     selectedSub = subs[_selectedIndex];
+        //   }
+        // } else {
+        //   if (selectedSub?.id != subs[_selectedIndex].id) {
+        //     selectedSub = subs[_selectedIndex];
+        //   }
+        // }
+
         return BoardContainer(
           zeroPadding: true,
           child: Builder(
@@ -78,7 +111,34 @@ class _SubstituteboardScreenTabletState
                             ),
                             Container(
                               padding: EdgeInsets.only(top: AppSize.s20),
-                              child: SubstituteComponent(),
+                              child: SubstituteComponent(
+                                substitution: subs[_selectedIndex],
+                                onSubUpdate: (sub) {
+                                  int index = subs.indexWhere(
+                                    (s) => s.id == sub.id,
+                                  );
+                                  if (index != -1) {
+                                    subs[index] = sub;
+                                    if (isHome) {
+                                      matchSubstitutions = matchSubstitutions
+                                          ?.copyWith(homeSubs: subs);
+                                    } else {
+                                      matchSubstitutions = matchSubstitutions
+                                          ?.copyWith(awaySubs: subs);
+                                    }
+
+                                    if (matchSubstitutions != null) {
+                                      context.read<MatchBloc>().add(
+                                        SubUpdateEvent(
+                                          matchId: selectedMatch?.id ?? "",
+                                          matchSubstitutions:
+                                              matchSubstitutions!,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
                             ),
                           ],
                         ),
@@ -88,9 +148,21 @@ class _SubstituteboardScreenTabletState
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            HomeAwayComponent(),
-                            MatchPaginationComponent(),
-                            MatchAddDeleteComponent(),
+                            HomeAwayComponent(
+                              isHome: (b) {
+                                zlog(data: "isHomeChanging");
+                                setState(() {
+                                  isHome = b;
+                                });
+                              },
+                            ),
+                            SubstitutePaginationComponent(
+                              total: subs.length,
+                              onSubChange: (s) {
+                                _updateSelectedIndex(s);
+                              },
+                            ),
+                            MatchAddDeleteComponent(showAdd: false),
                           ],
                         ),
                       ),

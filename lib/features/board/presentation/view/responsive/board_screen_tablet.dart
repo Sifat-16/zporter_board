@@ -4,7 +4,6 @@ import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
-import 'package:zporter_board/features/auth/presentation/view_model/auth_event.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_state.dart';
 import 'package:zporter_board/features/board/presentation/view/components/board_menu_component.dart';
 import 'package:zporter_board/features/board/presentation/view_model/board_bloc.dart';
@@ -26,6 +25,13 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
   Screens selectedScreen = Screens.TACTICS;
   String? userId;
 
+  _resetApp() {
+    setState(() {
+      selectedScreen = Screens.TACTICS;
+      userId = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
@@ -37,9 +43,12 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
           },
           listener: (context, state) {
             if (state is AuthStatusSuccess) {
+              _resetApp();
               setState(() {
                 userId = state.userEntity.uid;
               });
+            } else if (state is LogoutState) {
+              _resetApp();
             }
           },
         ),
@@ -53,6 +62,10 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
         // Add more BlocListeners here for other Blocs if needed
       ],
       child: SafeArea(
+        top: selectedScreen != Screens.TACTICS,
+        left: selectedScreen != Screens.TACTICS,
+        bottom: selectedScreen != Screens.TACTICS,
+        right: selectedScreen != Screens.TACTICS,
         child: Material(
           color: ColorManager.black,
           child: Stack(
@@ -103,44 +116,73 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state is AuthStatusSuccess) {
-          String? email = state.userEntity.email;
-          if (email == null) {
-            return Center(
-              child: TextButton(
-                onPressed: () {
-                  context.read<AuthBloc>().add(GoogleSignInEvent());
-                },
-                child: Text(
-                  "Login",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
-                ),
-              ),
-            );
-          } else {
-            return Center(
-              child: TextButton(
-                onPressed: () {
-                  context.read<AuthBloc>().add(LogoutEvent());
-                },
-                child: Text(
-                  "Logout",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
-                ),
-              ),
-            );
-          }
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
-      listener: (BuildContext context, AuthState state) {},
-    );
+    return SizedBox();
+    // return BlocConsumer<AuthBloc, AuthState>(
+    //   builder: (context, state) {
+    //     // return Center(
+    //     //   child: TextButton(
+    //     //     onPressed: () {
+    //     //       context.read<AuthBloc>().add(LogoutEvent());
+    //     //     },
+    //     //     child: Text(
+    //     //       "Logout",
+    //     //       style: Theme.of(
+    //     //         context,
+    //     //       ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
+    //     //     ),
+    //     //   ),
+    //     // );
+    //     if (state is AuthStatusSuccess || state is LogoutState) {
+    //       String? email;
+    //       if (state is AuthStatusSuccess) {
+    //         email = state.userEntity.email;
+    //       }
+    //       if (email == null) {
+    //         return Center(
+    //           child: TextButton(
+    //             onPressed: () {
+    //               context.read<AuthBloc>().add(GoogleSignInEvent());
+    //             },
+    //             child: Text(
+    //               "Login",
+    //               style: Theme.of(
+    //                 context,
+    //               ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
+    //             ),
+    //           ),
+    //         );
+    //       } else {
+    //         return Center(
+    //           child: TextButton(
+    //             onPressed: () {
+    //               context.read<AuthBloc>().add(LogoutEvent());
+    //             },
+    //             child: Text(
+    //               "Logout",
+    //               style: Theme.of(
+    //                 context,
+    //               ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
+    //             ),
+    //           ),
+    //         );
+    //       }
+    //     } else {
+    //       return Center(
+    //         child: TextButton(
+    //           onPressed: () {
+    //             context.read<AuthBloc>().add(LogoutEvent());
+    //           },
+    //           child: Text(
+    //             "Logout",
+    //             style: Theme.of(
+    //               context,
+    //             ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
+    //           ),
+    //         ),
+    //       );
+    //     }
+    //   },
+    //   listener: (BuildContext context, AuthState state) {},
+    // );
   }
 }

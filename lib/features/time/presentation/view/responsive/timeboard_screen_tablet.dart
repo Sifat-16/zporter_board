@@ -16,6 +16,7 @@ import 'package:zporter_board/features/match/presentation/view_model/match_event
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
 import 'package:zporter_board/features/time/presentation/view/component/score_component.dart';
 import 'package:zporter_board/features/time/presentation/view/component/time_manager_component.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class TimeboardScreenTablet extends StatefulWidget {
   const TimeboardScreenTablet({super.key});
@@ -41,11 +42,16 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
     super.build(context);
     return BlocConsumer<MatchBloc, MatchState>(
       builder: (context, state) {
+        zlog(
+          data:
+              "Timer data updated match time length : ${state.selectedMatch?.matchTime.length}",
+        );
         return BoardContainer(
           zeroPadding: true,
           child: Builder(
             builder: (context) {
               double height = getBoardHeightLeft(context);
+
               return state.selectedMatch == null
                   ? Container(child: Center(child: Text("No match to show")))
                   : Column(
@@ -64,6 +70,10 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
 
                         child: Builder(
                           builder: (context) {
+                            zlog(
+                              data:
+                                  "Timer data updated match time length : ${state.selectedMatch?.matchTime.length}",
+                            );
                             return TimerComponent(
                               elapsedSeconds:
                                   MatchUtils.getMatchTime(

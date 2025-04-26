@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zporter_board/core/common/components/dialog/confirmation_dialog.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
-import 'package:zporter_tactical_board/app/core/dialogs/confirmation_dialog.dart';
 
 class MatchAddDeleteComponent extends StatefulWidget {
-  const MatchAddDeleteComponent({super.key});
+  const MatchAddDeleteComponent({
+    super.key,
+    this.showAdd = true,
+    this.showDelete = true,
+  });
+  final bool showAdd;
+  final bool showDelete;
 
   @override
   State<MatchAddDeleteComponent> createState() =>
@@ -51,38 +57,41 @@ class _MatchAddDeleteComponentState extends State<MatchAddDeleteComponent>
             child: Row(
               spacing: 10,
               children: [
-                IconButton(
-                  onPressed: () {
-                    context.read<MatchBloc>().add(CreateNewMatchEvent());
-                  },
-                  icon: Icon(
-                    Icons.add_circle_outline,
-                    color: ColorManager.white,
+                if (widget.showAdd)
+                  IconButton(
+                    onPressed: () {
+                      context.read<MatchBloc>().add(CreateNewMatchEvent());
+                    },
+                    icon: Icon(
+                      Icons.add_circle_outline,
+                      color: ColorManager.white,
+                    ),
                   ),
-                ),
 
-                IconButton(
-                  onPressed: () async {
-                    bool? confirmed = await showConfirmationDialog(
-                      context: context,
-                      title: "Delete Match?",
-                      content:
-                          "This operation will delete the match data (score, time, substitution)",
-                    );
-                    if (confirmed == true) {
-                      context.read<MatchBloc>().add(
-                        DeleteMatchEvent(
-                          matchId:
-                              state.matches?[state.selectedIndex ?? 0].id ?? "",
-                        ),
+                if (widget.showDelete)
+                  IconButton(
+                    onPressed: () async {
+                      bool? confirmed = await showConfirmationDialog(
+                        context: context,
+                        title: "End Match?",
+                        content:
+                            "Are you sure you want to delete and end this match? Time, result and subs will be deleted!",
                       );
-                    }
-                  },
-                  icon: Icon(
-                    Icons.delete_sweep_outlined,
-                    color: ColorManager.white,
+                      if (confirmed == true) {
+                        context.read<MatchBloc>().add(
+                          DeleteMatchEvent(
+                            matchId:
+                                state.matches?[state.selectedIndex ?? 0].id ??
+                                "",
+                          ),
+                        );
+                      }
+                    },
+                    icon: Icon(
+                      Icons.delete_sweep_outlined,
+                      color: ColorManager.white,
+                    ),
                   ),
-                ),
               ],
             ),
           ),

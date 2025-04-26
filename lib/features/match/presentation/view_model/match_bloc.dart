@@ -6,11 +6,14 @@ import 'package:zporter_board/core/utils/log/debugger.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/domain/requests/update_match_score_request.dart';
 import 'package:zporter_board/features/match/domain/requests/update_match_time_request.dart';
+import 'package:zporter_board/features/match/domain/requests/update_sub_request.dart';
+import 'package:zporter_board/features/match/domain/usecases/clear_match_db_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/create_new_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/delete_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/fetch_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_match_score_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_match_time_usecase.dart';
+import 'package:zporter_board/features/match/domain/usecases/update_sub_usecase.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
 import 'package:zporter_tactical_board/app/helper/logger.dart';
@@ -21,17 +24,23 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
   UpdateMatchTimeUsecase _updateMatchTimeUsecase;
   CreateNewMatchUseCase _createNewMatchUseCase;
   DeleteMatchUseCase _deleteMatchUseCase;
+  ClearMatchDbUseCase _clearMatchDbUseCase;
+  UpdateSubUseCase _updateSubUseCase;
   MatchBloc({
     required FetchMatchUsecase fetchMatchUsecase,
     required UpdateMatchScoreUsecase updateMatchScoreUsecase,
     required UpdateMatchTimeUsecase updateMatchTimeUsecase,
     required CreateNewMatchUseCase createNewMatchUseCase,
     required DeleteMatchUseCase deleteMatchUseCase,
+    required ClearMatchDbUseCase clearMatchDbUseCase,
+    required UpdateSubUseCase updateSubUseCase,
   }) : _fetchMatchUsecase = fetchMatchUsecase,
        _updateMatchScoreUsecase = updateMatchScoreUsecase,
        _updateMatchTimeUsecase = updateMatchTimeUsecase,
        _createNewMatchUseCase = createNewMatchUseCase,
        _deleteMatchUseCase = deleteMatchUseCase,
+       _clearMatchDbUseCase = clearMatchDbUseCase,
+       _updateSubUseCase = updateSubUseCase,
        super(MatchState.initial()) {
     on<MatchLoadEvent>(_onLoadMatches);
     on<MatchSelectEvent>(_onMatchSelected);
@@ -41,11 +50,9 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     on<CreateNewMatchEvent>(_createNewMatch);
     on<DeleteMatchEvent>(_deleteMatch);
     on<UpdateMatchEvent>(_updateMatch);
+    on<ClearMatchDbEvent>(_clearMatchDb);
+    on<SubUpdateEvent>(_subUpdate);
   }
-
-  // List<FootballMatch>? matches;
-  // FootballMatch? selectedMatch;
-  // int selectedIndex = 0;
 
   FutureOr<void> _onLoadMatches(
     MatchLoadEvent event,
@@ -123,6 +130,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
           matchTimeUpdateStatus: event.matchTimeUpdateStatus,
         ),
       );
+
       add(UpdateMatchEvent(footballMatch: updatedMatch));
     } catch (e) {
       debug(data: "Error while updating time ${e.toString()}");
@@ -134,23 +142,19 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     Emitter<MatchState> emit,
   ) {
     List<FootballMatch>? matches = state.matches;
+    FootballMatch? selectedMatch = state.selectedMatch;
     int index =
         matches?.indexWhere((m) => m.id == event.footballMatch.id) ?? -1;
     if (index != -1) {
       matches?[index] = event.footballMatch;
-      // FootballMatch? selectedMatch = matches?[selectedIndex];
-    }
-    emit(state.copyWith(matches: matches));
-  }
 
-  // _updateMatch(FootballMatch updatedMatch) {
-  //   int index = matches?.indexWhere((m) => m.id == updatedMatch.id) ?? -1;
-  //   if (index != -1) {
-  //     matches?[index] = updatedMatch;
-  //     selectedMatch = matches?[selectedIndex];
-  //   }
-  //   emit(MatchUpdateState());
-  // }
+      if (selectedMatch?.id == matches?[index].id) {
+        selectedMatch = matches?[index];
+      }
+    }
+
+    emit(state.copyWith(matches: matches, selectedMatch: selectedMatch));
+  }
 
   FutureOr<void> _createNewMatch(
     CreateNewMatchEvent event,
@@ -164,8 +168,9 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
       FootballMatch newMatch = await _createNewMatchUseCase.call(null);
       matches?.add(newMatch);
       selectedMatch = matches?.lastOrNull;
-      selectedIndex =
-          matches?.indexWhere((m) => m.id == selectedMatch?.id) ?? -1;
+      selectedIndex = (matches?.length ?? 0) - 1;
+
+      zlog(data: "Selected index ${selectedMatch?.id} - ${newMatch.id}");
 
       emit(
         state.copyWith(
@@ -200,6 +205,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
           selectedIndex = index;
           matches?.removeAt(index);
           if ((matches ?? []).isEmpty) {
+            zlog(data: "Matches are empty called new match");
             add(CreateNewMatchEvent());
           } else {
             int length = matches?.length ?? 0;
@@ -224,5 +230,49 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     }
 
     BotToast.cleanAll();
+  }
+
+  FutureOr<void> _clearMatchDb(
+    ClearMatchDbEvent event,
+    Emitter<MatchState> emit,
+  ) async {
+    await _clearMatchDbUseCase.call(null);
+    add(MatchLoadEvent());
+  }
+
+  FutureOr<void> _subUpdate(
+    SubUpdateEvent event,
+    Emitter<MatchState> emit,
+  ) async {
+    zlog(data: "Bloc: Handling SubUpdateEvent for match ${event.matchId}");
+
+    try {
+      // 1. Prepare the request object for the use case
+      final UpdateSubRequest request = UpdateSubRequest(
+        matchId: event.matchId,
+        matchSubstitutions: event.matchSubstitutions,
+      );
+
+      // 2. Call the use case to perform the update via the repository
+      // The use case should return the fully updated FootballMatch object
+      final FootballMatch updatedMatch = await _updateSubUseCase.call(request);
+      zlog(
+        data:
+            "Bloc: Substitution update successful via use case for match ${updatedMatch.id}",
+      );
+
+      // 3. Trigger the internal state update handler with the latest match data
+      // This reuses the logic in _updateMatch to keep the state consistent
+      add(UpdateMatchEvent(footballMatch: updatedMatch));
+    } catch (e, stackTrace) {
+      // Catch potential errors from use case/repository
+      zlog(data: "Bloc Error: Failed to update substitutions: $e\n$stackTrace");
+      // Show error feedback to the user
+      BotToast.showText(text: "Error updating substitutions: ${e.toString()}");
+      // Optionally emit a state indicating failure
+      // emit(state.copyWith(failureMessage: e.toString(), isLoading: false)); // Need isLoading if using loading state
+    } finally {
+      // Ensure loading indicator is always removed
+    }
   }
 }

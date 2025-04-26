@@ -3,57 +3,103 @@ import 'package:flutter/material.dart';
 import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
+import 'package:zporter_board/features/substitute/data/model/substitution.dart';
 
 class SubstituteComponent extends StatefulWidget {
-  const SubstituteComponent({super.key});
+  const SubstituteComponent({
+    super.key,
+    required this.substitution,
+    required this.onSubUpdate,
+  });
+
+  final Substitution substitution;
+  final Function(Substitution) onSubUpdate;
 
   @override
   State<SubstituteComponent> createState() => _SubstituteComponentState();
 }
 
 class _SubstituteComponentState extends State<SubstituteComponent> {
-  int _teamAFirstDigit = 4;
-  int _teamASecondDigit = 3;
+  int _outFirstDigit = 4;
+  int _outSecondDigit = 3;
 
-  int _teamBFirstDigit = 4;
-  int _teamBSecondDigit = 3;
+  int _inFirstDigit = 4;
+  int _inSecondDigit = 3;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((t) {
+      _extractSub(widget.substitution);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant SubstituteComponent oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.substitution != widget.substitution) {
+      _extractSub(widget.substitution);
+    }
+  }
+
+  _updateSub() {
+    Substitution substitution = widget.substitution.copyWith(
+      playerOutId: "${_outFirstDigit}${_outSecondDigit}",
+      playerInId: "${_inFirstDigit}${_inSecondDigit}",
+    );
+    widget.onSubUpdate.call(substitution);
+  }
+
+  _extractSub(Substitution sub) {
+    setState(() {
+      _outFirstDigit = (int.parse(sub.playerOutId) / 10).toInt();
+      _outSecondDigit = (int.parse(sub.playerOutId) % 10).toInt();
+      _inFirstDigit = (int.parse(sub.playerInId) / 10).toInt();
+      _inSecondDigit = (int.parse(sub.playerInId) % 10).toInt();
+    });
+  }
 
   // Function to increment a digit
   void _incrementDigit(int team, String digit) {
     setState(() {
       if (team == 1) {
-        if (digit == 'first' && _teamAFirstDigit < 9) {
-          _teamAFirstDigit++;
-        } else if (digit == 'second' && _teamASecondDigit < 9) {
-          _teamASecondDigit++;
+        if (digit == 'first' && _outFirstDigit < 9) {
+          _outFirstDigit++;
+        } else if (digit == 'second' && _outSecondDigit < 9) {
+          _outSecondDigit++;
         }
       } else {
-        if (digit == 'first' && _teamBFirstDigit < 9) {
-          _teamBFirstDigit++;
-        } else if (digit == 'second' && _teamBSecondDigit < 9) {
-          _teamBSecondDigit++;
+        if (digit == 'first' && _inFirstDigit < 9) {
+          _inFirstDigit++;
+        } else if (digit == 'second' && _inSecondDigit < 9) {
+          _inSecondDigit++;
         }
       }
     });
+    _updateSub();
   }
 
   // Function to decrement a digit
   void _decrementDigit(int team, String digit) {
     setState(() {
       if (team == 1) {
-        if (digit == 'first' && _teamAFirstDigit > 0) {
-          _teamAFirstDigit--;
-        } else if (digit == 'second' && _teamASecondDigit > 0) {
-          _teamASecondDigit--;
+        if (digit == 'first' && _outFirstDigit > 0) {
+          _outFirstDigit--;
+        } else if (digit == 'second' && _outSecondDigit > 0) {
+          _outSecondDigit--;
         }
       } else {
-        if (digit == 'first' && _teamBFirstDigit > 0) {
-          _teamBFirstDigit--;
-        } else if (digit == 'second' && _teamBSecondDigit > 0) {
-          _teamBSecondDigit--;
+        if (digit == 'first' && _inFirstDigit > 0) {
+          _inFirstDigit--;
+        } else if (digit == 'second' && _inSecondDigit > 0) {
+          _inSecondDigit--;
         }
       }
     });
+
+    _updateSub();
   }
 
   @override
@@ -79,21 +125,21 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         AnimatedFlipCounter(
-                          value: _teamAFirstDigit,
+                          value: _outFirstDigit,
                           textStyle: Theme.of(
                             context,
                           ).textTheme.titleLarge!.copyWith(
                             fontSize: AppSize.s128,
                             fontWeight: FontWeight.bold,
                             color:
-                                _teamAFirstDigit == 0
+                                _outFirstDigit == 0
                                     ? ColorManager.transparent
                                     : ColorManager.white,
                           ),
                         ),
                         const SizedBox(width: 10), // Space between digits
                         AnimatedFlipCounter(
-                          value: _teamASecondDigit,
+                          value: _outSecondDigit,
                           textStyle: Theme.of(
                             context,
                           ).textTheme.titleLarge!.copyWith(
@@ -121,21 +167,21 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         AnimatedFlipCounter(
-                          value: _teamBFirstDigit,
+                          value: _inFirstDigit,
                           textStyle: Theme.of(
                             context,
                           ).textTheme.titleLarge!.copyWith(
                             fontSize: AppSize.s128,
                             fontWeight: FontWeight.bold,
                             color:
-                                _teamBFirstDigit == 0
+                                _inFirstDigit == 0
                                     ? ColorManager.transparent
                                     : ColorManager.white,
                           ),
                         ),
                         const SizedBox(width: 10), // Space between digits
                         AnimatedFlipCounter(
-                          value: _teamBSecondDigit,
+                          value: _inSecondDigit,
                           textStyle: Theme.of(
                             context,
                           ).textTheme.titleLarge!.copyWith(

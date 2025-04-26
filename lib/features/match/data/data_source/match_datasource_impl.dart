@@ -9,9 +9,12 @@ import 'package:zporter_board/features/match/data/model/team.dart';
 // Import request objects
 import 'package:zporter_board/features/match/domain/requests/update_match_score_request.dart';
 import 'package:zporter_board/features/match/domain/requests/update_match_time_request.dart';
+import 'package:zporter_board/features/match/domain/requests/update_sub_request.dart';
 import 'package:zporter_board/features/scoreboard/data/model/score.dart';
 import 'package:zporter_board/features/substitute/data/model/substitution.dart';
 import 'package:zporter_board/features/time/data/model/match_time.dart';
+import 'package:zporter_tactical_board/app/generator/random_generator.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class MatchDataSourceImpl implements MatchDataSource {
   final FirebaseFirestore firestore;
@@ -37,7 +40,24 @@ class MatchDataSourceImpl implements MatchDataSource {
     );
     final defaultAwayTeam = Team(id: null, name: "Away Team", players: []);
     final defaultScore = MatchScore(homeScore: 0, awayScore: 0);
-    final defaultSubstitutions = MatchSubstitutions(substitutions: []);
+    final defaultSubstitutions = MatchSubstitutions(
+      homeSubs: List.generate(99, (index) {
+        return Substitution(
+          id: RandomGenerator.generateId(),
+          playerOutId: "43",
+          playerInId: "43",
+          minute: 10,
+        );
+      }),
+      awaySubs: List.generate(99, (index) {
+        return Substitution(
+          id: RandomGenerator.generateId(),
+          playerOutId: "43",
+          playerInId: "43",
+          minute: 10,
+        );
+      }),
+    );
     final defaultMatchTime = <MatchTime>[]; // Start with empty time list
 
     return FootballMatch(
@@ -58,6 +78,7 @@ class MatchDataSourceImpl implements MatchDataSource {
 
   @override
   Future<List<FootballMatch>> getAllMatches() async {
+    zlog(data: "Coming to get all matches");
     final userId = _getCurrentUserId(); // Get current user ID early
     final CollectionReference matchCollection = firestore.collection(
       FirestoreConstants.matches,
@@ -333,6 +354,88 @@ class MatchDataSourceImpl implements MatchDataSource {
       debug(data: "Generic Exception during deleteMatch: $e");
       throw Exception(
         "An unexpected error occurred while deleting the match: $e",
+      );
+    }
+  }
+
+  @override
+  Future<int> clearMatchDb() {
+    // TODO: implement clearMatchDb
+    throw UnimplementedError();
+  }
+
+  // --- In MatchDataSourceImpl class ---
+
+  @override
+  Future<FootballMatch> updateSub(UpdateSubRequest updateSubRequest) async {
+    final userId =
+        _getCurrentUserId(); // For logging/context, rules handle auth
+    final String matchId = updateSubRequest.matchId;
+    final MatchSubstitutions newSubstitutions =
+        updateSubRequest.matchSubstitutions;
+
+    if (matchId.isEmpty) {
+      throw ArgumentError(
+        "Match ID cannot be empty for updating substitutions.",
+      );
+    }
+
+    // Get the reference to the specific match document
+    final DocumentReference matchDocRef = firestore
+        .collection(FirestoreConstants.matches)
+        .doc(matchId);
+
+    try {
+      debug(
+        data: "Updating substitutions for match: $matchId for user: $userId",
+      );
+
+      // Prepare the data map for the update operation
+      final Map<String, dynamic> updateData = {
+        // Convert the new MatchSubstitutions object to its JSON representation
+        'substitutions': newSubstitutions.toJson(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      // Perform the update on Firestore
+      await matchDocRef.update(updateData);
+
+      // --- Return the updated match ---
+      // Fetch the updated document data after the update completes
+      final DocumentSnapshot updatedDoc = await matchDocRef.get();
+      if (!updatedDoc.exists) {
+        // Should not happen if update succeeded, but good practice to check
+        throw Exception(
+          "Match document $matchId not found after update attempt.",
+        );
+      }
+
+      debug(data: "Match substitutions updated successfully for $matchId");
+
+      // Parse the updated data back into a FootballMatch object
+      return FootballMatch.fromJson(
+        updatedDoc.data() as Map<String, dynamic>,
+        updatedDoc.id, // Pass the document ID back
+      );
+      // --- End return updated match ---
+    } on FirebaseException catch (e) {
+      debug(
+        data:
+            "FirebaseException during updateSub: ${e.message} code: ${e.code}",
+      );
+      if (e.code == 'permission-denied') {
+        throw Exception(
+          "Permission denied to update substitutions for match $matchId.",
+        );
+      } else if (e.code == 'not-found') {
+        throw Exception("Match $matchId not found for updating substitutions.");
+      }
+      // Add other specific Firebase error handling if needed
+      throw Exception("Error updating match substitutions: ${e.message}");
+    } catch (e) {
+      debug(data: "Generic Exception during updateSub: $e");
+      throw Exception(
+        "An unexpected error occurred while updating match substitutions: $e",
       );
     }
   }

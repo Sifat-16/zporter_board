@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/scoreboard/data/model/score.dart';
+import 'package:zporter_board/features/substitute/data/model/substitution.dart';
 
 enum MatchTimeUpdateStatus { START, PAUSE, STOP }
 
@@ -29,6 +30,16 @@ class MatchScoreUpdateEvent extends MatchEvent {
   @override
   // TODO: implement props
   List<Object?> get props => [matchId, newScore];
+}
+
+class SubUpdateEvent extends MatchEvent {
+  final String matchId;
+  final MatchSubstitutions matchSubstitutions;
+  SubUpdateEvent({required this.matchId, required this.matchSubstitutions});
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [matchId, matchSubstitutions];
 }
 
 class MatchTimeUpdateEvent extends MatchEvent {
@@ -66,3 +77,5 @@ class DeleteMatchEvent extends MatchEvent {
   // TODO: implement props
   List<Object?> get props => [matchId];
 }
+
+class ClearMatchDbEvent extends MatchEvent {}

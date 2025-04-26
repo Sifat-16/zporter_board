@@ -4,7 +4,7 @@ class BoardState {
   final Screens selectedScreen;
   const BoardState({required this.selectedScreen});
   factory BoardState.initial() {
-    return const BoardState(selectedScreen: Screens.TIME);
+    return const BoardState(selectedScreen: Screens.TACTICS);
   }
 
   BoardState copyWith({

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/features/board/presentation/view_model/board_bloc.dart';
 import 'package:zporter_board/features/board/presentation/view_model/board_event.dart';
@@ -11,13 +12,15 @@ enum Screens { TACTICS, TIME, SCOREBOARD, SUBSTITUTION, ANALYTICS }
 // Simple data class for menu items
 class MenuItemData {
   final Screens screen;
-  final IconData icon;
+  final String? image;
+  final IconData? icon;
   final String label;
   // final bool isActive; // To determine styling
 
   MenuItemData({
     required this.screen,
-    required this.icon,
+    this.icon,
+    this.image,
     required this.label,
     // this.isActive = false,
   });
@@ -39,12 +42,16 @@ class _BoardMenuComponentState extends State<BoardMenuComponent> {
   final List<MenuItemData> _menuItems = [
     MenuItemData(
       screen: Screens.TACTICS,
-      icon:
-          Icons
-              .developer_board, // Consider replacing with a more suitable icon if needed
+      image:
+          AssetsManager
+              .soccer_field, // Consider replacing with a more suitable icon if needed
       label: 'Tactics',
     ),
-    MenuItemData(screen: Screens.TIME, icon: Icons.timer, label: 'Time'),
+    MenuItemData(
+      screen: Screens.TIME,
+      image: AssetsManager.digital_clock,
+      label: 'Time',
+    ),
     MenuItemData(
       screen: Screens.SCOREBOARD,
       icon: Icons.scoreboard,
@@ -52,7 +59,7 @@ class _BoardMenuComponentState extends State<BoardMenuComponent> {
     ),
     MenuItemData(
       screen: Screens.SUBSTITUTION,
-      icon: Icons.people,
+      image: AssetsManager.substitute_player,
       label: 'Subs',
     ),
     MenuItemData(
@@ -73,6 +80,11 @@ class _BoardMenuComponentState extends State<BoardMenuComponent> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((t) {
+      Future.delayed(Duration.zero, () {
+        _openMenu();
+      });
+    });
   }
 
   void _toggleMenu() {
@@ -164,14 +176,25 @@ class _BoardMenuComponentState extends State<BoardMenuComponent> {
                 color: isActive ? ColorManager.yellow : Colors.transparent,
                 borderRadius: BorderRadius.circular(isActive ? 4.0 : 0),
               ),
-              child: Icon(
-                item.icon,
-                color:
-                    isActive
-                        ? ColorManager.white
-                        : itemColor, // Adjusted active icon color
-                size: 28,
-              ),
+              child:
+                  item.image == null
+                      ? Icon(
+                        item.icon,
+                        color:
+                            isActive
+                                ? ColorManager.white
+                                : itemColor, // Adjusted active icon color
+                        size: 28,
+                      )
+                      : ImageIcon(
+                        AssetImage(item.image ?? ""),
+
+                        color:
+                            isActive
+                                ? ColorManager.white
+                                : itemColor, // Adjusted active icon color
+                        size: 28,
+                      ),
             ),
             const SizedBox(height: 6),
             Text(

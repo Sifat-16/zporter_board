@@ -22,12 +22,14 @@ import 'package:zporter_board/features/match/data/data_source/match_datasource_i
 import 'package:zporter_board/features/match/data/data_source/match_datasource_local_impl.dart';
 import 'package:zporter_board/features/match/data/repository/match_repository_impl.dart';
 import 'package:zporter_board/features/match/domain/repository/match_repository.dart';
+import 'package:zporter_board/features/match/domain/usecases/clear_match_db_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/create_new_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/delete_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/fetch_and_sync_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/fetch_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_match_score_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_match_time_usecase.dart';
+import 'package:zporter_board/features/match/domain/usecases/update_sub_usecase.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 
 final sl = GetIt.instance;
@@ -109,6 +111,7 @@ Future<void> init() async {
       signOutUseCase: sl.get(),
       fetchAndSyncLocalMatchesUseCase: sl.get(),
       guestLoginUseCase: sl.get(),
+      matchBloc: sl.get(),
     ),
   );
 
@@ -152,12 +155,20 @@ Future<void> init() async {
   sl.registerLazySingleton<DeleteMatchUseCase>(
     () => DeleteMatchUseCase(matchRepository: sl.get()),
   );
-  sl.registerLazySingleton<FetchAndSyncLocalMatchesUseCaseImpl>(
-    () => FetchAndSyncLocalMatchesUseCaseImpl(
+  sl.registerLazySingleton<UpdateSubUseCase>(
+    () => UpdateSubUseCase(matchRepository: sl.get()),
+  );
+  sl.registerLazySingleton<FetchAndSyncLocalMatchesUseCase>(
+    () => FetchAndSyncLocalMatchesUseCase(
       remoteMatchDataSource: sl<MatchDataSource>(instanceName: 'remote'),
       localMatchDataSource: sl<MatchDataSource>(instanceName: 'local'),
       userIdService: sl<UserIdService>(),
+      clearMatchDbUseCase: sl<ClearMatchDbUseCase>(),
     ),
+  );
+
+  sl.registerLazySingleton<ClearMatchDbUseCase>(
+    () => ClearMatchDbUseCase(matchRepository: sl.get()),
   );
 
   sl.registerLazySingleton<MatchBloc>(
@@ -167,6 +178,8 @@ Future<void> init() async {
       updateMatchTimeUsecase: sl.get(),
       createNewMatchUseCase: sl.get(),
       deleteMatchUseCase: sl.get(),
+      clearMatchDbUseCase: sl.get(),
+      updateSubUseCase: sl.get(),
     ),
   );
 }

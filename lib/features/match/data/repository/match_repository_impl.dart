@@ -8,6 +8,8 @@ import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/domain/repository/match_repository.dart';
 import 'package:zporter_board/features/match/domain/requests/update_match_score_request.dart';
 import 'package:zporter_board/features/match/domain/requests/update_match_time_request.dart';
+import 'package:zporter_board/features/match/domain/requests/update_sub_request.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class MatchRepositoryImpl implements MatchRepository {
   final MatchDataSource _remoteDataSource; // For Firebase operations
@@ -111,13 +113,14 @@ class MatchRepositoryImpl implements MatchRepository {
   ) async {
     final userId = _getCurrentUserId(); // For potential remote operation
 
-    debug(
-      data:
-          "Repo: Updating match score locally first (Match ID: ${updateMatchScoreRequest.matchId})...",
-    );
     // 1. Always update locally
     final updatedLocalMatch = await _localDataSource.updateMatchScore(
       updateMatchScoreRequest,
+    );
+
+    debug(
+      data:
+          "Repo: Updating match score locally first (Match ID: ${updateMatchScoreRequest.matchId})...",
     );
 
     if (_isLoggedIn()) {
@@ -183,6 +186,10 @@ class MatchRepositoryImpl implements MatchRepository {
     } else {
       // 3. If offline, return the locally updated match
       debug(data: "Repo: User is offline. Time only updated locally.");
+      zlog(
+        data:
+            "Timer data updated match time length : ${updatedLocalMatch.matchTime.length} from repository",
+      );
       return updatedLocalMatch;
     }
   }
@@ -248,6 +255,60 @@ class MatchRepositoryImpl implements MatchRepository {
           localDeleteSuccess; // Stricter: Both must succeed if online
     } else {
       return localDeleteSuccess;
+    }
+  }
+
+  @override
+  Future<int> clearMatchDb() async {
+    return _localDataSource.clearMatchDb();
+  }
+
+  @override
+  Future<FootballMatch> updateSub(UpdateSubRequest updateSubRequest) async {
+    final userId =
+        _getCurrentUserId(); // For logging and potentially remote context
+
+    debug(
+      data:
+          "Repo: Updating substitutions locally first (Match ID: ${updateSubRequest.matchId})...",
+    );
+
+    // 1. Always update locally first
+    // Assume localDataSource throws errors if it fails critically
+    final FootballMatch updatedLocalMatch = await _localDataSource.updateSub(
+      updateSubRequest,
+    );
+    debug(data: "Repo: Local substitution update completed.");
+
+    // 2. Check if online and attempt remote update
+    if (_isLoggedIn()) {
+      debug(
+        data:
+            "Repo: User is online, attempting to update substitutions remotely for user $userId",
+      );
+      try {
+        // Attempt remote update
+        final FootballMatch updatedRemoteMatch = await _remoteDataSource
+            .updateSub(
+              updateSubRequest, // Pass the request containing new substitutions
+            );
+        debug(data: "Repo: Remote substitution update successful.");
+        // Return the result from the remote source
+        return updatedRemoteMatch;
+      } catch (e) {
+        debug(
+          data:
+              "Repo: Remote substitution update failed: $e. Substitutions updated locally.",
+        );
+        // Show user feedback about sync failure
+        BotToast.showText(text: "Substitutions updated locally, sync failed.");
+        // Return the locally updated match as fallback
+        return updatedLocalMatch;
+      }
+    } else {
+      // 3. If offline, return the locally updated match
+      debug(data: "Repo: User is offline. Substitutions only updated locally.");
+      return updatedLocalMatch;
     }
   }
 }
