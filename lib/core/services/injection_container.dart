@@ -28,6 +28,7 @@ import 'package:zporter_board/features/match/domain/usecases/create_period_useca
 import 'package:zporter_board/features/match/domain/usecases/delete_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/fetch_and_sync_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/fetch_match_usecase.dart';
+import 'package:zporter_board/features/match/domain/usecases/update_match_period_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_match_score_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_match_time_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_sub_usecase.dart';
@@ -176,6 +177,10 @@ Future<void> init() async {
     () => CreatePeriodUseCase(matchRepository: sl.get()),
   );
 
+  sl.registerLazySingleton<UpdateMatchPeriodUseCase>(
+    () => UpdateMatchPeriodUseCase(matchRepository: sl.get()),
+  );
+
   sl.registerLazySingleton<MatchBloc>(
     () => MatchBloc(
       fetchMatchUsecase: sl.get(),
@@ -186,6 +191,7 @@ Future<void> init() async {
       clearMatchDbUseCase: sl.get(),
       updateSubUseCase: sl.get(),
       createPeriodUseCase: sl.get(),
+      updateMatchPeriodUseCase: sl.get(),
     ),
   );
 }

@@ -1,17 +1,23 @@
+import 'package:zporter_board/core/common/components/timer/timer_contol_buttons.dart';
 import 'package:zporter_board/features/time/presentation/view/component/timer_mode_widget.dart';
 
 class MatchPeriod {
   int periodNumber;
   TimerMode timerMode;
-  // ---------------------------------------------------
-  Duration? presetDuration;
-  List<MatchTimeBloc> intervals;
+  // NOTE: presetDuration field for DOWN mode is removed as per your code snippet
+  List<MatchTimeBloc> intervals; // For UP/DOWN mode time tracking
+  ExtraTime extraTime; // Holds extra time details (nullable)
+
+  TimeActiveStatus upPeriodStatus; // Status of the main UP/DOWN timer
+  TimeActiveStatus extraPeriodStatus; // Status of the EXTRA timer
 
   MatchPeriod({
     required this.periodNumber,
     required this.timerMode,
-    this.presetDuration,
-    required this.intervals,
+    this.intervals = const [], // Default to empty list
+    required this.extraTime, // Make nullable
+    this.upPeriodStatus = TimeActiveStatus.STOPPED,
+    this.extraPeriodStatus = TimeActiveStatus.STOPPED,
   });
 
   factory MatchPeriod.fromJson(Map<String, dynamic> json) {
@@ -23,85 +29,106 @@ class MatchPeriod {
           return TimerMode.EXTRA;
         case "UP":
         default:
-          return TimerMode.UP; // Default to UP for null or unrecognized strings
+          return TimerMode.UP; // Default to UP
       }
     }
 
-    // Handle Duration deserialization carefully
-    int? presetMillis = json['presetDurationMillis'] as int?;
-    Duration? presetDuration =
-        presetMillis != null ? Duration(milliseconds: presetMillis) : null;
+    TimeActiveStatus timeActiveStatusFromString(String? statusString) {
+      switch (statusString?.toUpperCase()) {
+        case 'RUNNING':
+          return TimeActiveStatus.RUNNING;
+        case 'PAUSED':
+          return TimeActiveStatus.PAUSED;
+        case 'STOPPED': // Treat STOPPED and null/default the same
+        default:
+          return TimeActiveStatus.STOPPED;
+      }
+    }
 
-    // --- CHANGE: Convert string from JSON to enum ---
-    // Read the string value, default to "UP" if missing/null
+    // --- timerMode conversion ---
     final String timerModeStringFromJson = json['timerMode'] as String? ?? "UP";
-    // Convert the string to the TimerMode enum using the helper function
     final TimerMode timerModeEnum = timerModeFromString(
       timerModeStringFromJson,
     );
-    // ------------------------------------------------
+    // --------------------------
+
+    // --- Deserialize nested extraTime object if present ---
+    final Map<String, dynamic> extraTimeJson =
+        json['extraTime'] as Map<String, dynamic>;
+    final ExtraTime extraTimeObject = ExtraTime.fromJson(extraTimeJson);
+
+    final String mainStatusString =
+        json['upPeriodStatus'] as String? ?? 'STOPPED';
+    final TimeActiveStatus mainStatusEnum = timeActiveStatusFromString(
+      mainStatusString,
+    );
+
+    final String extraStatusString =
+        json['extraPeriodStatus'] as String? ?? 'STOPPED';
+    final TimeActiveStatus extraStatusEnum = timeActiveStatusFromString(
+      extraStatusString,
+    );
+
+    // ----------------------------------------------------
 
     return MatchPeriod(
-      periodNumber:
-          json['periodNumber'] as int? ?? 1, // Default to 1 if missing
-      // Assign the converted enum value
-      timerMode: timerModeEnum, // <--- Use enum value
-      presetDuration: presetDuration,
+      periodNumber: json['periodNumber'] as int? ?? 1,
+      timerMode: timerModeEnum,
+      // presetDuration field removed
       intervals:
           (json['intervals'] as List<dynamic>? ?? [])
               .map((e) => MatchTimeBloc.fromJson(e as Map<String, dynamic>))
               .toList(),
+      extraTime: extraTimeObject, // Assign deserialized object (or null)
+      upPeriodStatus: mainStatusEnum, // Assign main status enum
+      extraPeriodStatus: extraStatusEnum,
     );
   }
 
-  // Method to convert a MatchPeriod instance to JSON
   Map<String, dynamic> toJson() {
     return {
       'periodNumber': periodNumber,
-      // --- CHANGE: Convert enum back to string for JSON storage ---
-      // Using '.name' gives the standard enum string representation ("UP", "DOWN", "EXTRA")
-      'timerMode': timerMode.name,
-      // ---------------------------------------------------------
-      // Store Duration as milliseconds for reliable serialization
-      'presetDurationMillis': presetDuration?.inMilliseconds,
+      'timerMode': timerMode.name, // Store enum as string
+      // presetDuration field removed
       'intervals': intervals.map((e) => e.toJson()).toList(),
+      // --- Serialize nested extraTime object if present ---
+      'extraTime': extraTime.toJson(), // Use null-aware call
+      'mainPeriodStatus': upPeriodStatus.name, // Store enum as string
+      'extraPeriodStatus': extraPeriodStatus.name,
+      // -------------------------------------------------
     };
   }
 
-  // CopyWith method for creating modified instances (useful for state management)
   MatchPeriod copyWith({
     int? periodNumber,
-    // --- CHANGE: Parameter type is now TimerMode? ---
     TimerMode? timerMode,
-    // ------------------------------------------------
-    Duration? presetDuration,
-    bool clearPresetDuration =
-        false, // Flag to explicitly set presetDuration to null
+    // presetDuration parameter removed
     List<MatchTimeBloc>? intervals,
+    ExtraTime? extraTime,
+    TimeActiveStatus? upPeriodStatus,
+    TimeActiveStatus? extraPeriodStatus,
+    bool clearExtraTime = false, // Flag to explicitly set extraTime to null
   }) {
     return MatchPeriod(
       periodNumber: periodNumber ?? this.periodNumber,
-      // --- CHANGE: Assign enum value ---
       timerMode: timerMode ?? this.timerMode,
-      // ---------------------------------
-      presetDuration:
-          clearPresetDuration ? null : (presetDuration ?? this.presetDuration),
-      intervals:
-          intervals ??
-          this.intervals
-              .map((e) => e.copyWith())
-              .toList(), // Deep copy intervals
+      // presetDuration field removed
+      intervals: intervals ?? this.intervals.map((e) => e.copyWith()).toList(),
+      // Handle copying/clearing extraTime
+      extraTime:
+          extraTime ?? this.extraTime, // Use copyWith for deep copy if not null
+      upPeriodStatus: upPeriodStatus ?? this.upPeriodStatus,
+      extraPeriodStatus: extraPeriodStatus ?? this.extraPeriodStatus,
     );
   }
 
-  // Optional: Add helper methods if needed, e.g., calculate elapsed time for this period
+  // Calculates elapsed time based on the MAIN 'intervals' list
+  // Used primarily for UP mode display or DOWN mode calculation (if presetDuration existed)
   Duration calculateElapsedRunningTime() {
     Duration elapsed = Duration.zero;
-    DateTime now = DateTime.now(); // Capture current time once
+    DateTime now = DateTime.now();
     for (final interval in intervals) {
       if (interval.endTime != null) {
-        // Completed interval
-        // Ensure difference is not negative
         Duration diff = interval.endTime!.difference(interval.startTime);
         elapsed += (diff.isNegative ? Duration.zero : diff);
       } else {
@@ -110,7 +137,6 @@ class MatchPeriod {
         elapsed += (diff.isNegative ? Duration.zero : diff);
       }
     }
-    // Final check
     return elapsed.isNegative ? Duration.zero : elapsed;
   }
 }
@@ -177,5 +203,73 @@ class MatchTimeBloc {
     //   return jsonValue.toDate();
     // }
     return null; // Or throw an error if format is unexpected
+  }
+}
+
+class ExtraTime {
+  Duration presetDuration;
+  List<MatchTimeBloc> intervals;
+
+  ExtraTime({
+    required this.presetDuration,
+    this.intervals = const [], // Default to empty list
+  });
+
+  factory ExtraTime.fromJson(Map<String, dynamic> json) {
+    int? presetMillis = json['presetDurationMillis'] as int?;
+    // Default extra time duration if missing? e.g., 3 minutes or 0? Let's use 0.
+    Duration presetDuration =
+        presetMillis != null
+            ? Duration(milliseconds: presetMillis)
+            : Duration.zero;
+
+    return ExtraTime(
+      presetDuration: presetDuration,
+      intervals:
+          (json['intervals'] as List<dynamic>? ?? [])
+              .map((e) => MatchTimeBloc.fromJson(e as Map<String, dynamic>))
+              .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'presetDurationMillis': presetDuration.inMilliseconds,
+      'intervals': intervals.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  ExtraTime copyWith({
+    Duration? presetDuration,
+    List<MatchTimeBloc>? intervals,
+  }) {
+    return ExtraTime(
+      presetDuration: presetDuration ?? this.presetDuration,
+      intervals: intervals ?? this.intervals.map((e) => e.copyWith()).toList(),
+    );
+  }
+
+  // Helper to calculate elapsed running time *within* this extra time period
+  Duration calculateElapsedRunningTime() {
+    Duration elapsed = Duration.zero;
+    DateTime now = DateTime.now();
+    for (final interval in intervals) {
+      if (interval.endTime != null) {
+        Duration diff = interval.endTime!.difference(interval.startTime);
+        elapsed += (diff.isNegative ? Duration.zero : diff);
+      } else {
+        // Currently running interval within extra time
+        Duration diff = now.difference(interval.startTime);
+        elapsed += (diff.isNegative ? Duration.zero : diff);
+      }
+    }
+    return elapsed.isNegative ? Duration.zero : elapsed;
+  }
+
+  // Helper to calculate remaining extra time
+  Duration calculateRemainingTime() {
+    final elapsed = calculateElapsedRunningTime();
+    final remaining = presetDuration - elapsed;
+    return remaining.isNegative ? Duration.zero : remaining;
   }
 }

@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zporter_board/core/common/components/timer/timer_contol_buttons.dart';
+import 'package:zporter_board/core/services/navigation_service.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
+import 'package:zporter_board/core/utils/match/match_utils.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/domain/requests/update_match_score_request.dart';
 import 'package:zporter_board/features/match/domain/requests/update_match_time_request.dart';
@@ -12,6 +15,7 @@ import 'package:zporter_board/features/match/domain/usecases/create_new_match_us
 import 'package:zporter_board/features/match/domain/usecases/create_period_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/delete_match_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/fetch_match_usecase.dart';
+import 'package:zporter_board/features/match/domain/usecases/update_match_period_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_match_score_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_match_time_usecase.dart';
 import 'package:zporter_board/features/match/domain/usecases/update_sub_usecase.dart';
@@ -19,6 +23,7 @@ import 'package:zporter_board/features/match/presentation/view_model/match_event
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
 import 'package:zporter_board/features/time/data/model/match_time.dart';
 import 'package:zporter_board/features/time/presentation/view/component/timer_mode_widget.dart';
+import 'package:zporter_tactical_board/app/core/dialogs/confirmation_dialog.dart';
 import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class MatchBloc extends Bloc<MatchEvent, MatchState> {
@@ -30,6 +35,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
   ClearMatchDbUseCase _clearMatchDbUseCase;
   UpdateSubUseCase _updateSubUseCase;
   CreatePeriodUseCase _createPeriodUseCase;
+  UpdateMatchPeriodUseCase _updateMatchPeriodUseCase;
   MatchBloc({
     required FetchMatchUsecase fetchMatchUsecase,
     required UpdateMatchScoreUsecase updateMatchScoreUsecase,
@@ -39,6 +45,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     required ClearMatchDbUseCase clearMatchDbUseCase,
     required UpdateSubUseCase updateSubUseCase,
     required CreatePeriodUseCase createPeriodUseCase,
+    required UpdateMatchPeriodUseCase updateMatchPeriodUseCase,
   }) : _fetchMatchUsecase = fetchMatchUsecase,
        _updateMatchScoreUsecase = updateMatchScoreUsecase,
        _updateMatchTimeUsecase = updateMatchTimeUsecase,
@@ -47,6 +54,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
        _clearMatchDbUseCase = clearMatchDbUseCase,
        _updateSubUseCase = updateSubUseCase,
        _createPeriodUseCase = createPeriodUseCase,
+       _updateMatchPeriodUseCase = updateMatchPeriodUseCase,
        super(MatchState.initial()) {
     on<MatchLoadEvent>(_onLoadMatches);
     on<MatchPeriodSelectEvent>(_onMatchPeriodSelected);
@@ -60,6 +68,8 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     on<SubUpdateEvent>(_subUpdate);
     on<CreateNewPeriodEvent>(_createNewPeriod);
     on<ChangePeriodModeEvent>(_changePeriodMode);
+    on<IncreaseExtraTimeEvent>(_increaseExtraTime);
+    on<DecreaseExtraTimeEvent>(_decreaseExtraTime);
   }
 
   FutureOr<void> _onLoadMatches(
@@ -128,15 +138,46 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
   ) async {
     try {
       FootballMatch? footballMatch = state.match;
+      if (event.matchTimeUpdateStatus == MatchTimeUpdateStatus.START) {
+        // cross check if any timer is running or not
+        MatchPeriod? runningPeriod = MatchUtils.checkAnyTimerRunning(
+          match: footballMatch,
+        );
+        if (runningPeriod != null) {
+          bool? confirm = await showConfirmationDialog(
+            context: NavigationService.instance.currentContext!,
+            title: "Timer Already Running!",
+            content:
+                "Another timer ( Period - ${runningPeriod.periodNumber + 1} ${runningPeriod.extraPeriodStatus == TimeActiveStatus.RUNNING ? "(extra)" : ""} ) is currently active. Starting this timer will automatically stop the running one. Do you want to continue?",
+          );
+          if (confirm == true) {
+            await _updateMatchTimeUsecase.call(
+              UpdateMatchTimeRequest(
+                matchId: footballMatch?.id ?? "",
+                footballMatch: footballMatch!,
+                matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
+                matchPeriodId: runningPeriod.periodNumber,
+                timerMode:
+                    runningPeriod.extraPeriodStatus == TimeActiveStatus.RUNNING
+                        ? TimerMode.EXTRA
+                        : TimerMode.UP,
+              ),
+            );
+          } else {
+            return;
+          }
+        }
+      }
       FootballMatch updatedMatch = await _updateMatchTimeUsecase.call(
         UpdateMatchTimeRequest(
           matchId: footballMatch?.id ?? "",
           footballMatch: footballMatch!,
           matchTimeUpdateStatus: event.matchTimeUpdateStatus,
           matchPeriodId: event.periodId,
+          timerMode: event.timerMode,
         ),
       );
-      zlog(data: "Updated match time status ${updatedMatch.status}");
+
       add(UpdateMatchEvent(footballMatch: updatedMatch));
     } catch (e) {
       debug(data: "Error while updating time ${e.toString()}");
@@ -262,6 +303,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
       periodNumber: index + 1,
       timerMode: TimerMode.UP,
       intervals: [],
+      extraTime: ExtraTime(presetDuration: Duration(minutes: 3), intervals: []),
     );
     newMatchPeriod = await _createPeriodUseCase.call(newMatchPeriod);
     periods.add(newMatchPeriod);
@@ -289,5 +331,65 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     MatchPeriod? matchPeriod = state.selectedPeriod;
     matchPeriod = matchPeriod?.copyWith(timerMode: event.newMode);
     emit(state.copyWith(selectedPeriod: matchPeriod));
+  }
+
+  FutureOr<void> _increaseExtraTime(
+    IncreaseExtraTimeEvent event,
+    Emitter<MatchState> emit,
+  ) async {
+    FootballMatch? match = state.match;
+    MatchPeriod? matchPeriod = state.selectedPeriod;
+    if (matchPeriod != null) {
+      ExtraTime extraTime = matchPeriod.extraTime;
+      Duration duration = extraTime.presetDuration;
+      extraTime = extraTime.copyWith(
+        presetDuration: duration + Duration(minutes: 1),
+      );
+      matchPeriod = matchPeriod.copyWith(extraTime: extraTime);
+      matchPeriod = await _updateMatchPeriodUseCase.call(matchPeriod);
+
+      if (match != null) {
+        match = _updatePeriods(match, matchPeriod);
+      }
+
+      emit(state.copyWith(selectedPeriod: matchPeriod, match: match));
+    }
+  }
+
+  FootballMatch _updatePeriods(FootballMatch match, MatchPeriod matchPeriod) {
+    List<MatchPeriod> matchPeriods = match.matchPeriod;
+    int index = matchPeriods.indexWhere(
+      (t) => t.periodNumber == matchPeriod.periodNumber,
+    );
+    if (index != -1) {
+      matchPeriods[index] = matchPeriod;
+      match.matchPeriod = matchPeriods;
+    }
+    return match;
+  }
+
+  FutureOr<void> _decreaseExtraTime(
+    DecreaseExtraTimeEvent event,
+    Emitter<MatchState> emit,
+  ) async {
+    FootballMatch? match = state.match;
+    MatchPeriod? matchPeriod = state.selectedPeriod;
+    if (matchPeriod != null) {
+      ExtraTime extraTime = matchPeriod.extraTime;
+      Duration duration = extraTime.presetDuration;
+
+      extraTime = extraTime.copyWith(
+        presetDuration: duration - Duration(minutes: 1),
+      );
+
+      if (duration.inMinutes > 1) {
+        matchPeriod = matchPeriod.copyWith(extraTime: extraTime);
+        matchPeriod = await _updateMatchPeriodUseCase.call(matchPeriod);
+        if (match != null) {
+          match = _updatePeriods(match, matchPeriod);
+        }
+        emit(state.copyWith(selectedPeriod: matchPeriod, match: match));
+      }
+    }
   }
 }

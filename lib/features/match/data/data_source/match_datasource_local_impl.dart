@@ -74,7 +74,15 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
       }),
     );
     final defaultMatchTime = <MatchPeriod>[
-      MatchPeriod(periodNumber: 0, timerMode: TimerMode.UP, intervals: []),
+      MatchPeriod(
+        periodNumber: 0,
+        timerMode: TimerMode.UP,
+        intervals: [],
+        extraTime: ExtraTime(
+          presetDuration: Duration(minutes: 3),
+          intervals: [],
+        ),
+      ),
     ]; // Start with empty time list
 
     return FootballMatch(
@@ -82,7 +90,6 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
       userId: _getCurrentUserId(), // Assign the current user's ID
       name: "My First Match", // Default name
       matchPeriod: defaultMatchTime,
-      status: "SCHEDULED", // Default status
       homeTeam: defaultHomeTeam,
       awayTeam: defaultAwayTeam,
       matchScore: defaultScore,
@@ -236,19 +243,14 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
             "Sembast Warning: updateMatchTime called with ID $requestIdFromRequest but operating on fixed key $_singleMatchKey",
       );
     }
+
     //-----------------------------------------------------------------------------
 
     // 2. Create the final match object to be saved
     final updatedMatch = matchFromRequest.copyWith(
       // Ensure the object being saved uses the correct fixed ID for Sembast record key consistency
       id: _singleMatchKey,
-      // Update status and timestamp based on the request/current time
-      status: updateMatchTimeRequest.matchTimeUpdateStatus.name,
       updatedAt: DateTime.now(), // Set a fresh timestamp for the update
-    );
-
-    zlog(
-      data: "Current match time update status updating ${updatedMatch.status}",
     );
 
     // 3. Convert the *entire* updated match object (with correct ID) to JSON
@@ -445,6 +447,66 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
       debug(data: "Sembast: Error during createNewPeriod transaction: $e");
       // Re-throw the error to be handled by the repository/usecase layer
       throw Exception("Failed to add period locally: $e");
+    }
+  }
+
+  @override
+  Future<MatchPeriod> updatePeriod(MatchPeriod matchPeriodToUpdate) async {
+    final recordRef = _getMatchRecordRef();
+
+    // Use transaction for safe read-modify-write
+    try {
+      await _db.transaction((txn) async {
+        final snapshot = await recordRef.getSnapshot(txn);
+        if (snapshot == null) {
+          throw Exception(
+            "Sembast: Cannot update period, match record not found with key $_singleMatchKey.",
+          );
+        }
+
+        final currentMatch = FootballMatch.fromJson(
+          snapshot.value,
+          snapshot.key,
+        );
+
+        // Find the index of the period to update based on periodNumber
+        final int periodIndex = currentMatch.matchPeriod.indexWhere(
+          (p) => p.periodNumber == matchPeriodToUpdate.periodNumber,
+        );
+
+        if (periodIndex == -1) {
+          // Period with the given number not found in the current match
+          throw Exception(
+            "Sembast: Cannot update period, period number ${matchPeriodToUpdate.periodNumber} not found in match.",
+          );
+        }
+
+        // Create the updated list of periods by replacing the element at the index
+        List<MatchPeriod> updatedPeriods = List.from(currentMatch.matchPeriod);
+        // Replace the old period object with the new one provided
+        updatedPeriods[periodIndex] = matchPeriodToUpdate;
+
+        // Prepare the updated FootballMatch object
+        final updatedMatch = currentMatch.copyWith(
+          matchPeriod: updatedPeriods, // Use the list with the replaced period
+          updatedAt: DateTime.now(), // Update timestamp
+          // Optionally update match status if needed
+        );
+
+        // Save the entire updated match back to Sembast
+        await recordRef.put(txn, updatedMatch.toJson());
+        debug(
+          data:
+              "Sembast: Updated period (${matchPeriodToUpdate.periodNumber}) for match key $_singleMatchKey",
+        );
+      }); // End transaction
+
+      // If transaction succeeds, return the updated period object that was passed in
+      return matchPeriodToUpdate;
+    } catch (e) {
+      debug(data: "Sembast: Error during updatePeriod transaction: $e");
+      // Re-throw the error to be handled by the repository/usecase layer
+      throw Exception("Failed to update period locally: $e");
     }
   }
 }

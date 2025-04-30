@@ -11,7 +11,6 @@ class FootballMatch {
   String name;
   List<MatchPeriod>
   matchPeriod; // Consider making final if not modified after creation
-  String status;
   Team homeTeam;
   Team awayTeam;
   MatchScore matchScore;
@@ -26,7 +25,6 @@ class FootballMatch {
     required this.userId,
     required this.name,
     required this.matchPeriod,
-    required this.status,
     required this.homeTeam,
     required this.awayTeam,
     required this.matchScore,
@@ -62,7 +60,6 @@ class FootballMatch {
           (json['matchPeriod'] as List<dynamic>? ?? [])
               .map((e) => MatchPeriod.fromJson(e as Map<String, dynamic>))
               .toList(),
-      status: json['status'] as String? ?? 'Scheduled', // Provide default
       // Add null checks for nested objects before calling fromJson
       homeTeam: Team.fromJson(json['homeTeam'] as Map<String, dynamic>? ?? {}),
       awayTeam: Team.fromJson(json['awayTeam'] as Map<String, dynamic>? ?? {}),
@@ -90,7 +87,6 @@ class FootballMatch {
       'userId': userId,
       'name': name,
       'matchPeriod': matchPeriod.map((e) => e.toJson()).toList(),
-      'status': status,
       'homeTeam': homeTeam.toJson(),
       'awayTeam': awayTeam.toJson(),
       'matchScore': matchScore.toJson(),
@@ -114,7 +110,6 @@ class FootballMatch {
     String? userId,
     String? name,
     List<MatchPeriod>? matchPeriod,
-    String? status,
     Team? homeTeam,
     Team? awayTeam,
     MatchScore? matchScore,
@@ -134,7 +129,6 @@ class FootballMatch {
           this.matchPeriod
               .map((e) => e.copyWith())
               .toList(), // Deep copy example
-      status: status ?? this.status,
       homeTeam: homeTeam ?? this.homeTeam, // Deep copy example
       awayTeam: awayTeam ?? this.awayTeam, // Deep copy example
       matchScore: matchScore ?? this.matchScore, // Deep copy example

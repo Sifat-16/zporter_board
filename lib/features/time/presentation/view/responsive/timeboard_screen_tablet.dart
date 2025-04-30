@@ -166,12 +166,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/board_container.dart';
-import 'package:zporter_board/core/common/components/timer/timer_component.dart';
-import 'package:zporter_board/core/common/components/timer/timer_contol_buttons.dart';
-import 'package:zporter_board/core/common/components/timer/timer_controller.dart';
-import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/helper/board_container_space_helper.dart';
-import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/core/utils/match/match_utils.dart';
 import 'package:zporter_board/features/match/presentation/view/component/match_pagination_component.dart';
@@ -180,9 +175,10 @@ import 'package:zporter_board/features/match/presentation/view_model/match_bloc.
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
 import 'package:zporter_board/features/time/presentation/view/component/score_component.dart';
-import 'package:zporter_board/features/time/presentation/view/component/time_manager_component.dart';
+import 'package:zporter_board/features/time/presentation/view/component/timer_extra_component.dart';
 // Import needed for TimerMode enum if used directly
 import 'package:zporter_board/features/time/presentation/view/component/timer_mode_widget.dart';
+import 'package:zporter_board/features/time/presentation/view/component/timer_up_component.dart';
 import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class TimeboardScreenTablet extends StatefulWidget {
@@ -195,7 +191,6 @@ class TimeboardScreenTablet extends StatefulWidget {
 class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
     with AutomaticKeepAliveClientMixin {
   // Keep the controller as TimerComponent might still need it in UP mode
-  final TimerController _timerController = TimerController();
 
   @override
   void initState() {
@@ -204,7 +199,7 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
 
   // --- HELPER FUNCTION TO DECIDE WHICH WIDGET TO SHOW ---
   // This function now returns either the original TimerComponent or a simple Text widget
-  Widget _buildCentralDisplay(MatchState state) {
+  Widget _buildCentralDisplay(MatchState state, double height) {
     final selectedPeriod = state.selectedPeriod;
     // Default to "UP" if period or mode is null/empty
     final TimerMode currentMode = selectedPeriod?.timerMode ?? TimerMode.UP;
@@ -222,27 +217,9 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
           ),
         );
       case TimerMode.EXTRA:
-        return const Center(
-          child: Text(
-            'EXTRA Mode Active', // Simple placeholder
-            style: TextStyle(
-              fontSize: AppSize.s40,
-              color: Colors.cyan,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        );
+        return TimerExtraComponent(height: height);
       case TimerMode.UP:
-        final intervals = selectedPeriod?.intervals ?? [];
-        final matchTimeStatus = MatchUtils.getMatchTime(intervals);
-        return TimerComponent(
-          elapsedSeconds: matchTimeStatus.elapsedSeconds,
-          letterSpacing: 20,
-          isRunning: matchTimeStatus.isRunning,
-          textSize: AppSize.s180,
-          textColor: ColorManager.white,
-          controller: _timerController, // Pass the existing controller
-        );
+        return TimerUpComponent(height: height);
       // -----------------------------------------------------------
     }
   }
@@ -287,57 +264,61 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
                     ),
                   ),
 
+                  Container(
+                    height: height * .75,
+                    child: _buildCentralDisplay(state, height * .75),
+                  ),
                   // --- CENTRAL DISPLAY AREA ---
-                  Container(
-                    // Keep styling as is
-                    height: height * .65,
-                    child: SizedBox(
-                      width: context.widthPercent(100),
-                      // Use the helper function to determine the child widget
-                      child: _buildCentralDisplay(state),
-                    ),
-                  ),
-                  // -----------------------------
-
-                  // TimeManagerComponent remains unchanged in structure
-                  Container(
-                    height: height * .1,
-                    child: TimeManagerComponent(
-                      // Note: TimeManagerComponent might need adjustment later
-                      // if its display/logic depends on the mode (e.g., showing preset time)
-                      matchPeriod: state.selectedPeriod,
-                      status:
-                          state.match?.status == "START"
-                              ? TimeActiveStatus.RUNNING
-                              : state.match?.status == "PAUSED"
-                              ? TimeActiveStatus.PAUSED
-                              : TimeActiveStatus.STOPPED,
-                      onStart: () {
-                        context.read<MatchBloc>().add(
-                          MatchTimeUpdateEvent(
-                            matchTimeUpdateStatus: MatchTimeUpdateStatus.START,
-                            periodId: state.selectedPeriod?.periodNumber ?? -1,
-                          ),
-                        );
-                      },
-                      onPause: () {
-                        context.read<MatchBloc>().add(
-                          MatchTimeUpdateEvent(
-                            matchTimeUpdateStatus: MatchTimeUpdateStatus.PAUSE,
-                            periodId: state.selectedPeriod?.periodNumber ?? -1,
-                          ),
-                        );
-                      },
-                      onStop: () {
-                        context.read<MatchBloc>().add(
-                          MatchTimeUpdateEvent(
-                            periodId: state.selectedPeriod?.periodNumber ?? -1,
-                            matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  // Container(
+                  //   // Keep styling as is
+                  //   height: height * .65,
+                  //   child: SizedBox(
+                  //     width: context.widthPercent(100),
+                  //     // Use the helper function to determine the child widget
+                  //     child: _buildCentralDisplay(state),
+                  //   ),
+                  // ),
+                  // // -----------------------------
+                  //
+                  // // TimeManagerComponent remains unchanged in structure
+                  // Container(
+                  //   height: height * .1,
+                  //   child: TimeManagerComponent(
+                  //     // Note: TimeManagerComponent might need adjustment later
+                  //     // if its display/logic depends on the mode (e.g., showing preset time)
+                  //     matchPeriod: state.selectedPeriod,
+                  //     status:
+                  //         state.match?.status == "START"
+                  //             ? TimeActiveStatus.RUNNING
+                  //             : state.match?.status == "PAUSE"
+                  //             ? TimeActiveStatus.PAUSED
+                  //             : TimeActiveStatus.STOPPED,
+                  //     onStart: () {
+                  //       context.read<MatchBloc>().add(
+                  //         MatchTimeUpdateEvent(
+                  //           matchTimeUpdateStatus: MatchTimeUpdateStatus.START,
+                  //           periodId: state.selectedPeriod?.periodNumber ?? -1,
+                  //         ),
+                  //       );
+                  //     },
+                  //     onPause: () {
+                  //       context.read<MatchBloc>().add(
+                  //         MatchTimeUpdateEvent(
+                  //           matchTimeUpdateStatus: MatchTimeUpdateStatus.PAUSE,
+                  //           periodId: state.selectedPeriod?.periodNumber ?? -1,
+                  //         ),
+                  //       );
+                  //     },
+                  //     onStop: () {
+                  //       context.read<MatchBloc>().add(
+                  //         MatchTimeUpdateEvent(
+                  //           periodId: state.selectedPeriod?.periodNumber ?? -1,
+                  //           matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
+                  //         ),
+                  //       );
+                  //     },
+                  //   ),
+                  // ),
 
                   // Bottom Row remains unchanged in structure
                   Container(

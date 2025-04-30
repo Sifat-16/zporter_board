@@ -46,15 +46,17 @@ class SubUpdateEvent extends MatchEvent {
 class MatchTimeUpdateEvent extends MatchEvent {
   final int periodId;
   final MatchTimeUpdateStatus matchTimeUpdateStatus;
+  final TimerMode timerMode;
 
   MatchTimeUpdateEvent({
     required this.periodId,
+    required this.timerMode,
     required this.matchTimeUpdateStatus,
   });
 
   @override
   // TODO: implement props
-  List<Object?> get props => [matchTimeUpdateStatus];
+  List<Object?> get props => [matchTimeUpdateStatus, periodId, timerMode];
 }
 
 class MatchUpdateEvent extends MatchEvent {}
@@ -90,3 +92,7 @@ class ChangePeriodModeEvent extends MatchEvent {
   // TODO: implement props
   List<Object?> get props => [periodNumber, newMode];
 }
+
+class IncreaseExtraTimeEvent extends MatchEvent {}
+
+class DecreaseExtraTimeEvent extends MatchEvent {}

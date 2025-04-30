@@ -20,4 +20,5 @@ abstract class MatchRepository {
   Future<int> clearMatchDb();
 
   Future<MatchPeriod> createNewPeriod({required MatchPeriod matchPeriod});
+  Future<MatchPeriod> updatePeriod(MatchPeriod matchPeriod);
 }

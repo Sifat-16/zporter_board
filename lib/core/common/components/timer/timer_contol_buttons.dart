@@ -52,7 +52,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Start Button
-        _TimerButton(
+        TimerButton(
           icon: Icons.play_circle_outline,
           label: 'Start',
           isActive: _activeStatus == TimeActiveStatus.RUNNING,
@@ -63,7 +63,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
         ),
         SizedBox(width: 20),
         // Pause Button
-        _TimerButton(
+        TimerButton(
           icon: Icons.pause_circle_outline,
           label: 'Pause',
           isActive: _activeStatus == TimeActiveStatus.PAUSED,
@@ -74,7 +74,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
         ),
         SizedBox(width: 20),
         // Stop Button
-        _TimerButton(
+        TimerButton(
           icon: Icons.stop,
           label: 'Stop',
           isActive: _activeStatus == TimeActiveStatus.STOPPED,
@@ -88,13 +88,13 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
   }
 }
 
-class _TimerButton extends StatelessWidget {
+class TimerButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isActive;
   final VoidCallback onPressed;
 
-  const _TimerButton({
+  const TimerButton({
     required this.icon,
     required this.label,
     required this.isActive,

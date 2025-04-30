@@ -22,4 +22,6 @@ abstract class MatchDataSource {
 
   Future<bool> deleteMatch(String matchId);
   Future<int> clearMatchDb();
+
+  Future<MatchPeriod> updatePeriod(MatchPeriod matchPeriod);
 }

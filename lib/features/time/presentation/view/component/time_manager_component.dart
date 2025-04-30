@@ -44,11 +44,6 @@ class TimeManagerComponent extends StatelessWidget {
           CounterTimerComponent(
             startTime: MatchUtils.findInitialTime(matchPeriod: matchPeriod),
           ),
-          // Text("TOTAL 01:45:59", style: Theme.of(context).textTheme.titleMedium!.copyWith(
-          //     color: ColorManager.grey,
-          //     fontWeight: FontWeight.bold,
-          //     fontSize: AppSize.s28
-          // ),),
         ],
       ),
     );

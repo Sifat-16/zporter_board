@@ -369,4 +369,27 @@ class MatchRepositoryImpl implements MatchRepository {
       return await _localDataSource.createNewPeriod(matchPeriod: matchPeriod);
     }
   }
+
+  @override
+  Future<MatchPeriod> updatePeriod(MatchPeriod matchPeriod) async {
+    if (_isLoggedIn()) {
+      try {
+        debug(data: "Repo: Getting single Period from Remote");
+        final remotePeriod = await _remoteDataSource.updatePeriod(matchPeriod);
+
+        return remotePeriod;
+      } catch (e) {
+        debug(data: "Repo: Remote period failed: $e. Falling back to local.");
+        BotToast.showText(
+          text: "Couldn't fetch latest data, showing offline version.",
+        );
+        // Fallback to local storage on error
+        return await _localDataSource.updatePeriod(matchPeriod);
+      }
+    } else {
+      // Offline: Fetch directly from local
+      debug(data: "Repo: Updating single period from Local (offline)");
+      return await _localDataSource.updatePeriod(matchPeriod);
+    }
+  }
 }

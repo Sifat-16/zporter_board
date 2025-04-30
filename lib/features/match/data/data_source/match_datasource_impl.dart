@@ -63,7 +63,15 @@ class MatchDataSourceImpl implements MatchDataSource {
       }),
     );
     final defaultMatchTime = <MatchPeriod>[
-      MatchPeriod(periodNumber: 0, timerMode: TimerMode.UP, intervals: []),
+      MatchPeriod(
+        periodNumber: 0,
+        timerMode: TimerMode.UP,
+        intervals: [],
+        extraTime: ExtraTime(
+          presetDuration: Duration(minutes: 3),
+          intervals: [],
+        ),
+      ),
     ]; // Start with empty time list
 
     return FootballMatch(
@@ -71,7 +79,6 @@ class MatchDataSourceImpl implements MatchDataSource {
       userId: userId, // Assign the current user's ID
       name: "My First Match", // Default name
       matchPeriod: defaultMatchTime,
-      status: "SCHEDULED", // Default status
       homeTeam: defaultHomeTeam,
       awayTeam: defaultAwayTeam,
       matchScore: defaultScore,
@@ -493,6 +500,12 @@ class MatchDataSourceImpl implements MatchDataSource {
   @override
   Future<MatchPeriod> createNewPeriod({MatchPeriod? matchPeriod}) {
     // TODO: implement createNewPeriod
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<MatchPeriod> updatePeriod(MatchPeriod matchPeriod) {
+    // TODO: implement updatePeriod
     throw UnimplementedError();
   }
 }
