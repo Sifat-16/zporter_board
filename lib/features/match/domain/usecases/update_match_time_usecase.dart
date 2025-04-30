@@ -15,24 +15,37 @@ class UpdateMatchTimeUsecase
   @override
   Future<FootballMatch> call(param) async {
     if (param.matchTimeUpdateStatus == MatchTimeUpdateStatus.START) {
-      param.footballMatch = startTime(footBallMatch: param.footballMatch);
+      param.footballMatch = startTime(
+        footBallMatch: param.footballMatch,
+        matchPeriodId: param.matchPeriodId,
+      );
     } else {
-      param.footballMatch = stopTime(footBallMatch: param.footballMatch);
+      param.footballMatch = stopTime(
+        footBallMatch: param.footballMatch,
+        matchPeriodId: param.matchPeriodId,
+      );
     }
 
     return await matchRepository.updateMatchTime(param);
   }
 
-  FootballMatch startTime({required FootballMatch footBallMatch}) {
+  FootballMatch startTime({
+    required FootballMatch footBallMatch,
+    required int matchPeriodId,
+  }) {
     // create new match time object with start time - Date now , end time - null, nextId - null
     // Iterate through match times and connect the id to null next id
     // if already time is running and again the users taps start through exception
-    List<MatchTime> times = footBallMatch.matchTime;
+    int index = footBallMatch.matchPeriod.indexWhere(
+      (t) => t.periodNumber == matchPeriodId,
+    );
+    List<MatchTimeBloc> times = footBallMatch.matchPeriod[index].intervals;
+
     int alreadyRunningTimeIndex = times.indexWhere((t) => t.endTime == null);
     if (alreadyRunningTimeIndex != -1) {
       throw Exception("Timer already running");
     }
-    MatchTime matchTime = MatchTime(
+    MatchTimeBloc matchTime = MatchTimeBloc(
       id: RandomGenerator.generateId(),
       startTime: DateTime.now(),
       endTime: null,
@@ -45,21 +58,29 @@ class UpdateMatchTimeUsecase
       times[lastStoppedTime].nextId = matchTime.id;
     }
     times.add(matchTime);
-    footBallMatch.matchTime = times;
+
+    footBallMatch.matchPeriod[index].intervals = times;
     return footBallMatch;
   }
 
-  FootballMatch stopTime({required FootballMatch footBallMatch}) {
+  FootballMatch stopTime({
+    required FootballMatch footBallMatch,
+    required int matchPeriodId,
+  }) {
     // Look for end time null object which is considered running and set to date - now
     // if not found throw can't be stop cause already stopped
-    List<MatchTime> times = footBallMatch.matchTime;
+    int index = footBallMatch.matchPeriod.indexWhere(
+      (t) => t.periodNumber == matchPeriodId,
+    );
+    List<MatchTimeBloc> times = footBallMatch.matchPeriod[index].intervals;
+
     int alreadyRunningTimeIndex = times.indexWhere((t) => t.endTime == null);
     if (alreadyRunningTimeIndex == -1) {
       throw Exception("Timer already stopped");
     }
 
     times[alreadyRunningTimeIndex].endTime = DateTime.now();
-    footBallMatch.matchTime = times;
+    footBallMatch.matchPeriod[index].intervals = times;
     return footBallMatch;
   }
 }

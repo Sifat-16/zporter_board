@@ -12,6 +12,7 @@ import 'package:zporter_board/features/match/domain/requests/update_sub_request.
 import 'package:zporter_board/features/scoreboard/data/model/score.dart';
 import 'package:zporter_board/features/substitute/data/model/substitution.dart';
 import 'package:zporter_board/features/time/data/model/match_time.dart';
+import 'package:zporter_board/features/time/presentation/view/component/timer_mode_widget.dart';
 import 'package:zporter_tactical_board/app/generator/random_generator.dart';
 import 'package:zporter_tactical_board/app/helper/logger.dart';
 
@@ -21,7 +22,8 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
   final UserIdService _userIdService;
 
   // Define a store name (like a table name)
-  static const String storeName = 'matches';
+  static const String storeName = 'matches_v2';
+  static const String _singleMatchKey = "current_user_match";
 
   MatchDatasourceLocalImpl({
     required Database database,
@@ -33,6 +35,10 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
   String _getCurrentUserId() {
     final currentUser = _userIdService.getCurrentUserId();
     return currentUser;
+  }
+
+  RecordRef<String, Map<String, dynamic>> _getMatchRecordRef() {
+    return _store.record(_singleMatchKey);
   }
 
   /// --- Helper Function to Create a Default Match ---
@@ -67,13 +73,15 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
         );
       }),
     );
-    final defaultMatchTime = <MatchTime>[]; // Start with empty time list
+    final defaultMatchTime = <MatchPeriod>[
+      MatchPeriod(periodNumber: 0, timerMode: TimerMode.UP, intervals: []),
+    ]; // Start with empty time list
 
     return FootballMatch(
       id: RandomGenerator.generateId(), // ID will be assigned by Firestore on creation
       userId: _getCurrentUserId(), // Assign the current user's ID
       name: "My First Match", // Default name
-      matchTime: defaultMatchTime,
+      matchPeriod: defaultMatchTime,
       status: "SCHEDULED", // Default status
       homeTeam: defaultHomeTeam,
       awayTeam: defaultAwayTeam,
@@ -85,36 +93,36 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
     );
   }
 
-  @override
-  Future<List<FootballMatch>> getAllMatches() async {
-    zlog(data: "Coming to get all matches");
-    final finder = Finder(filter: Filter.equals('userId', _getCurrentUserId()));
-    final snapshots = await _store.find(_db, finder: finder);
-
-    List<FootballMatch> matches =
-        snapshots.map((snapshot) {
-          // IMPORTANT: Use the Sembast key as the match ID
-          return FootballMatch.fromJson(snapshot.value, snapshot.key);
-        }).toList();
-
-    // Handle default match creation if no matches found locally
-    if (matches.isEmpty) {
-      debug(
-        data: "Sembast: No matches found for user userId. Creating default.",
-      );
-      final defaultMatch = await createMatch();
-      matches = [defaultMatch]; // Return list with the new default match
-    } else {
-      debug(data: "Sembast: Found ${matches.length} matches for user userId");
-    }
-
-    // Sort locally (same logic as Firestore version)
-    matches.sort(
-      (a, b) =>
-          (a.createdAt ?? DateTime(0)).compareTo(b.createdAt ?? DateTime(0)),
-    );
-    return matches;
-  }
+  // @override
+  // Future<List<FootballMatch>> getAllMatches() async {
+  //   zlog(data: "Coming to get all matches");
+  //   final finder = Finder(filter: Filter.equals('userId', _getCurrentUserId()));
+  //   final snapshots = await _store.find(_db, finder: finder);
+  //
+  //   List<FootballMatch> matches =
+  //       snapshots.map((snapshot) {
+  //         // IMPORTANT: Use the Sembast key as the match ID
+  //         return FootballMatch.fromJson(snapshot.value, snapshot.key);
+  //       }).toList();
+  //
+  //   // Handle default match creation if no matches found locally
+  //   if (matches.isEmpty) {
+  //     debug(
+  //       data: "Sembast: No matches found for user userId. Creating default.",
+  //     );
+  //     final defaultMatch = await createMatch();
+  //     matches = [defaultMatch]; // Return list with the new default match
+  //   } else {
+  //     debug(data: "Sembast: Found ${matches.length} matches for user userId");
+  //   }
+  //
+  //   // Sort locally (same logic as Firestore version)
+  //   matches.sort(
+  //     (a, b) =>
+  //         (a.createdAt ?? DateTime(0)).compareTo(b.createdAt ?? DateTime(0)),
+  //   );
+  //   return matches;
+  // }
 
   @override
   Future<FootballMatch> updateMatchScore(
@@ -161,46 +169,106 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
     return updatedMatch; // Return the object we used for putting
   }
 
+  // @override
+  // Future<FootballMatch> updateMatchTime(
+  //   UpdateMatchTimeRequest updateMatchTimeRequest,
+  // ) async {
+  //   final matchId = updateMatchTimeRequest.matchId;
+  //   final record = _store.record(matchId);
+  //
+  //   // 1. Get the potentially updated match object from the request
+  //   // Assuming updateMatchTimeRequest.footballMatch ALREADY contains the desired matchTime
+  //   final FootballMatch matchFromRequest = updateMatchTimeRequest.footballMatch;
+  //
+  //   // 2. Create the final match object to be saved, ensuring updatedAt and status are current
+  //   final updatedMatch = matchFromRequest.copyWith(
+  //     status:
+  //         updateMatchTimeRequest
+  //             .matchTimeUpdateStatus
+  //             .name, // Update status from request
+  //     updatedAt: DateTime.now(), // Set a fresh timestamp
+  //     // Ensure the ID from the request is used (or overwrite if needed)
+  //     id: matchId,
+  //   );
+  //
+  //   zlog(
+  //     data: "Current match time update status updating ${updatedMatch.status}",
+  //   );
+  //
+  //   // 3. Convert the *entire* updated match object to JSON
+  //   final updatedJson = updatedMatch.toJson();
+  //
+  //   // 4. Use 'put' to overwrite the entire record
+  //   await record.put(_db, updatedJson);
+  //
+  //   debug(
+  //     data:
+  //         "Sembast: Overwrote match $matchId with updated time/status for user ${_getCurrentUserId()}",
+  //   );
+  //   zlog(
+  //     data:
+  //         "Timer data updated match (overwritten) time length : ${updatedMatch.matchPeriod.length}",
+  //   );
+  //
+  //   // 5. Return the updated match object
+  //   // Return the object we used for putting, ensuring ID is correct
+  //   return updatedMatch; // The object already has the correct ID and data
+  // }
+
   @override
   Future<FootballMatch> updateMatchTime(
     UpdateMatchTimeRequest updateMatchTimeRequest,
   ) async {
-    final matchId = updateMatchTimeRequest.matchId;
-    final record = _store.record(matchId);
+    // ALWAYS use the fixed key for the single match record in local storage
+    final recordRef =
+        _getMatchRecordRef(); // Get RecordRef using _singleMatchKey
 
     // 1. Get the potentially updated match object from the request
-    // Assuming updateMatchTimeRequest.footballMatch ALREADY contains the desired matchTime
+    // This object contains the updated list of periods and intervals, session start time, etc.
     final FootballMatch matchFromRequest = updateMatchTimeRequest.footballMatch;
 
-    // 2. Create the final match object to be saved, ensuring updatedAt and status are current
+    // --- Optional: Log a warning if the request ID doesn't match the fixed key ---
+    final String requestIdFromRequest = updateMatchTimeRequest.matchId;
+    if (requestIdFromRequest != _singleMatchKey &&
+        requestIdFromRequest.isNotEmpty) {
+      debug(
+        data:
+            "Sembast Warning: updateMatchTime called with ID $requestIdFromRequest but operating on fixed key $_singleMatchKey",
+      );
+    }
+    //-----------------------------------------------------------------------------
+
+    // 2. Create the final match object to be saved
     final updatedMatch = matchFromRequest.copyWith(
-      status:
-          updateMatchTimeRequest
-              .matchTimeUpdateStatus
-              .name, // Update status from request
-      updatedAt: DateTime.now(), // Set a fresh timestamp
-      // Ensure the ID from the request is used (or overwrite if needed)
-      id: matchId,
+      // Ensure the object being saved uses the correct fixed ID for Sembast record key consistency
+      id: _singleMatchKey,
+      // Update status and timestamp based on the request/current time
+      status: updateMatchTimeRequest.matchTimeUpdateStatus.name,
+      updatedAt: DateTime.now(), // Set a fresh timestamp for the update
     );
 
-    // 3. Convert the *entire* updated match object to JSON
+    zlog(
+      data: "Current match time update status updating ${updatedMatch.status}",
+    );
+
+    // 3. Convert the *entire* updated match object (with correct ID) to JSON
     final updatedJson = updatedMatch.toJson();
 
-    // 4. Use 'put' to overwrite the entire record
-    await record.put(_db, updatedJson);
+    // 4. Use 'put' to overwrite the record associated with the fixed key (_singleMatchKey)
+    await recordRef.put(_db, updatedJson); // Use the correct record reference
 
     debug(
       data:
-          "Sembast: Overwrote match $matchId with updated time/status for user ${_getCurrentUserId()}",
+          "Sembast: Overwrote match record $_singleMatchKey with updated time/status",
     );
+    // Ensure you are using the correct field name ('matchPeriod') from your FootballMatch model
     zlog(
       data:
-          "Timer data updated match (overwritten) time length : ${updatedMatch.matchTime.length}",
+          "Timer data updated match (overwritten) periods length : ${updatedMatch.matchPeriod.length}",
     );
 
-    // 5. Return the updated match object
-    // Return the object we used for putting, ensuring ID is correct
-    return updatedMatch; // The object already has the correct ID and data
+    // 5. Return the updated match object we just saved
+    return updatedMatch;
   }
 
   @override
@@ -297,6 +365,86 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
       throw Exception(
         "An unexpected error occurred while updating match substitutions locally: $e",
       );
+    }
+  }
+
+  @override
+  Future<FootballMatch> getDefaultMatch() async {
+    final recordRef = _getMatchRecordRef();
+    final snapshot = await recordRef.getSnapshot(_db);
+
+    if (snapshot != null) {
+      debug(
+        data:
+            "Sembast: Found existing match with key ${_singleMatchKey} - ${snapshot.value}",
+      );
+      return FootballMatch.fromJson(snapshot.value, snapshot.key);
+    } else {
+      debug(data: "Sembast: No match found. Creating default.");
+      final defaultMatch = _buildDefaultMatch();
+      await recordRef.put(_db, defaultMatch.toJson());
+      // Fetch again to be consistent (though Sembast is synchronous after put)
+      final newSnapshot = await recordRef.getSnapshot(_db);
+      return FootballMatch.fromJson(newSnapshot!.value, newSnapshot.key);
+      // return defaultMatch;
+    }
+  }
+
+  @override
+  Future<MatchPeriod> createNewPeriod({
+    required MatchPeriod matchPeriod,
+  }) async {
+    // This function now ASSUMES newPeriod is fully configured (correct number, mode, etc.)
+    // and that the match record exists. Checks are done before calling this.
+    final recordRef = _getMatchRecordRef();
+
+    try {
+      // Use transaction for safe read-modify-write
+      await _db.transaction((txn) async {
+        final snapshot = await recordRef.getSnapshot(txn);
+        if (snapshot == null) {
+          // If called when match doesn't exist, this is an error based on preconditions
+          throw Exception(
+            "Sembast: Cannot add period, match record not found with key $_singleMatchKey.",
+          );
+        }
+
+        final currentMatch = FootballMatch.fromJson(
+          snapshot.value,
+          snapshot.key,
+        );
+
+        // --- Add the PREPARED new period to the list ---
+        List<MatchPeriod> updatedPeriods = List.from(
+          currentMatch.matchPeriod,
+        ); // Use correct field name
+        updatedPeriods.add(matchPeriod); // Add the provided period object
+        //-----------------------------------------------
+
+        // --- Prepare updated match object ---
+        final matchWithNewPeriod = currentMatch.copyWith(
+          matchPeriod: updatedPeriods, // Use correct field name
+          updatedAt: DateTime.now(), // Update timestamp
+          // Optionally update status if needed
+        );
+        //---------------------------------
+
+        // --- Save back to Sembast ---
+        await recordRef.put(txn, matchWithNewPeriod.toJson());
+        debug(
+          data:
+              "Sembast: Added provided period (${matchPeriod.periodNumber}) for match key $_singleMatchKey",
+        );
+        //---------------------------
+      }); // End transaction
+
+      // If transaction succeeds, return the period object that was passed in and added
+      return matchPeriod;
+    } catch (e) {
+      // Catch potential transaction errors or the exception thrown if match not found
+      debug(data: "Sembast: Error during createNewPeriod transaction: $e");
+      // Re-throw the error to be handled by the repository/usecase layer
+      throw Exception("Failed to add period locally: $e");
     }
   }
 }

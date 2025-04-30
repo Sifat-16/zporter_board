@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class LiveClockComponent extends StatefulWidget {
@@ -40,6 +41,7 @@ class _LiveClockWidgetState extends State<LiveClockComponent> {
         color: Colors.grey,
         fontWeight: FontWeight.bold,
         fontSize: 28,
+        fontFamily: 'monospaced',
       ),
     );
   }

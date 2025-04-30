@@ -9,6 +9,7 @@ import 'package:zporter_board/features/match/domain/repository/match_repository.
 import 'package:zporter_board/features/match/domain/requests/update_match_score_request.dart';
 import 'package:zporter_board/features/match/domain/requests/update_match_time_request.dart';
 import 'package:zporter_board/features/match/domain/requests/update_sub_request.dart';
+import 'package:zporter_board/features/time/data/model/match_time.dart';
 import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class MatchRepositoryImpl implements MatchRepository {
@@ -30,40 +31,40 @@ class MatchRepositoryImpl implements MatchRepository {
   bool _isLoggedIn() => _userIdService.isFirebaseLoggedIn();
   String _getCurrentUserId() => _userIdService.getCurrentUserId();
 
-  @override
-  Future<List<FootballMatch>> getAllMatches() async {
-    final userId = _getCurrentUserId(); // Needed for remote query
-
-    if (_isLoggedIn()) {
-      try {
-        // Prioritize fetching from remote when online
-        debug(data: "Repo: Getting matches from Remote for user $userId");
-        final remoteMatches =
-            await _remoteDataSource.getAllMatches(); // Pass userId
-
-        // Optional: Background sync to ensure local is up-to-date with remote
-        // This is more complex, involves comparing lists, adding/updating/deleting locally.
-        // For now, just return remote data when online.
-
-        return remoteMatches;
-      } catch (e) {
-        debug(
-          data: "Repo: Remote getAllMatches failed: $e. Falling back to local.",
-        );
-        BotToast.showText(
-          text: "Couldn't fetch latest data, showing offline matches.",
-        );
-        // Fallback to local storage on error
-        return await _localDataSource
-            .getAllMatches(); // Doesn't need userId param based on your impl
-      }
-    } else {
-      // Offline: Fetch directly from local
-      debug(data: "Repo: Getting matches from Local (offline)");
-      return await _localDataSource
-          .getAllMatches(); // Doesn't need userId param based on your impl
-    }
-  }
+  // @override
+  // Future<List<FootballMatch>> getAllMatches() async {
+  //   final userId = _getCurrentUserId(); // Needed for remote query
+  //
+  //   if (_isLoggedIn()) {
+  //     try {
+  //       // Prioritize fetching from remote when online
+  //       debug(data: "Repo: Getting matches from Remote for user $userId");
+  //       final remoteMatches =
+  //           await _remoteDataSource.getAllMatches(); // Pass userId
+  //
+  //       // Optional: Background sync to ensure local is up-to-date with remote
+  //       // This is more complex, involves comparing lists, adding/updating/deleting locally.
+  //       // For now, just return remote data when online.
+  //
+  //       return remoteMatches;
+  //     } catch (e) {
+  //       debug(
+  //         data: "Repo: Remote getAllMatches failed: $e. Falling back to local.",
+  //       );
+  //       BotToast.showText(
+  //         text: "Couldn't fetch latest data, showing offline matches.",
+  //       );
+  //       // Fallback to local storage on error
+  //       return await _localDataSource
+  //           .getAllMatches(); // Doesn't need userId param based on your impl
+  //     }
+  //   } else {
+  //     // Offline: Fetch directly from local
+  //     debug(data: "Repo: Getting matches from Local (offline)");
+  //     return await _localDataSource
+  //         .getAllMatches(); // Doesn't need userId param based on your impl
+  //   }
+  // }
 
   @override
   Future<FootballMatch> createMatch() async {
@@ -188,7 +189,7 @@ class MatchRepositoryImpl implements MatchRepository {
       debug(data: "Repo: User is offline. Time only updated locally.");
       zlog(
         data:
-            "Timer data updated match time length : ${updatedLocalMatch.matchTime.length} from repository",
+            "Timer data updated match time length : ${updatedLocalMatch.matchPeriod.length} from repository",
       );
       return updatedLocalMatch;
     }
@@ -309,6 +310,63 @@ class MatchRepositoryImpl implements MatchRepository {
       // 3. If offline, return the locally updated match
       debug(data: "Repo: User is offline. Substitutions only updated locally.");
       return updatedLocalMatch;
+    }
+  }
+
+  @override
+  Future<FootballMatch> getDefaultMatch() async {
+    if (_isLoggedIn()) {
+      try {
+        debug(data: "Repo: Getting single match from Remote");
+        final remoteMatch = await _remoteDataSource.getDefaultMatch();
+        // Sync remote data to local storage upon successful fetch
+        try {
+          await _localDataSource.createMatch(footballMatch: remoteMatch);
+          debug(data: "Repo: Synced remote match to local storage.");
+        } catch (syncError) {
+          debug(data: "Repo: Failed to sync remote match to local: $syncError");
+          // Decide if this is critical - maybe show a non-blocking warning
+        }
+        return remoteMatch;
+      } catch (e) {
+        debug(data: "Repo: Remote getMatch failed: $e. Falling back to local.");
+        BotToast.showText(
+          text: "Couldn't fetch latest data, showing offline version.",
+        );
+        // Fallback to local storage on error
+        return await _localDataSource.getDefaultMatch();
+      }
+    } else {
+      // Offline: Fetch directly from local
+      debug(data: "Repo: Getting single match from Local (offline)");
+      return await _localDataSource.getDefaultMatch();
+    }
+  }
+
+  @override
+  Future<MatchPeriod> createNewPeriod({
+    required MatchPeriod matchPeriod,
+  }) async {
+    if (_isLoggedIn()) {
+      try {
+        debug(data: "Repo: Getting single Period from Remote");
+        final remotePeriod = await _remoteDataSource.createNewPeriod(
+          matchPeriod: matchPeriod,
+        );
+
+        return remotePeriod;
+      } catch (e) {
+        debug(data: "Repo: Remote period failed: $e. Falling back to local.");
+        BotToast.showText(
+          text: "Couldn't fetch latest data, showing offline version.",
+        );
+        // Fallback to local storage on error
+        return await _localDataSource.createNewPeriod(matchPeriod: matchPeriod);
+      }
+    } else {
+      // Offline: Fetch directly from local
+      debug(data: "Repo: Getting single period from Local (offline)");
+      return await _localDataSource.createNewPeriod(matchPeriod: matchPeriod);
     }
   }
 }

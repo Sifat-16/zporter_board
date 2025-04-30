@@ -6,8 +6,8 @@ import 'package:zporter_board/features/match/presentation/view_model/match_bloc.
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
 
-class MatchAddDeleteComponent extends StatefulWidget {
-  const MatchAddDeleteComponent({
+class PeriodAddMatchDeleteComponent extends StatefulWidget {
+  const PeriodAddMatchDeleteComponent({
     super.key,
     this.showAdd = true,
     this.showDelete = true,
@@ -16,11 +16,12 @@ class MatchAddDeleteComponent extends StatefulWidget {
   final bool showDelete;
 
   @override
-  State<MatchAddDeleteComponent> createState() =>
-      _MatchAddDeleteComponentState();
+  State<PeriodAddMatchDeleteComponent> createState() =>
+      _PeriodAddMatchDeleteComponentState();
 }
 
-class _MatchAddDeleteComponentState extends State<MatchAddDeleteComponent>
+class _PeriodAddMatchDeleteComponentState
+    extends State<PeriodAddMatchDeleteComponent>
     with AutomaticKeepAliveClientMixin {
   // List<FootballMatch> footBallMatch = [];
   // int selectedIndex = 0;
@@ -57,10 +58,11 @@ class _MatchAddDeleteComponentState extends State<MatchAddDeleteComponent>
             child: Row(
               spacing: 10,
               children: [
-                if (widget.showAdd)
+                if (widget.showAdd &&
+                    (state.match?.matchPeriod.length ?? 0) < 9)
                   IconButton(
                     onPressed: () {
-                      context.read<MatchBloc>().add(CreateNewMatchEvent());
+                      context.read<MatchBloc>().add(CreateNewPeriodEvent());
                     },
                     icon: Icon(
                       Icons.add_circle_outline,
@@ -78,13 +80,7 @@ class _MatchAddDeleteComponentState extends State<MatchAddDeleteComponent>
                             "Are you sure you want to delete and end this match? Time, result and subs will be deleted!",
                       );
                       if (confirmed == true) {
-                        context.read<MatchBloc>().add(
-                          DeleteMatchEvent(
-                            matchId:
-                                state.matches?[state.selectedIndex ?? 0].id ??
-                                "",
-                          ),
-                        );
+                        context.read<MatchBloc>().add(DeleteMatchEvent());
                       }
                     },
                     icon: Icon(

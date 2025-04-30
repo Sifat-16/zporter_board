@@ -9,7 +9,7 @@ import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/domain/usecases/clear_match_db_usecase.dart';
 
 class FetchAndSyncLocalMatchesUseCase
-    implements UseCase<List<FootballMatch>, BuildContext> {
+    implements UseCase<FootballMatch?, BuildContext> {
   final MatchDataSource _remoteMatchDataSource; // Firebase
   final MatchDataSource _localMatchDataSource; // Sembast
   final UserIdService _userIdService; // To get current user ID
@@ -26,7 +26,7 @@ class FetchAndSyncLocalMatchesUseCase
        _clearMatchDbUseCase = clearMatchDbUseCase;
 
   @override
-  Future<List<FootballMatch>> call(BuildContext context) async {
+  Future<FootballMatch?> call(BuildContext context) async {
     final currentUserId = _userIdService.getCurrentUserId();
 
     debug(
@@ -34,12 +34,12 @@ class FetchAndSyncLocalMatchesUseCase
     );
 
     try {
-      final List<FootballMatch> localMatches =
-          await _localMatchDataSource.getAllMatches();
+      final FootballMatch localMatches =
+          await _localMatchDataSource.getDefaultMatch();
       // --- Show Dialog ---
       debug(
         data:
-            "FetchSyncUseCase: Found ${localMatches.length} local matches. Asking user.. ${_localMatchDataSource.runtimeType}.",
+            "FetchSyncUseCase: Found localMatches.length} local matches. Asking user.. ${_localMatchDataSource.runtimeType}.",
       );
 
       bool? doMerge = await showConfirmationDialog(
@@ -47,7 +47,7 @@ class FetchAndSyncLocalMatchesUseCase
         barrierDismissible: false,
         title: "Local Data Detected!",
         content:
-            "You have ${localMatches.length} match(es) saved locally. Do you want to merge them with your online account or delete the local copies?",
+            "You have match data saved locally. Do you want to merge them with your online account or delete the local copies?",
         confirmButtonText: "MERGE ONLINE",
         cancelButtonText: "DELETE LOCAL",
       );
@@ -57,18 +57,16 @@ class FetchAndSyncLocalMatchesUseCase
       if (doMerge == true) {
         return localMatches;
       } else {
-        return [];
+        return null;
       }
     } catch (e) {
     } finally {}
-    return [];
+    return null;
   }
 
-  Future<bool> syncRemote(List<FootballMatch> matches) async {
+  Future<bool> syncRemote(FootballMatch matches) async {
     BotToast.showText(text: "Syncing data");
-    for (var match in matches) {
-      await _remoteMatchDataSource.createMatch(footballMatch: match);
-    }
+    await _remoteMatchDataSource.createMatch(footballMatch: matches);
     BotToast.showText(text: "Sync completed!!");
 
     return true;

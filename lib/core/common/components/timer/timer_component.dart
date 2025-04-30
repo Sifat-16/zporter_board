@@ -130,17 +130,20 @@ class _TimerComponentState extends State<TimerComponent>
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = TextStyle(
+    var textStyle = TextStyle(
       color: widget.textColor ?? Colors.green,
       fontSize: widget.textSize ?? 48.0,
       fontWeight: widget.fontWeight ?? FontWeight.bold,
       letterSpacing: widget.letterSpacing,
+      fontFamily: 'monospace',
     );
 
     return FittedBox(
       fit: BoxFit.fitWidth,
+
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Text("${_minutes.toString().padLeft(2, '0')}", style: textStyle),
           Text(

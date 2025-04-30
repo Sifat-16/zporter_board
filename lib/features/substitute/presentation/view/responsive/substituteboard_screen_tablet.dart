@@ -5,7 +5,7 @@ import 'package:zporter_board/core/helper/board_container_space_helper.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
-import 'package:zporter_board/features/match/presentation/view/component/match_add_delete_component.dart';
+import 'package:zporter_board/features/match/presentation/view/component/period_add_match_delete_component.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
@@ -51,7 +51,7 @@ class _SubstituteboardScreenTabletState
     super.build(context);
     return BlocConsumer<MatchBloc, MatchState>(
       builder: (context, state) {
-        final FootballMatch? selectedMatch = state.selectedMatch;
+        final FootballMatch? selectedMatch = state.match;
 
         MatchSubstitutions? matchSubstitutions = selectedMatch?.substitutions;
 
@@ -83,7 +83,7 @@ class _SubstituteboardScreenTabletState
                       Container(
                         height: height * .15,
                         child: SubstituteboardHeader(
-                          matchTimes: state.selectedMatch?.matchTime ?? [],
+                          matchTimes: state.selectedPeriod?.intervals ?? [],
                         ),
                       ),
 
@@ -162,7 +162,7 @@ class _SubstituteboardScreenTabletState
                                 _updateSelectedIndex(s);
                               },
                             ),
-                            MatchAddDeleteComponent(showAdd: false),
+                            PeriodAddMatchDeleteComponent(showAdd: false),
                           ],
                         ),
                       ),

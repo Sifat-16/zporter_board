@@ -47,7 +47,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     GoogleSignInEvent event,
     Emitter<AuthState> emit,
   ) async {
-    List<FootballMatch> matchesToSync = [];
+    FootballMatch? matchesToSync;
     BuildContext? context = NavigationService.instance.currentContext;
     if (context != null) {
       matchesToSync = await _fetchAndSyncLocalMatchesUseCase.call(context);
@@ -59,7 +59,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(GoogleSignInFailure(message: "Something went wrong!"));
       } else {
         bool isMatchSynced = await _fetchAndSyncLocalMatchesUseCase.syncRemote(
-          matchesToSync,
+          matchesToSync!,
         );
         emit(AuthStatusSuccess(userEntity: userEntity));
         _matchBloc.add(MatchLoadEvent());

@@ -8,7 +8,7 @@ import 'package:zporter_board/features/time/data/model/match_time.dart';
 class SubstituteboardHeader extends StatefulWidget {
   const SubstituteboardHeader({super.key, required this.matchTimes});
 
-  final List<MatchTime> matchTimes;
+  final List<MatchTimeBloc> matchTimes;
 
   @override
   State<SubstituteboardHeader> createState() => _SubstituteboardHeaderState();

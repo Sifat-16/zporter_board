@@ -8,15 +8,15 @@ import 'package:zporter_board/features/match/presentation/view_model/match_event
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
 import 'package:zporter_tactical_board/app/manager/values_manager.dart';
 
-class MatchPaginationComponent extends StatefulWidget {
-  const MatchPaginationComponent({super.key});
+class PeriodPaginationComponent extends StatefulWidget {
+  const PeriodPaginationComponent({super.key});
 
   @override
-  State<MatchPaginationComponent> createState() =>
-      _MatchPaginationComponentState();
+  State<PeriodPaginationComponent> createState() =>
+      _PeriodPaginationComponentState();
 }
 
-class _MatchPaginationComponentState extends State<MatchPaginationComponent>
+class _PeriodPaginationComponentState extends State<PeriodPaginationComponent>
     with AutomaticKeepAliveClientMixin {
   // List<FootballMatch> footBallMatch = [];
   // int selectedIndex = 0;
@@ -32,17 +32,7 @@ class _MatchPaginationComponentState extends State<MatchPaginationComponent>
   Widget build(BuildContext context) {
     super.build(context);
     return BlocConsumer<MatchBloc, MatchState>(
-      listener: (BuildContext context, MatchState state) {
-        // if (state is MatchUpdateState) {
-        //   WidgetsBinding.instance.addPostFrameCallback((t) {
-        //     MatchBloc matchBloc = context.read<MatchBloc>();
-        //     setState(() {
-        //       footBallMatch = matchBloc.matches ?? [];
-        //       selectedIndex = matchBloc.selectedIndex;
-        //     });
-        //   });
-        // }
-      },
+      listener: (BuildContext context, MatchState state) {},
       builder: (context, state) {
         if (state.isLoading) {
           return Center(child: CircularProgressIndicator());
@@ -63,7 +53,7 @@ class _MatchPaginationComponentState extends State<MatchPaginationComponent>
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
             child:
-                (state.matches ?? []).isEmpty
+                state.match == null
                     ? SizedBox.shrink()
                     : Container(
                       child: Column(
@@ -74,7 +64,7 @@ class _MatchPaginationComponentState extends State<MatchPaginationComponent>
                                 .copyWith(color: ColorManager.grey),
                           ),
                           CompactPaginator(
-                            initialPage: state.selectedIndex ?? 0,
+                            initialPage: state.selectedPeriodId ?? 0,
                             maxPagesToShow: 6,
                             config: CompactPaginatorUiConfig(
                               navButtonPadding: EdgeInsets.zero,
@@ -82,10 +72,10 @@ class _MatchPaginationComponentState extends State<MatchPaginationComponent>
                               navIconSize: AppSize.s32,
                               pageNumberFontSize: AppSize.s18,
                             ),
-                            totalPages: (state.matches ?? []).length,
+                            totalPages: (state.match?.matchPeriod ?? []).length,
                             onPageChanged: (int index) {
                               context.read<MatchBloc>().add(
-                                MatchSelectEvent(index: index),
+                                MatchPeriodSelectEvent(index: index),
                               );
                             },
                           ),
