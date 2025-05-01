@@ -36,17 +36,17 @@ class TimerModeWidget extends StatefulWidget {
 class _TimerModeWidgetState extends State<TimerModeWidget> {
   // --- Helper method MOVED INSIDE the State class ---
   // Converts the input string prop to the corresponding TimerMode enum
-  TimerMode _getModeFromString(String modeString) {
-    switch (modeString.toUpperCase()) {
-      case "DOWN":
-        return TimerMode.DOWN;
-      case "EXTRA":
-        return TimerMode.EXTRA;
-      case "UP":
-      default: // Default to UP if string is unexpected or empty
-        return TimerMode.UP;
-    }
-  }
+  // TimerMode _getModeFromString(String modeString) {
+  //   switch (modeString.toUpperCase()) {
+  //     case "DOWN":
+  //       return TimerMode.DOWN;
+  //     case "EXTRA":
+  //       return TimerMode.EXTRA;
+  //     case "UP":
+  //     default: // Default to UP if string is unexpected or empty
+  //       return TimerMode.UP;
+  //   }
+  // }
   // ----------------------------------------------------
 
   @override
@@ -80,14 +80,14 @@ class _TimerModeWidgetState extends State<TimerModeWidget> {
           },
         ),
 
-        // Down Button
-        ButtonWithDivider(
-          label: TimerMode.DOWN.displayTitle.toUpperCase(),
-          isSelected: activeMode == TimerMode.DOWN,
-          onPressed: () {
-            widget.onModeSelected(TimerMode.DOWN);
-          },
-        ),
+        // // Down Button
+        // ButtonWithDivider(
+        //   label: TimerMode.DOWN.displayTitle.toUpperCase(),
+        //   isSelected: activeMode == TimerMode.DOWN,
+        //   onPressed: () {
+        //     widget.onModeSelected(TimerMode.DOWN);
+        //   },
+        // ),
 
         // Extra Button
         ButtonWithDivider(

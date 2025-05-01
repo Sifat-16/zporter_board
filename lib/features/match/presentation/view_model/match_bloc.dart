@@ -70,6 +70,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     on<ChangePeriodModeEvent>(_changePeriodMode);
     on<IncreaseExtraTimeEvent>(_increaseExtraTime);
     on<DecreaseExtraTimeEvent>(_decreaseExtraTime);
+    on<TimerRunOutEvent>(_onTimerRunOut);
   }
 
   FutureOr<void> _onLoadMatches(
@@ -138,47 +139,129 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
   ) async {
     try {
       FootballMatch? footballMatch = state.match;
+      bool proceedToStart = true;
       if (event.matchTimeUpdateStatus == MatchTimeUpdateStatus.START) {
         // cross check if any timer is running or not
-        MatchPeriod? runningPeriod = MatchUtils.checkAnyTimerRunning(
+        List<MatchPeriod> runningPeriods = MatchUtils.checkAnyTimerRunning(
           match: footballMatch,
         );
-        if (runningPeriod != null) {
-          bool? confirm = await showConfirmationDialog(
-            context: NavigationService.instance.currentContext!,
-            title: "Timer Already Running!",
-            content:
-                "Another timer ( Period - ${runningPeriod.periodNumber + 1} ${runningPeriod.extraPeriodStatus == TimeActiveStatus.RUNNING ? "(extra)" : ""} ) is currently active. Starting this timer will automatically stop the running one. Do you want to continue?",
-          );
-          if (confirm == true) {
-            await _updateMatchTimeUsecase.call(
-              UpdateMatchTimeRequest(
-                matchId: footballMatch?.id ?? "",
-                footballMatch: footballMatch!,
-                matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
-                matchPeriodId: runningPeriod.periodNumber,
-                timerMode:
-                    runningPeriod.extraPeriodStatus == TimeActiveStatus.RUNNING
-                        ? TimerMode.EXTRA
-                        : TimerMode.UP,
-              ),
-            );
+
+        // If any timers are already running, ask for confirmation
+        if (runningPeriods.isNotEmpty) {
+          String runningTimersString;
+          String dialogTitle;
+          String dialogContent;
+
+          // --- Construct Dialog Message ---
+          if (runningPeriods.length == 1) {
+            // Message for a single running timer
+            final period = runningPeriods[0];
+            runningTimersString =
+                "Period ${period.periodNumber + 1}${period.extraPeriodStatus == TimeActiveStatus.RUNNING ? " (extra)" : ""}";
+            dialogTitle = "Timer Already Running!";
+            dialogContent =
+                "Another timer ($runningTimersString) is currently active. Starting this timer will automatically stop the running one. Do you want to continue?";
           } else {
-            return;
+            // Message for multiple running timers
+            runningTimersString = runningPeriods
+                .map((period) {
+                  return "Period ${period.periodNumber + 1}${period.extraPeriodStatus == TimeActiveStatus.RUNNING ? " (extra)" : ""}";
+                })
+                .join(
+                  ", ",
+                ); // Join with commas, e.g., "Period 1, Period 2 (extra)"
+            dialogTitle = "Multiple Timers Running!";
+            dialogContent =
+                "The following timers are currently active: $runningTimersString. Starting this timer will automatically stop all running timers. Do you want to continue?";
+          }
+          // --- End Message Construction ---
+
+          // --- Show Confirmation ---
+          // Ensure you have a valid context, NavigationService.instance.currentContext might be risky if not guaranteed
+          final context = NavigationService.instance.currentContext;
+          bool? confirm;
+          if (context != null && context.mounted) {
+            // Check context validity
+            confirm = await showConfirmationDialog(
+              context: context,
+              title: dialogTitle,
+              content: dialogContent,
+              confirmButtonText: "Stop Running & Start",
+              cancelButtonText: "Cancel",
+            );
+          }
+
+          // --- Handle Confirmation ---
+          if (confirm == true) {
+            zlog(
+              data:
+                  "User confirmed stopping ${runningPeriods.length} running timer(s).",
+            );
+            // Attempt to stop ALL currently running timers
+            for (final periodToStop in runningPeriods) {
+              try {
+                zlog(
+                  data:
+                      "Stopping timer for Period ${periodToStop.periodNumber + 1} (Mode: ${periodToStop.extraPeriodStatus == TimeActiveStatus.RUNNING ? TimerMode.EXTRA : TimerMode.UP})...",
+                );
+                // Re-fetch the latest match state before stopping? Or assume footballMatch is current enough?
+                // For simplicity, assume footballMatch is reasonably current.
+                await _updateMatchTimeUsecase.call(
+                  UpdateMatchTimeRequest(
+                    matchId: footballMatch?.id ?? "",
+                    // Pass the potentially modified footballMatch object from the Bloc's state if needed
+                    footballMatch:
+                        footballMatch!, // Use the currently held match object
+                    matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
+                    matchPeriodId:
+                        periodToStop.periodNumber, // ID of the period to stop
+                    timerMode:
+                        periodToStop.extraPeriodStatus ==
+                                TimeActiveStatus.RUNNING
+                            ? TimerMode
+                                .EXTRA // Determine mode from the period being stopped
+                            : TimerMode.UP,
+                  ),
+                );
+                zlog(
+                  data:
+                      "Stopped timer for Period ${periodToStop.periodNumber + 1}.",
+                );
+                // Small delay might prevent rapid Firestore updates if needed, but often unnecessary
+                // await Future.delayed(const Duration(milliseconds: 50));
+              } catch (e) {
+                BotToast.showText(
+                  text:
+                      "Error stopping timer for Period ${periodToStop.periodNumber + 1}.",
+                );
+                // If stopping fails, should we prevent the new timer from starting?
+                proceedToStart = false;
+                break; // Exit the loop if one stop fails
+              }
+            }
+          } else {
+            // User cancelled the confirmation dialog
+            zlog(
+              data: "User cancelled starting new timer due to running timers.",
+            );
+            proceedToStart = false; // Do not proceed to start the new timer
           }
         }
       }
-      FootballMatch updatedMatch = await _updateMatchTimeUsecase.call(
-        UpdateMatchTimeRequest(
-          matchId: footballMatch?.id ?? "",
-          footballMatch: footballMatch!,
-          matchTimeUpdateStatus: event.matchTimeUpdateStatus,
-          matchPeriodId: event.periodId,
-          timerMode: event.timerMode,
-        ),
-      );
 
-      add(UpdateMatchEvent(footballMatch: updatedMatch));
+      if (proceedToStart == true) {
+        FootballMatch updatedMatch = await _updateMatchTimeUsecase.call(
+          UpdateMatchTimeRequest(
+            matchId: footballMatch?.id ?? "",
+            footballMatch: footballMatch!,
+            matchTimeUpdateStatus: event.matchTimeUpdateStatus,
+            matchPeriodId: event.periodId,
+            timerMode: event.timerMode,
+          ),
+        );
+
+        add(UpdateMatchEvent(footballMatch: updatedMatch));
+      }
     } catch (e) {
       debug(data: "Error while updating time ${e.toString()}");
     }
@@ -392,4 +475,9 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
       }
     }
   }
+
+  FutureOr<void> _onTimerRunOut(
+    TimerRunOutEvent event,
+    Emitter<MatchState> emit,
+  ) {}
 }

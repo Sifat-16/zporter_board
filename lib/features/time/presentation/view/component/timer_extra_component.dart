@@ -10,6 +10,7 @@ import 'package:zporter_board/features/match/domain/entity/match_time_status.dar
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_state.dart';
+import 'package:zporter_board/features/time/data/model/match_time.dart';
 import 'package:zporter_board/features/time/presentation/view/component/timer_mode_widget.dart';
 import 'package:zporter_tactical_board/app/helper/logger.dart';
 
@@ -36,11 +37,6 @@ class _TimerExtraComponentState extends State<TimerExtraComponent> {
       builder: (context, state) {
         double height = widget.height;
         final selectedPeriod = state.selectedPeriod;
-
-        zlog(
-          data:
-              "State of the period status extra screen ${selectedPeriod?.upPeriodStatus} - ${selectedPeriod?.extraPeriodStatus}",
-        );
 
         // It's crucial that selectedPeriod is not null and is EXTRA mode here
         // Add checks or ensure this component is only rendered when appropriate
@@ -95,12 +91,18 @@ class _TimerExtraComponentState extends State<TimerExtraComponent> {
                         textColor: ColorManager.white,
                         // --- Optional: Define callbacks ---
                         onFinished: () {
-                          zlog(
-                            data:
-                                "Extra Time Period ${selectedPeriod.periodNumber} Finished!",
-                          );
-                          // You might want to dispatch an event here, e.g., to auto-advance period
-                          // context.read<MatchBloc>().add(PeriodFinishedEvent(selectedPeriod.periodNumber));
+                          zlog(data: "On finished called on timer ");
+                          MatchPeriod? period = state.selectedPeriod;
+                          if (period != null) {
+                            context.read<MatchBloc>().add(
+                              MatchTimeUpdateEvent(
+                                periodId: period.periodNumber,
+                                timerMode: TimerMode.EXTRA,
+                                matchTimeUpdateStatus:
+                                    MatchTimeUpdateStatus.STOP,
+                              ),
+                            );
+                          }
                         },
                         onStart:
                             () => zlog(
@@ -109,7 +111,21 @@ class _TimerExtraComponentState extends State<TimerExtraComponent> {
                         onPause:
                             () => zlog(
                               data: "Countdown paused via widget callback",
-                            ), // Example
+                            ),
+                        onRunOutDetected: () {
+                          zlog(data: "RunOut detected need to take action");
+                          MatchPeriod? period = state.selectedPeriod;
+                          if (period != null) {
+                            context.read<MatchBloc>().add(
+                              MatchTimeUpdateEvent(
+                                periodId: period.periodNumber,
+                                timerMode: TimerMode.EXTRA,
+                                matchTimeUpdateStatus:
+                                    MatchTimeUpdateStatus.STOP,
+                              ),
+                            );
+                          }
+                        }, // Example
                         // onStop callback could be added if needed
                       ),
                     ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/board_container.dart';
 import 'package:zporter_board/core/helper/board_container_space_helper.dart';
+import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
@@ -83,7 +84,7 @@ class _SubstituteboardScreenTabletState
                       Container(
                         height: height * .15,
                         child: SubstituteboardHeader(
-                          matchTimes: state.selectedPeriod?.intervals ?? [],
+                          matchPeriod: state.selectedPeriod!,
                         ),
                       ),
 
@@ -145,24 +146,39 @@ class _SubstituteboardScreenTabletState
                       ),
                       Container(
                         height: height * .1,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        child: Stack(
                           children: [
-                            HomeAwayComponent(
-                              isHome: (b) {
-                                zlog(data: "isHomeChanging");
-                                setState(() {
-                                  isHome = b;
-                                });
-                              },
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 10.0),
+                                child: Image.asset(
+                                  AssetsManager.logo,
+                                  height: AppSize.s40,
+                                  width: AppSize.s40,
+                                ),
+                              ),
                             ),
-                            SubstitutePaginationComponent(
-                              total: subs.length,
-                              onSubChange: (s) {
-                                _updateSelectedIndex(s);
-                              },
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                HomeAwayComponent(
+                                  isHome: (b) {
+                                    zlog(data: "isHomeChanging");
+                                    setState(() {
+                                      isHome = b;
+                                    });
+                                  },
+                                ),
+                                SubstitutePaginationComponent(
+                                  total: subs.length,
+                                  onSubChange: (s) {
+                                    _updateSelectedIndex(s);
+                                  },
+                                ),
+                                PeriodAddMatchDeleteComponent(showAdd: false),
+                              ],
                             ),
-                            PeriodAddMatchDeleteComponent(showAdd: false),
                           ],
                         ),
                       ),

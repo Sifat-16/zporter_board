@@ -14,6 +14,7 @@ class TimerComponent extends StatefulWidget {
   final VoidCallback? onStart;
   final VoidCallback? onStop;
   final VoidCallback? onPause;
+  final VoidCallback onRunOut;
   final TimerController controller; // Controller for the timer
 
   const TimerComponent({
@@ -27,6 +28,7 @@ class TimerComponent extends StatefulWidget {
     this.fontWeight,
     this.onStart,
     this.onStop,
+    required this.onRunOut,
     this.onPause,
     this.letterSpacing,
   });
@@ -128,6 +130,13 @@ class _TimerComponentState extends State<TimerComponent>
     super.dispose();
   }
 
+  _detectTimeAndDestroyClock(int minutes) {
+    if (minutes >= 100) {
+      _timer?.cancel();
+      widget.onRunOut.call();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var textStyle = TextStyle(
@@ -137,6 +146,8 @@ class _TimerComponentState extends State<TimerComponent>
       letterSpacing: widget.letterSpacing,
       fontFamily: 'monospace',
     );
+
+    _detectTimeAndDestroyClock(_minutes);
 
     return FittedBox(
       fit: BoxFit.fitWidth,

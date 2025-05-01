@@ -106,7 +106,7 @@ class MatchUtils {
     return initialTime - elapsedDuration;
   }
 
-  static MatchPeriod? checkAnyTimerRunning({FootballMatch? match}) {
+  static List<MatchPeriod> checkAnyTimerRunning({FootballMatch? match}) {
     try {
       List<MatchPeriod> periods = match!.matchPeriod;
       periods =
@@ -117,8 +117,8 @@ class MatchUtils {
                     p.upPeriodStatus == TimeActiveStatus.RUNNING,
               )
               .toList();
-      return periods.firstOrNull;
+      return periods;
     } catch (e) {}
-    return null;
+    return [];
   }
 }

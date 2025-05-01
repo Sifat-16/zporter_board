@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
-import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_state.dart';
 import 'package:zporter_board/features/board/presentation/view/components/board_menu_component.dart';
@@ -76,24 +74,14 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
               if (!isFullScreenTactics)
                 Align(
                   alignment: Alignment.topLeft,
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        AssetsManager.logo,
-                        height: AppSize.s56,
-                        width: AppSize.s56,
-                      ),
-
-                      Padding(
-                        padding:
-                            selectedScreen == Screens.TACTICS
-                                ? EdgeInsets.only(
-                                  top: MediaQuery.paddingOf(context).top,
-                                )
-                                : EdgeInsets.zero,
-                        child: BoardMenuComponent(),
-                      ),
-                    ],
+                  child: Padding(
+                    padding:
+                        selectedScreen == Screens.TACTICS
+                            ? EdgeInsets.only(
+                              top: MediaQuery.paddingOf(context).top,
+                            )
+                            : EdgeInsets.zero,
+                    child: BoardMenuComponent(),
                   ),
                 ),
             ],

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/scoreboard/data/model/score.dart';
 import 'package:zporter_board/features/substitute/data/model/substitution.dart';
+import 'package:zporter_board/features/time/data/model/match_time.dart';
 import 'package:zporter_board/features/time/presentation/view/component/timer_mode_widget.dart';
 
 enum MatchTimeUpdateStatus { START, PAUSE, STOP }
@@ -96,3 +97,12 @@ class ChangePeriodModeEvent extends MatchEvent {
 class IncreaseExtraTimeEvent extends MatchEvent {}
 
 class DecreaseExtraTimeEvent extends MatchEvent {}
+
+class TimerRunOutEvent extends MatchEvent {
+  final MatchPeriod period;
+  TimerRunOutEvent({required this.period});
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [period];
+}

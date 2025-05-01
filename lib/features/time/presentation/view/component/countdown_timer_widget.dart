@@ -7,12 +7,6 @@ import 'package:zporter_board/core/common/components/timer/timer_contol_buttons.
 import 'package:zporter_board/core/utils/match/match_utils.dart';
 import 'package:zporter_board/features/time/data/model/match_time.dart';
 import 'package:zporter_tactical_board/app/helper/logger.dart';
-// Import any necessary packages or local files (like logger if needed)
-// import 'package:zporter_tactical_board/app/helper/logger.dart'; // Example if using zlog
-
-// --- Controller Definition ---
-
-// --- Countdown Timer Widget ---
 
 /// A widget that displays a countdown timer (MM:SS) and can be controlled externally.
 class CountDownTimerWidget extends StatefulWidget {
@@ -30,6 +24,7 @@ class CountDownTimerWidget extends StatefulWidget {
   final VoidCallback? onPause;
   final VoidCallback? onStop;
   final VoidCallback? onFinished;
+  final VoidCallback? onRunOutDetected;
 
   const CountDownTimerWidget({
     super.key,
@@ -45,6 +40,7 @@ class CountDownTimerWidget extends StatefulWidget {
     this.onPause,
     this.onStop,
     this.onFinished,
+    this.onRunOutDetected,
   });
 
   @override
@@ -71,8 +67,10 @@ class _CountDownTimerWidgetState extends State<CountDownTimerWidget> {
     );
 
     // Auto-start if needed
-    if (widget.isRunning && _remainingDuration > Duration.zero) {
-      _startTimer(callCallback: false);
+    if (widget.isRunning && _remainingDuration <= Duration.zero) {
+      widget.onRunOutDetected?.call();
+    } else if (widget.isRunning && _remainingDuration > Duration.zero) {
+      _startTimer();
     }
   }
 
@@ -88,8 +86,17 @@ class _CountDownTimerWidgetState extends State<CountDownTimerWidget> {
     zlog(data: "Match time status here i got ${widget.isRunning}");
 
     // Sync internal running state with parent's isRunning prop
+    if (widget.isRunning) {
+      Duration _dremainingDuration = widget.initialDuration;
+      if (_dremainingDuration.isNegative) _dremainingDuration = Duration.zero;
+      if (_dremainingDuration <= Duration.zero) {
+        widget.onRunOutDetected?.call();
+        return;
+      }
+    }
     if (widget.isRunning != oldWidget.isRunning) {
       if (widget.isRunning) {
+        _isRunning = false;
         _startTimer();
       } else {
         _pauseTimer();
@@ -224,6 +231,8 @@ class _CountDownTimerWidgetState extends State<CountDownTimerWidget> {
     if (duration.isNegative) duration = Duration.zero;
     final int minutes = duration.inMinutes.abs();
     final int seconds = duration.inSeconds.abs() % 60;
+
+    zlog(data: "On finished called on timer ${_isRunning}");
 
     return FittedBox(
       fit: BoxFit.fitWidth,

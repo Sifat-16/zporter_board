@@ -47,6 +47,15 @@ class _TimerUpComponentState extends State<TimerUpComponent> {
                 child: TimerComponent(
                   elapsedSeconds: matchTimeStatus.elapsedSeconds,
                   letterSpacing: 20,
+                  onRunOut: () {
+                    context.read<MatchBloc>().add(
+                      MatchTimeUpdateEvent(
+                        periodId: selectedPeriod!.periodNumber,
+                        timerMode: TimerMode.UP,
+                        matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
+                      ),
+                    );
+                  },
                   isRunning: matchTimeStatus.isRunning,
                   textSize: AppSize.s180,
                   textColor: ColorManager.white,

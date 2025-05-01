@@ -58,7 +58,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
           isActive: _activeStatus == TimeActiveStatus.RUNNING,
           onPressed: () {
             widget.onStart();
-            _setActiveButton(TimeActiveStatus.RUNNING);
+            // _setActiveButton(TimeActiveStatus.RUNNING);
           },
         ),
         SizedBox(width: 20),
@@ -69,7 +69,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
           isActive: _activeStatus == TimeActiveStatus.PAUSED,
           onPressed: () {
             widget.onPause();
-            _setActiveButton(TimeActiveStatus.PAUSED);
+            // _setActiveButton(TimeActiveStatus.PAUSED);
           },
         ),
         SizedBox(width: 20),
@@ -80,7 +80,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
           isActive: _activeStatus == TimeActiveStatus.STOPPED,
           onPressed: () {
             widget.onStop();
-            _setActiveButton(TimeActiveStatus.STOPPED);
+            // _setActiveButton(TimeActiveStatus.STOPPED);
           },
         ),
       ],

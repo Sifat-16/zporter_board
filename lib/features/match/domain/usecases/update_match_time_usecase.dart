@@ -173,7 +173,30 @@ class UpdateMatchTimeUsecase
       throw Exception("Timer already stopped");
     }
 
-    times[alreadyRunningTimeIndex].endTime = DateTime.now();
+    DateTime end = DateTime.now();
+
+    Duration presetDuration = extraTime.presetDuration;
+    Duration totalDuration = Duration.zero;
+    Duration remaining = Duration.zero;
+
+    for (var t in times) {
+      if (t.endTime != null) {
+        totalDuration = totalDuration + (t.endTime!.difference(t.startTime));
+        remaining = remaining + (t.endTime!.difference(t.startTime));
+      } else {
+        totalDuration = totalDuration + (end.difference(t.startTime));
+      }
+    }
+
+    if (totalDuration > presetDuration) {
+      zlog(data: "Special case where timer runout when user was not online");
+      end = times[alreadyRunningTimeIndex].startTime.add(
+        presetDuration - remaining,
+      );
+    }
+
+    times[alreadyRunningTimeIndex].endTime = end;
+
     footBallMatch.matchPeriod[index].extraTime.intervals = times;
     footBallMatch.matchPeriod[index].timerMode = TimerMode.EXTRA;
     TimeActiveStatus status =

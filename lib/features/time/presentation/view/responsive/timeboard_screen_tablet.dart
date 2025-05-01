@@ -167,6 +167,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/board_container.dart';
 import 'package:zporter_board/core/helper/board_container_space_helper.dart';
+import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/core/utils/match/match_utils.dart';
 import 'package:zporter_board/features/match/presentation/view/component/match_pagination_component.dart';
@@ -323,32 +324,52 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
                   // Bottom Row remains unchanged in structure
                   Container(
                     height: height * .1,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    // padding: EdgeInsets.only(
+                    //   left: context.widthPercent(10),
+                    //   right: context.widthPercent(5),
+                    // ),
+                    child: Stack(
                       children: [
-                        TimerModeWidget(
-                          // Pass state and callback - ensure callback dispatches event
-                          currentTimerMode:
-                              state.selectedPeriod?.timerMode ?? TimerMode.UP,
-                          onModeSelected: (TimerMode value) {
-                            zlog(data: "Timermode value changing ${value}");
-                            // Ensure period exists before dispatching
-                            if (state.selectedPeriod != null) {
-                              // Dispatch event to change mode in Bloc
-                              context.read<MatchBloc>().add(
-                                ChangePeriodModeEvent(
-                                  periodNumber:
-                                      state.selectedPeriod!.periodNumber,
-                                  newMode: value,
-                                  // Handle potential preset duration setting here too if needed
-                                ),
-                              );
-                            }
-                          },
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 10.0),
+                            child: Image.asset(
+                              AssetsManager.logo,
+                              height: AppSize.s40,
+                              width: AppSize.s40,
+                            ),
+                          ),
                         ),
-                        // Other components remain unchanged
-                        PeriodPaginationComponent(),
-                        PeriodAddMatchDeleteComponent(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            TimerModeWidget(
+                              // Pass state and callback - ensure callback dispatches event
+                              currentTimerMode:
+                                  state.selectedPeriod?.timerMode ??
+                                  TimerMode.UP,
+                              onModeSelected: (TimerMode value) {
+                                zlog(data: "Timermode value changing ${value}");
+                                // Ensure period exists before dispatching
+                                if (state.selectedPeriod != null) {
+                                  // Dispatch event to change mode in Bloc
+                                  context.read<MatchBloc>().add(
+                                    ChangePeriodModeEvent(
+                                      periodNumber:
+                                          state.selectedPeriod!.periodNumber,
+                                      newMode: value,
+                                      // Handle potential preset duration setting here too if needed
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                            // Other components remain unchanged
+                            PeriodPaginationComponent(),
+                            PeriodAddMatchDeleteComponent(),
+                          ],
+                        ),
                       ],
                     ),
                   ),
