@@ -2,7 +2,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="Zporter Board"
+        android:label="Tactics Board"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
 
