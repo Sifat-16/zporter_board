@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/common/components/timer/counter_timer_component.dart';
@@ -224,7 +225,7 @@ class _CountDownTimerWidgetState extends State<CountDownTimerWidget> {
       fontSize: widget.textSize ?? 48.0,
       fontWeight: widget.fontWeight ?? FontWeight.bold,
       letterSpacing: widget.letterSpacing,
-      fontFamily: 'monospace',
+      fontFamily: Platform.isIOS ? 'Courier' : 'monospace',
     );
 
     Duration duration = _remainingDuration;

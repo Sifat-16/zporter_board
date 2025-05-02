@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/common/components/timer/timer_controller.dart';
@@ -144,7 +145,7 @@ class _TimerComponentState extends State<TimerComponent>
       fontSize: widget.textSize ?? 48.0,
       fontWeight: widget.fontWeight ?? FontWeight.bold,
       letterSpacing: widget.letterSpacing,
-      fontFamily: 'monospace',
+      fontFamily: Platform.isIOS ? 'Courier' : 'monospace',
     );
 
     _detectTimeAndDestroyClock(_minutes);
