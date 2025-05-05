@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -109,7 +110,7 @@ class _TimerWidgetState extends State<CounterTimerComponent> {
         color: Colors.grey,
         fontWeight: FontWeight.bold,
         fontSize: 28, // Keep original font size
-        fontFamily: 'monospaced', // Keep original font family
+        fontFamily: Platform.isIOS ? 'Courier' : 'monospace',
       ),
     );
   }

@@ -100,37 +100,6 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
     );
   }
 
-  // @override
-  // Future<List<FootballMatch>> getAllMatches() async {
-  //   zlog(data: "Coming to get all matches");
-  //   final finder = Finder(filter: Filter.equals('userId', _getCurrentUserId()));
-  //   final snapshots = await _store.find(_db, finder: finder);
-  //
-  //   List<FootballMatch> matches =
-  //       snapshots.map((snapshot) {
-  //         // IMPORTANT: Use the Sembast key as the match ID
-  //         return FootballMatch.fromJson(snapshot.value, snapshot.key);
-  //       }).toList();
-  //
-  //   // Handle default match creation if no matches found locally
-  //   if (matches.isEmpty) {
-  //     debug(
-  //       data: "Sembast: No matches found for user userId. Creating default.",
-  //     );
-  //     final defaultMatch = await createMatch();
-  //     matches = [defaultMatch]; // Return list with the new default match
-  //   } else {
-  //     debug(data: "Sembast: Found ${matches.length} matches for user userId");
-  //   }
-  //
-  //   // Sort locally (same logic as Firestore version)
-  //   matches.sort(
-  //     (a, b) =>
-  //         (a.createdAt ?? DateTime(0)).compareTo(b.createdAt ?? DateTime(0)),
-  //   );
-  //   return matches;
-  // }
-
   @override
   Future<FootballMatch> updateMatchScore(
     UpdateMatchScoreRequest updateMatchScoreRequest,
@@ -169,58 +138,8 @@ class MatchDatasourceLocalImpl implements MatchDataSource {
       data:
           "Sembast: Overwrote match $matchId with updated score for user ${_getCurrentUserId()}",
     );
-
-    // 5. Return the updated match object
-    // Since 'put' doesn't return the value, we return the object we just constructed.
-    // Ensure the ID is correctly set from the key
     return updatedMatch; // Return the object we used for putting
   }
-
-  // @override
-  // Future<FootballMatch> updateMatchTime(
-  //   UpdateMatchTimeRequest updateMatchTimeRequest,
-  // ) async {
-  //   final matchId = updateMatchTimeRequest.matchId;
-  //   final record = _store.record(matchId);
-  //
-  //   // 1. Get the potentially updated match object from the request
-  //   // Assuming updateMatchTimeRequest.footballMatch ALREADY contains the desired matchTime
-  //   final FootballMatch matchFromRequest = updateMatchTimeRequest.footballMatch;
-  //
-  //   // 2. Create the final match object to be saved, ensuring updatedAt and status are current
-  //   final updatedMatch = matchFromRequest.copyWith(
-  //     status:
-  //         updateMatchTimeRequest
-  //             .matchTimeUpdateStatus
-  //             .name, // Update status from request
-  //     updatedAt: DateTime.now(), // Set a fresh timestamp
-  //     // Ensure the ID from the request is used (or overwrite if needed)
-  //     id: matchId,
-  //   );
-  //
-  //   zlog(
-  //     data: "Current match time update status updating ${updatedMatch.status}",
-  //   );
-  //
-  //   // 3. Convert the *entire* updated match object to JSON
-  //   final updatedJson = updatedMatch.toJson();
-  //
-  //   // 4. Use 'put' to overwrite the entire record
-  //   await record.put(_db, updatedJson);
-  //
-  //   debug(
-  //     data:
-  //         "Sembast: Overwrote match $matchId with updated time/status for user ${_getCurrentUserId()}",
-  //   );
-  //   zlog(
-  //     data:
-  //         "Timer data updated match (overwritten) time length : ${updatedMatch.matchPeriod.length}",
-  //   );
-  //
-  //   // 5. Return the updated match object
-  //   // Return the object we used for putting, ensuring ID is correct
-  //   return updatedMatch; // The object already has the correct ID and data
-  // }
 
   @override
   Future<FootballMatch> updateMatchTime(

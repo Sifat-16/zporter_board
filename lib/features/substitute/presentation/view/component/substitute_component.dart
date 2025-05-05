@@ -20,11 +20,11 @@ class SubstituteComponent extends StatefulWidget {
 }
 
 class _SubstituteComponentState extends State<SubstituteComponent> {
-  int _outFirstDigit = 4;
-  int _outSecondDigit = 3;
+  int _outFirstDigit = 1;
+  int _outSecondDigit = 1;
 
-  int _inFirstDigit = 4;
-  int _inSecondDigit = 3;
+  int _inFirstDigit = 1;
+  int _inSecondDigit = 2;
 
   @override
   void initState() {

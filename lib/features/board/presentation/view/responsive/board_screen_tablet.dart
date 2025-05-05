@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
+import 'package:zporter_board/core/services/injection_container.dart';
+import 'package:zporter_board/core/services/user_id_service.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_state.dart';
 import 'package:zporter_board/features/board/presentation/view/components/board_menu_component.dart';
@@ -21,14 +23,13 @@ class BoardScreenTablet extends StatefulWidget {
 class _BoardScreenTabletState extends State<BoardScreenTablet>
     with SingleTickerProviderStateMixin {
   Screens selectedScreen = Screens.TACTICS;
-  String? userId;
+  UserIdService _userIdService = sl.get();
 
   bool isFullScreenTactics = false;
 
   _resetApp() {
     setState(() {
       selectedScreen = Screens.TACTICS;
-      userId = null;
     });
   }
 
@@ -44,9 +45,6 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
           listener: (context, state) {
             if (state is AuthStatusSuccess) {
               _resetApp();
-              setState(() {
-                userId = state.userEntity.uid;
-              });
             } else if (state is LogoutState) {
               _resetApp();
             }
@@ -94,7 +92,7 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
   Widget _buildScreens(Screens selectedScreen) {
     if (selectedScreen == Screens.TACTICS) {
       return TacticboardScreen(
-        userId: userId ?? "TEST-MY_EDIT",
+        userId: _userIdService.getCurrentUserId(),
         onFullScreenChanged: (s) {
           setState(() {
             isFullScreenTactics = s;

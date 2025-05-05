@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -41,7 +42,7 @@ class _LiveClockWidgetState extends State<LiveClockComponent> {
         color: Colors.grey,
         fontWeight: FontWeight.bold,
         fontSize: 28,
-        fontFamily: 'monospaced',
+        fontFamily: Platform.isIOS ? 'Courier' : 'monospace',
       ),
     );
   }

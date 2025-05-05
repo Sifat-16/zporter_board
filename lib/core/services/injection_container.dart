@@ -122,6 +122,7 @@ Future<void> init() async {
     () => MatchDataSourceImpl(
       firestore: FirebaseFirestore.instance,
       firebaseAuth: FirebaseAuth.instance,
+      userIdService: sl.get(),
     ),
     instanceName: 'remote',
   );
@@ -136,8 +137,8 @@ Future<void> init() async {
   sl.registerLazySingleton<MatchRepository>(
     () => MatchRepositoryImpl(
       remoteDataSource: sl<MatchDataSource>(instanceName: 'remote'),
-      localDataSource: sl<MatchDataSource>(instanceName: 'local'),
       userIdService: sl<UserIdService>(),
+      localDataSource: sl<MatchDataSource>(instanceName: 'local'),
     ),
   );
   sl.registerLazySingleton<FetchMatchUsecase>(
