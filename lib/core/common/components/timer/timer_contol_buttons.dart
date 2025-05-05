@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 
+enum TimeActiveStatus { RUNNING, PAUSED, STOPPED }
+
 class TimerControlButtons extends StatefulWidget {
   final VoidCallback onStart;
   final VoidCallback onPause;
   final VoidCallback onStop;
+  final TimeActiveStatus initialStatus;
 
   const TimerControlButtons({
     super.key,
     required this.onStart,
     required this.onPause,
     required this.onStop,
+    this.initialStatus = TimeActiveStatus.PAUSED,
   });
 
   @override
@@ -18,11 +22,27 @@ class TimerControlButtons extends StatefulWidget {
 }
 
 class _TimerControlButtonsState extends State<TimerControlButtons> {
-  String _activeButton = '';
+  TimeActiveStatus _activeStatus = TimeActiveStatus.PAUSED;
 
-  void _setActiveButton(String button) {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _activeStatus = widget.initialStatus;
+  }
+
+  @override
+  void didUpdateWidget(covariant TimerControlButtons oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialStatus != widget.initialStatus) {
+      _setActiveButton(widget.initialStatus);
+    }
+  }
+
+  void _setActiveButton(TimeActiveStatus button) {
     setState(() {
-      _activeButton = button;
+      _activeStatus = button;
     });
   }
 
@@ -32,35 +52,35 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Start Button
-        _TimerButton(
+        TimerButton(
           icon: Icons.play_circle_outline,
           label: 'Start',
-          isActive: _activeButton == 'start',
+          isActive: _activeStatus == TimeActiveStatus.RUNNING,
           onPressed: () {
             widget.onStart();
-            _setActiveButton('start');
+            // _setActiveButton(TimeActiveStatus.RUNNING);
           },
         ),
         SizedBox(width: 20),
         // Pause Button
-        _TimerButton(
+        TimerButton(
           icon: Icons.pause_circle_outline,
           label: 'Pause',
-          isActive: _activeButton == 'pause',
+          isActive: _activeStatus == TimeActiveStatus.PAUSED,
           onPressed: () {
             widget.onPause();
-            _setActiveButton('pause');
+            // _setActiveButton(TimeActiveStatus.PAUSED);
           },
         ),
         SizedBox(width: 20),
         // Stop Button
-        _TimerButton(
+        TimerButton(
           icon: Icons.stop,
           label: 'Stop',
-          isActive: _activeButton == 'stop',
+          isActive: _activeStatus == TimeActiveStatus.STOPPED,
           onPressed: () {
             widget.onStop();
-            _setActiveButton('stop');
+            // _setActiveButton(TimeActiveStatus.STOPPED);
           },
         ),
       ],
@@ -68,13 +88,13 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
   }
 }
 
-class _TimerButton extends StatelessWidget {
+class TimerButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isActive;
   final VoidCallback onPressed;
 
-  const _TimerButton({
+  const TimerButton({
     required this.icon,
     required this.label,
     required this.isActive,
@@ -88,7 +108,11 @@ class _TimerButton extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: onPressed,
-          child: Icon(icon, size: 40, color: isActive ? ColorManager.green : ColorManager.grey),
+          child: Icon(
+            icon,
+            size: 40,
+            color: isActive ? ColorManager.green : ColorManager.grey,
+          ),
         ),
 
         SizedBox(height: 5),
@@ -96,7 +120,7 @@ class _TimerButton extends StatelessWidget {
           label,
           style: Theme.of(context).textTheme.titleMedium!.copyWith(
             color: ColorManager.white,
-            fontWeight: FontWeight.bold
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],

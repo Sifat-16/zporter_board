@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+5
 
 environment:
   sdk: ^3.7.0-323.0.dev
@@ -71,6 +71,16 @@ dependencies:
       ref: app
 
   flutter_launcher_icons: ^0.14.3
+  flutter_slider_drawer: ^3.0.2
+  font_awesome_flutter: ^10.8.0
+  sembast: ^3.8.3
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.3
+  google_fonts: ^6.2.1
+  firebase_performance: ^0.10.1+5
+  firebase_crashlytics: ^4.3.5
+  firebase_analytics: ^11.4.5
+
 
 
 dev_dependencies:
@@ -132,6 +142,12 @@ flutter:
         - asset: assets/fonts/gilroy/Gilroy-Regular.ttf
         - asset: assets/fonts/gilroy/Gilroy-RegularItalic.ttf
           style: italic
+        - asset: assets/fonts/gilroy/Gilroy-Bold.ttf
+          weight: 700
+
+
+
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
@@ -139,8 +155,10 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/image/logo.png"
+  image_path: "assets/image/app_logo.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
+  adaptive_icon_foreground: "assets/image/app_logo_foreground.png"
+  adaptive_icon_background: "#F6B204"
 
 
 

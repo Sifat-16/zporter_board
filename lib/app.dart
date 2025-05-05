@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zporter_board/core/theme/app_theme.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
+import 'package:zporter_board/features/board/presentation/view_model/board_bloc.dart';
+import 'package:zporter_board/features/board/presentation/view_model/board_event.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 
 import 'core/services/injection_container.dart';
@@ -24,6 +26,9 @@ class _AppState extends State<App> {
       providers: [
         BlocProvider<AuthBloc>(create: (context) => sl<AuthBloc>()),
         BlocProvider<MatchBloc>(create: (context) => sl<MatchBloc>()),
+        BlocProvider<BoardBloc>(
+          create: (context) => sl<BoardBloc>()..add(BoardInitialized()),
+        ),
       ],
       child: ScreenUtilInit(
         minTextAdapt: true,

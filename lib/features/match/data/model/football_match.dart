@@ -6,27 +6,25 @@ import 'package:zporter_board/features/substitute/data/model/substitution.dart';
 import 'package:zporter_board/features/time/data/model/match_time.dart';
 
 class FootballMatch {
-  final String? id;
-  final String userId;
-  final String name;
-  List<MatchTime>
-  matchTime; // Consider making final if not modified after creation
-  final String status;
-  final Team homeTeam;
-  final Team awayTeam;
-  final MatchScore matchScore;
-  final MatchSubstitutions substitutions;
-  final String venue;
+  String? id;
+  String userId;
+  String name;
+  List<MatchPeriod>
+  matchPeriod; // Consider making final if not modified after creation
+  Team homeTeam;
+  Team awayTeam;
+  MatchScore matchScore;
+  MatchSubstitutions substitutions;
+  String venue;
   // --- NEW FIELDS ---
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   FootballMatch({
     this.id,
     required this.userId,
     required this.name,
-    required this.matchTime,
-    required this.status,
+    required this.matchPeriod,
     required this.homeTeam,
     required this.awayTeam,
     required this.matchScore,
@@ -58,11 +56,10 @@ class FootballMatch {
       id: documentId ?? json['id'] as String?, // Prefer explicit documentId
       userId: json['userId'] as String? ?? '', // Provide default if null
       name: json['name'] as String? ?? 'Unnamed Match', // Provide default
-      matchTime:
-          (json['matchTime'] as List<dynamic>? ?? [])
-              .map((e) => MatchTime.fromJson(e as Map<String, dynamic>))
+      matchPeriod:
+          (json['matchPeriod'] as List<dynamic>? ?? [])
+              .map((e) => MatchPeriod.fromJson(e as Map<String, dynamic>))
               .toList(),
-      status: json['status'] as String? ?? 'Scheduled', // Provide default
       // Add null checks for nested objects before calling fromJson
       homeTeam: Team.fromJson(json['homeTeam'] as Map<String, dynamic>? ?? {}),
       awayTeam: Team.fromJson(json['awayTeam'] as Map<String, dynamic>? ?? {}),
@@ -89,8 +86,7 @@ class FootballMatch {
       // 'id' is usually omitted in toJson as it's the document ID
       'userId': userId,
       'name': name,
-      'matchTime': matchTime.map((e) => e.toJson()).toList(),
-      'status': status,
+      'matchPeriod': matchPeriod.map((e) => e.toJson()).toList(),
       'homeTeam': homeTeam.toJson(),
       'awayTeam': awayTeam.toJson(),
       'matchScore': matchScore.toJson(),
@@ -113,8 +109,7 @@ class FootballMatch {
     bool clearId = false, // Flag to explicitly nullify ID during copy
     String? userId,
     String? name,
-    List<MatchTime>? matchTime,
-    String? status,
+    List<MatchPeriod>? matchPeriod,
     Team? homeTeam,
     Team? awayTeam,
     MatchScore? matchScore,
@@ -129,10 +124,11 @@ class FootballMatch {
       id: clearId ? null : (id ?? this.id), // Handle ID clearing/copying
       userId: userId ?? this.userId,
       name: name ?? this.name,
-      matchTime:
-          matchTime ??
-          this.matchTime.map((e) => e.copyWith()).toList(), // Deep copy example
-      status: status ?? this.status,
+      matchPeriod:
+          matchPeriod ??
+          this.matchPeriod
+              .map((e) => e.copyWith())
+              .toList(), // Deep copy example
       homeTeam: homeTeam ?? this.homeTeam, // Deep copy example
       awayTeam: awayTeam ?? this.awayTeam, // Deep copy example
       matchScore: matchScore ?? this.matchScore, // Deep copy example

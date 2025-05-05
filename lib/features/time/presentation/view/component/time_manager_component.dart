@@ -2,23 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:zporter_board/core/common/components/timer/counter_timer_component.dart';
 import 'package:zporter_board/core/common/components/timer/live_clock_component.dart';
 import 'package:zporter_board/core/common/components/timer/timer_contol_buttons.dart';
-import 'package:zporter_board/core/resource_manager/color_manager.dart';
-import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/core/utils/match/match_utils.dart';
-import 'package:zporter_board/core/utils/time/time_utils.dart';
-import 'package:zporter_board/features/match/data/model/football_match.dart';
+import 'package:zporter_board/features/time/data/model/match_time.dart';
 
 class TimeManagerComponent extends StatelessWidget {
-  const TimeManagerComponent({super.key,
-    required this.footballMatch,
+  const TimeManagerComponent({
+    super.key,
+    required this.matchPeriod,
     required this.onStart,
     required this.onPause,
-    required this.onStop,});
+    required this.onStop,
+    this.status,
+  });
   final VoidCallback onStart;
   final VoidCallback onPause;
   final VoidCallback onStop;
 
-  final FootballMatch? footballMatch;
+  final MatchPeriod? matchPeriod;
+  final TimeActiveStatus? status;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -26,16 +27,25 @@ class TimeManagerComponent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           LiveClockComponent(),
-          TimerControlButtons(onStart: onStart, onPause: onPause, onStop: onStop),
-          CounterTimerComponent(startTime: MatchUtils.findInitialTime(footballMatch:footballMatch),)
-          // Text("TOTAL 01:45:59", style: Theme.of(context).textTheme.titleMedium!.copyWith(
-          //     color: ColorManager.grey,
-          //     fontWeight: FontWeight.bold,
-          //     fontSize: AppSize.s28
-          // ),),
+          TimerControlButtons(
+            onStart: onStart,
+            onPause: onPause,
+            onStop: onStop,
+            initialStatus:
+                MatchUtils.getMatchTime(
+                          matchPeriod?.intervals ?? [],
+                        ).isRunning ==
+                        true
+                    ? TimeActiveStatus.RUNNING
+                    : status == null
+                    ? TimeActiveStatus.PAUSED
+                    : status!,
+          ),
+          CounterTimerComponent(
+            startTime: MatchUtils.findInitialTime(matchPeriod: matchPeriod),
+          ),
         ],
       ),
     );
   }
-
 }

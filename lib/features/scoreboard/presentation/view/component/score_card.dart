@@ -1,254 +1,266 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:zporter_board/core/common/components/container/dynamic_container.dart';
+import 'package:zporter_board/core/extension/size_extension.dart';
+// --- Assumed Imports (replace with your actual paths) ---
+// You might not need SizeExtension if font size is determined differently now
+// import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
-import 'package:zporter_board/core/resource_manager/values_manager.dart';
-import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/scoreboard/data/model/score.dart';
+// --- End of Assumed Imports ---
 
 class ScoreCard extends StatefulWidget {
-  const ScoreCard({Key? key, required this.matchScore, required this.updateMatchScore}) : super(key: key);
+  const ScoreCard({
+    super.key, // Use super parameters
+    required this.matchScore,
+    required this.updateMatchScore,
+  });
   final MatchScore? matchScore;
   final Function(MatchScore matchScore) updateMatchScore;
 
   @override
-  _ScoreCardState createState() => _ScoreCardState();
+  State<ScoreCard> createState() => _ScoreCardState();
 }
 
 class _ScoreCardState extends State<ScoreCard> {
+  // State variables to hold the complete scores
+  int _homeScore = 0;
+  int _awayScore = 0;
+
+  // Maximum score allowed (Adjust if 100 is inclusive or exclusive)
+  final int _maxScore = 99; // Allows scores 0 through 100
+  // Minimum score allowed
+  final int _minScore = 0;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _initiate();
-
+    _updateScoresFromWidget();
   }
 
   @override
   void didUpdateWidget(covariant ScoreCard oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
-    _initiate();
-  }
-
-
-
-
-  _initiate(){
-    MatchScore? matchScore = widget.matchScore;
-
-    if(matchScore!=null){
-      _teamHomeFirstDigit = (matchScore.homeScore/10).toInt();
-      _teamHomeSecondDigit = matchScore.homeScore%10;
-
-      _teamAwayFirstDigit = (matchScore.awayScore/10).toInt();
-      _teamAwaySecondDigit = matchScore.awayScore%10;
+    // Update local state if the input widget's score changes
+    if (widget.matchScore != oldWidget.matchScore) {
+      _updateScoresFromWidget();
     }
-
   }
 
-  int _teamHomeFirstDigit = 0;
-  int _teamHomeSecondDigit = 0;
-
-  int _teamAwayFirstDigit = 0;
-  int _teamAwaySecondDigit = 0;
-
-
-  //duplicate for update
-  int _teamHomeFirstDigitDuplicate = 0;
-  int _teamHomeSecondDigitDuplicate = 0;
-
-  int _teamAwayFirstDigitDuplicate = 0;
-  int _teamAwaySecondDigitDuplicate = 0;
-
-
-  initiateDuplicates(){
-    _teamHomeFirstDigitDuplicate = _teamHomeFirstDigit;
-    _teamHomeSecondDigitDuplicate = _teamHomeSecondDigit;
-
-    _teamAwayFirstDigitDuplicate = _teamAwayFirstDigit;
-    _teamAwaySecondDigitDuplicate = _teamAwaySecondDigit;
+  // Helper to update internal state from widget property
+  void _updateScoresFromWidget() {
+    // Ensure score stays within bounds when updating from widget
+    final initialHomeScore = widget.matchScore?.homeScore ?? 0;
+    final initialAwayScore = widget.matchScore?.awayScore ?? 0;
+    setState(() {
+      _homeScore = initialHomeScore.clamp(_minScore, _maxScore);
+      _awayScore = initialAwayScore.clamp(_minScore, _maxScore);
+    });
   }
 
-  // Function to increment a digit
-  void _incrementDigit(int team, String digit) {
-
-    initiateDuplicates();
-
-    if (team == 1) {
-      if (digit == 'first' && _teamHomeFirstDigit < 9) {
-        _teamHomeFirstDigitDuplicate++;
-      } else if (digit == 'second' && _teamHomeSecondDigit < 9) {
-        _teamHomeSecondDigitDuplicate++;
+  // Function to increment the score for a team
+  void _incrementScore(int team) {
+    setState(() {
+      if (team == 1 && _homeScore < _maxScore) {
+        _homeScore++;
+      } else if (team == 2 && _awayScore < _maxScore) {
+        _awayScore++;
+      } else {
+        // Optional: Add feedback if max score reached
+        print("Max score reached for team $team");
       }
-    } else {
-      if (digit == 'first' && _teamAwayFirstDigit < 9) {
-        _teamAwayFirstDigitDuplicate++;
-      } else if (digit == 'second' && _teamAwaySecondDigit < 9) {
-        _teamAwaySecondDigitDuplicate++;
-      }
-    }
-
-    _updateMatchScore();
-
+    });
+    _triggerUpdate();
   }
 
-  // Function to decrement a digit
-  void _decrementDigit(int team, String digit) {
-    initiateDuplicates();
-    if (team == 1) {
-      if (digit == 'first' && _teamHomeFirstDigit > 0) {
-        _teamHomeFirstDigitDuplicate--;
-      } else if (digit == 'second' && _teamHomeSecondDigit > 0) {
-        _teamHomeSecondDigitDuplicate--;
+  // Function to decrement the score for a team
+  void _decrementScore(int team) {
+    setState(() {
+      if (team == 1 && _homeScore > _minScore) {
+        _homeScore--;
+      } else if (team == 2 && _awayScore > _minScore) {
+        _awayScore--;
+      } else {
+        // Optional: Add feedback if min score reached
+        print("Min score reached for team $team");
       }
-    } else {
-      if (digit == 'first' && _teamAwayFirstDigit > 0) {
-        _teamAwayFirstDigitDuplicate--;
-      } else if (digit == 'second' && _teamAwaySecondDigit > 0) {
-        _teamAwaySecondDigitDuplicate--;
-      }
-    }
-
-    _updateMatchScore();
+    });
+    _triggerUpdate();
   }
 
-
-  _updateMatchScore(){
-    MatchScore matchScore = MatchScore(
-        homeScore: (_teamHomeFirstDigitDuplicate*10)+_teamHomeSecondDigitDuplicate,
-        awayScore: (_teamAwayFirstDigitDuplicate*10)+_teamAwaySecondDigitDuplicate
+  // Function to call the update callback from the parent widget
+  void _triggerUpdate() {
+    final updatedMatchScore = MatchScore(
+      homeScore: _homeScore,
+      awayScore: _awayScore,
     );
-    widget.updateMatchScore(matchScore);
+    widget.updateMatchScore(updatedMatchScore);
   }
-
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Scores Row (Team A — Team B)
-            Row(
+    // Define a base text style - Give it a large font size initially.
+    // FittedBox will scale it down. AppSize.s160 is used as the base.
+    final baseScoreTextStyle = Theme.of(context).textTheme.titleLarge!.copyWith(
+      // fontSize: context.screenHeight * .80, // Start with a large size
+      fontWeight: FontWeight.bold,
+      color: ColorManager.white,
+      fontFamily: 'monospaced',
+      // height:
+      //     1.0, // Explicitly set line height to prevent issues with large fonts
+    );
+
+    // Define the style for the dash separately
+    // Use a smaller, potentially fixed size if you don't want it to scale with the numbers
+    final dashTextStyle = Theme.of(context).textTheme.titleLarge!.copyWith(
+      fontSize: context.widthPercent(
+        10,
+      ), // Example: Smaller fixed size for dash
+      fontWeight: FontWeight.bold,
+      color: ColorManager.white,
+      // height: 1.0,
+    );
+
+    return DynamicContainer(
+      builder: (context, height, width) {
+        return Center(
+          child: Container(
+            // padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(color: Colors.transparent),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
               children: [
-                // Team A Score
-                Flexible(
-                  flex: 1,
+                // Scores Row (Team A — Team B)
+                SizedBox(
+                  height: height * .85,
+
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      AnimatedFlipCounter(
-                        value: _teamHomeFirstDigit,
-                        textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                          fontSize: AppSize.s160,
-                          fontWeight: FontWeight.bold,
-                          color: ColorManager.white,
+                      SizedBox(
+                        height: height * .85,
+                        width: context.widthPercent(40),
+                        child: FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Row(
+                            children: [
+                              if (_isSingleDigit(_homeScore))
+                                Opacity(
+                                  opacity: 0,
+                                  child: AnimatedFlipCounter(
+                                    value: _homeScore,
+                                    textStyle:
+                                        baseScoreTextStyle, // Use the large base style
+                                    duration: const Duration(milliseconds: 300),
+                                  ),
+                                ),
+                              AnimatedFlipCounter(
+                                value: _homeScore,
+                                textStyle:
+                                    baseScoreTextStyle, // Use the large base style
+                                duration: const Duration(milliseconds: 300),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 10), // Space between digits
-                      AnimatedFlipCounter(
-                        value: _teamHomeSecondDigit,
-                        textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                          fontSize: AppSize.s160,
-                          fontWeight: FontWeight.bold,
-                          color: ColorManager.white,
+
+                      // const SizedBox(height: 20), // Space before buttons
+                      // Big Dash
+                      SizedBox(
+                        height: height * .85,
+                        width: context.widthPercent(20),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                          ), // Adjust horizontal space
+                          // Center the dash vertically within the IntrinsicHeight
+                          child: Center(child: Text('—', style: dashTextStyle)),
+                        ),
+                      ),
+
+                      // const SizedBox(height: 20), // Space before buttons
+                      SizedBox(
+                        height: height * .85,
+                        width: context.widthPercent(40),
+                        child: FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Row(
+                            children: [
+                              AnimatedFlipCounter(
+                                value: _awayScore,
+                                textStyle:
+                                    baseScoreTextStyle, // Use the large base style
+                                duration: const Duration(milliseconds: 300),
+                              ),
+
+                              if (_isSingleDigit(_awayScore))
+                                Opacity(
+                                  opacity: 0,
+                                  child: AnimatedFlipCounter(
+                                    value: _awayScore,
+                                    textStyle:
+                                        baseScoreTextStyle, // Use the large base style
+                                    duration: const Duration(milliseconds: 300),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // Big Dash
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20), // Adjust spacing around the dash
-                  child: Text(
-                    '—',
-                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      fontSize: AppSize.s160, // Match the score size
-                      fontWeight: FontWeight.bold,
-                      color: ColorManager.white,
-                    ),
-                  ),
-                ),
-
-                // Team B Score
-                Flexible(
-                  flex: 1,
+                SizedBox(
+                  height: height * .15,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      AnimatedFlipCounter(
-                        value: _teamAwayFirstDigit,
-                        textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                          fontSize: AppSize.s160,
-                          fontWeight: FontWeight.bold,
-                          color: ColorManager.white,
-                        ),
-                      ),
-                      const SizedBox(width: 10), // Space between digits
-                      AnimatedFlipCounter(
-                        value: _teamAwaySecondDigit,
-                        textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                          fontSize: AppSize.s160,
-                          fontWeight: FontWeight.bold,
-                          color: ColorManager.white,
-                        ),
-                      ),
+                      _buildScoreControls(1, height * .15),
+                      _buildScoreControls(2, height * .15),
                     ],
                   ),
                 ),
               ],
             ),
-
-            // Buttons Row (Team A and Team B buttons)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Team A Buttons
-                _buildButtonColumn(1, 'first'),
-                const SizedBox(width: 30), // Space between buttons
-                _buildButtonColumn(1, 'second'),
-                const SizedBox(width: 120), // Space between teams
-
-
-
-
-                // Team B Buttons
-                _buildButtonColumn(2, 'first'),
-                const SizedBox(width: 30), // Space between buttons
-                _buildButtonColumn(2, 'second'),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-// Helper widget to create buttons for each digit
-  Widget _buildButtonColumn(int team, String digit) {
-    return Column(
+  // Helper widget to create increment/decrement buttons for a team
+  Widget _buildScoreControls(int team, double height) {
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          child: Icon(Icons.keyboard_arrow_up, color: Colors.grey, size: AppSize.s48),
-          onTap: () => _incrementDigit(team, digit),
+          onTap: () => _incrementScore(team),
+          child: Icon(
+            Icons.keyboard_arrow_up,
+            size: height,
+            color: ColorManager.grey, // Make sure ColorManager.grey is defined
+          ),
         ),
         GestureDetector(
-          child: Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: AppSize.s48),
-          onTap: () => _decrementDigit(team, digit),
+          onTap: () => _decrementScore(team),
+          child: Icon(
+            Icons.keyboard_arrow_down,
+            size: height,
+            color: ColorManager.grey, // Make sure ColorManager.grey is defined
+          ),
         ),
       ],
     );
+  }
+
+  bool _isSingleDigit(int number) {
+    return number >= 0 && number <= 9;
   }
 }

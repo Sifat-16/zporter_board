@@ -41,48 +41,53 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAmOXkLV7nc59JTbJ03EcSWFVw5OGyr4PY',
-    appId: '1:623338569626:web:24496d400257efa6120423',
-    messagingSenderId: '623338569626',
-    projectId: 'zporter-board',
-    authDomain: 'zporter-board.firebaseapp.com',
-    storageBucket: 'zporter-board.firebasestorage.app',
-    measurementId: 'G-RNFGQC4KPB',
+    apiKey: 'AIzaSyBcgLI4SUU3QGkq9R9ASTSt6QjpW3enlDQ',
+    appId: '1:134085653898:web:61339e3b851a90151b8473',
+    messagingSenderId: '134085653898',
+    projectId: 'zporter-board-dev',
+    authDomain: 'zporter-board-dev.firebaseapp.com',
+    storageBucket: 'zporter-board-dev.firebasestorage.app',
+    measurementId: 'G-SQTLB8M5PT',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBiXs0KM7tNLjAB9UVKb-D1DDevaASEaRQ',
-    appId: '1:623338569626:android:7ccaf1f6ec4ab51b120423',
-    messagingSenderId: '623338569626',
-    projectId: 'zporter-board',
-    storageBucket: 'zporter-board.firebasestorage.app',
+    apiKey: 'AIzaSyBB1l3bCAdbTeY5K994umyWdOhSk_H9rKw',
+    appId: '1:134085653898:android:6e92b5f71281d1431b8473',
+    messagingSenderId: '134085653898',
+    projectId: 'zporter-board-dev',
+    storageBucket: 'zporter-board-dev.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBMIAOYa-sqbdLTCYhp3YucRloN_Lur0jE',
-    appId: '1:623338569626:ios:1b10755070663085120423',
-    messagingSenderId: '623338569626',
-    projectId: 'zporter-board',
-    storageBucket: 'zporter-board.firebasestorage.app',
+    apiKey: 'AIzaSyAgpJWBk_Na0E3xBcas1DBEBRmuvHW4el8',
+    appId: '1:134085653898:ios:97d5a05a898d69501b8473',
+    messagingSenderId: '134085653898',
+    projectId: 'zporter-board-dev',
+    storageBucket: 'zporter-board-dev.firebasestorage.app',
+    androidClientId: '134085653898-a2787uqbdujnvkhgerb07sd2f5qcij3d.apps.googleusercontent.com',
+    iosClientId: '134085653898-6k0eqd7vnami56425tqqtfp3jvqk0js7.apps.googleusercontent.com',
     iosBundleId: 'com.zporter.zporterBoard',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBMIAOYa-sqbdLTCYhp3YucRloN_Lur0jE',
-    appId: '1:623338569626:ios:1b10755070663085120423',
-    messagingSenderId: '623338569626',
-    projectId: 'zporter-board',
-    storageBucket: 'zporter-board.firebasestorage.app',
+    apiKey: 'AIzaSyAgpJWBk_Na0E3xBcas1DBEBRmuvHW4el8',
+    appId: '1:134085653898:ios:97d5a05a898d69501b8473',
+    messagingSenderId: '134085653898',
+    projectId: 'zporter-board-dev',
+    storageBucket: 'zporter-board-dev.firebasestorage.app',
+    androidClientId: '134085653898-a2787uqbdujnvkhgerb07sd2f5qcij3d.apps.googleusercontent.com',
+    iosClientId: '134085653898-6k0eqd7vnami56425tqqtfp3jvqk0js7.apps.googleusercontent.com',
     iosBundleId: 'com.zporter.zporterBoard',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAmOXkLV7nc59JTbJ03EcSWFVw5OGyr4PY',
-    appId: '1:623338569626:web:22295fb13fa3f8ca120423',
-    messagingSenderId: '623338569626',
-    projectId: 'zporter-board',
-    authDomain: 'zporter-board.firebaseapp.com',
-    storageBucket: 'zporter-board.firebasestorage.app',
-    measurementId: 'G-0Y2N6WZFL6',
+    apiKey: 'AIzaSyBcgLI4SUU3QGkq9R9ASTSt6QjpW3enlDQ',
+    appId: '1:134085653898:web:848d1b81281f13731b8473',
+    messagingSenderId: '134085653898',
+    projectId: 'zporter-board-dev',
+    authDomain: 'zporter-board-dev.firebaseapp.com',
+    storageBucket: 'zporter-board-dev.firebasestorage.app',
+    measurementId: 'G-26ZXRL23J0',
   );
+
 }

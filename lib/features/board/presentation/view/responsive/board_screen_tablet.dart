@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
-import 'package:zporter_board/core/resource_manager/route_manager.dart';
-import 'package:zporter_board/core/resource_manager/values_manager.dart';
+import 'package:zporter_board/core/services/injection_container.dart';
+import 'package:zporter_board/core/services/user_id_service.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
-import 'package:zporter_board/features/auth/presentation/view_model/auth_event.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_state.dart';
+import 'package:zporter_board/features/board/presentation/view/components/board_menu_component.dart';
+import 'package:zporter_board/features/board/presentation/view_model/board_bloc.dart';
+import 'package:zporter_board/features/board/presentation/view_model/board_state.dart';
 import 'package:zporter_board/features/scoreboard/presentation/view/scoreboard_screen.dart';
 import 'package:zporter_board/features/substitute/presentation/view/substituteboard_screen.dart';
-import 'package:zporter_board/features/tacticV2/presentation/view/tacticboard_screen_v2.dart';
 import 'package:zporter_board/features/time/presentation/view/timeboard_screen.dart';
+import 'package:zporter_tactical_board/presentation/tactic/view/tacticboard_screen.dart';
 
 class BoardScreenTablet extends StatefulWidget {
   const BoardScreenTablet({super.key});
@@ -22,103 +22,92 @@ class BoardScreenTablet extends StatefulWidget {
 
 class _BoardScreenTabletState extends State<BoardScreenTablet>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  late PageController _pageController;
+  Screens selectedScreen = Screens.TACTICS;
+  UserIdService _userIdService = sl.get();
 
-  // List of tab names and content to display
-  final List<Map<String, dynamic>> _tabs = [
-    {'title': 'Scoreboard', 'content': ScoreBoardScreen()},
-    {'title': 'Time', 'content': TimeboardScreen()},
-    {'title': 'Substitute', 'content': SubstituteboardScreen()},
-    {'title': 'Tactic', 'content': TacticboardScreenV2()},
-    {'title': 'Settings', 'content': SettingsScreen()},
-  ];
+  bool isFullScreenTactics = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // Initialize the TabController
-    _tabController = TabController(length: _tabs.length, vsync: this);
-    _pageController = PageController();
-
-    // Sync TabBar with PageView swipe
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        _pageController.jumpToPage(_tabController.index);
-      }
+  _resetApp() {
+    setState(() {
+      selectedScreen = Screens.TACTICS;
     });
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorManager.black,
-      appBar: AppBar(
-        backgroundColor: ColorManager.black,
-
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Image.asset(
-            AssetsManager.logo,
-            height: AppSize.s24,
-            width: AppSize.s24,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthBloc, AuthState>(
+          listenWhen: (previous, current) {
+            // Optional: Only listen if the state changes significantly
+            return previous != current;
+          },
+          listener: (context, state) {
+            if (state is AuthStatusSuccess) {
+              _resetApp();
+            } else if (state is LogoutState) {
+              _resetApp();
+            }
+          },
+        ),
+        BlocListener<BoardBloc, BoardState>(
+          listener: (context, state) {
+            setState(() {
+              selectedScreen = state.selectedScreen;
+            });
+          },
+        ),
+        // Add more BlocListeners here for other Blocs if needed
+      ],
+      child: SafeArea(
+        top: selectedScreen != Screens.TACTICS,
+        left: selectedScreen != Screens.TACTICS,
+        bottom: selectedScreen != Screens.TACTICS,
+        right: selectedScreen != Screens.TACTICS,
+        child: Material(
+          color: ColorManager.black,
+          child: Stack(
+            children: [
+              Positioned.fill(child: _buildScreens(selectedScreen)),
+              if (!isFullScreenTactics)
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding:
+                        selectedScreen == Screens.TACTICS
+                            ? EdgeInsets.only(
+                              top: MediaQuery.paddingOf(context).top,
+                            )
+                            : EdgeInsets.zero,
+                    child: BoardMenuComponent(),
+                  ),
+                ),
+            ],
           ),
         ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-
-          children: [
-            TabBar(
-              controller: _tabController,
-              labelColor: ColorManager.yellow,
-              padding: EdgeInsets.zero,
-              unselectedLabelColor: ColorManager.white,
-              indicatorColor:
-                  ColorManager.transparent, // Remove the indicator line
-              labelPadding: EdgeInsets.symmetric(
-                horizontal: AppSize.s16,
-              ), // Remove padding between tab labels
-              isScrollable: true,
-              dividerHeight: 0,
-
-              tabs:
-                  _tabs.map((tab) {
-                    return Tab(text: tab['title']);
-                  }).toList(),
-            ),
-          ],
-        ),
-      ),
-      body: PageView(
-        controller: _pageController,
-        physics: NeverScrollableScrollPhysics(),
-        onPageChanged: (index) {
-          _tabController.animateTo(index); // Sync TabBar with PageView
-        },
-        children:
-            _tabs.map((tab) {
-              dynamic type = tab['content'];
-              if (type is Widget) {
-                return type;
-              }
-              return Center(
-                child: Text(
-                  tab['content'],
-                  style: TextStyle(color: ColorManager.white),
-                ),
-              );
-            }).toList(),
       ),
     );
+  }
+
+  Widget _buildScreens(Screens selectedScreen) {
+    if (selectedScreen == Screens.TACTICS) {
+      return TacticboardScreen(
+        userId: _userIdService.getCurrentUserId(),
+        onFullScreenChanged: (s) {
+          setState(() {
+            isFullScreenTactics = s;
+          });
+        },
+      );
+    } else if (selectedScreen == Screens.TIME) {
+      return TimeboardScreen();
+    } else if (selectedScreen == Screens.SCOREBOARD) {
+      return ScoreBoardScreen();
+    } else if (selectedScreen == Screens.SUBSTITUTION) {
+      return SubstituteboardScreen();
+    } else {
+      return SettingsScreen();
+    }
   }
 }
 
@@ -132,26 +121,73 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
-      builder: (context, state) {
-        return Center(
-          child: TextButton(
-            onPressed: () {
-              context.read<AuthBloc>().add(LogoutEvent());
-              GoRouter.of(context).goNamed(Routes.auth);
-            },
-            child: Text(
-              "Logout",
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
-            ),
-          ),
-        );
-      },
-      listener: (BuildContext context, AuthState state) {
-        if (state is AuthStatusFailure) {}
-      },
-    );
+    return SizedBox();
+    // return BlocConsumer<AuthBloc, AuthState>(
+    //   builder: (context, state) {
+    //     // return Center(
+    //     //   child: TextButton(
+    //     //     onPressed: () {
+    //     //       context.read<AuthBloc>().add(LogoutEvent());
+    //     //     },
+    //     //     child: Text(
+    //     //       "Logout",
+    //     //       style: Theme.of(
+    //     //         context,
+    //     //       ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
+    //     //     ),
+    //     //   ),
+    //     // );
+    //     if (state is AuthStatusSuccess || state is LogoutState) {
+    //       String? email;
+    //       if (state is AuthStatusSuccess) {
+    //         email = state.userEntity.email;
+    //       }
+    //       if (email == null) {
+    //         return Center(
+    //           child: TextButton(
+    //             onPressed: () {
+    //               context.read<AuthBloc>().add(GoogleSignInEvent());
+    //             },
+    //             child: Text(
+    //               "Login",
+    //               style: Theme.of(
+    //                 context,
+    //               ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
+    //             ),
+    //           ),
+    //         );
+    //       } else {
+    //         return Center(
+    //           child: TextButton(
+    //             onPressed: () {
+    //               context.read<AuthBloc>().add(LogoutEvent());
+    //             },
+    //             child: Text(
+    //               "Logout",
+    //               style: Theme.of(
+    //                 context,
+    //               ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
+    //             ),
+    //           ),
+    //         );
+    //       }
+    //     } else {
+    //       return Center(
+    //         child: TextButton(
+    //           onPressed: () {
+    //             context.read<AuthBloc>().add(LogoutEvent());
+    //           },
+    //           child: Text(
+    //             "Logout",
+    //             style: Theme.of(
+    //               context,
+    //             ).textTheme.labelLarge!.copyWith(color: ColorManager.white),
+    //           ),
+    //         ),
+    //       );
+    //     }
+    //   },
+    //   listener: (BuildContext context, AuthState state) {},
+    // );
   }
 }

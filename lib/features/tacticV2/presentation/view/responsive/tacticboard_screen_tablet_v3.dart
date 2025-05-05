@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_state.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 import 'package:zporter_tactical_board/tactic_page.dart';
 
 class TacticboardScreenTabletV3 extends StatefulWidget {
@@ -20,6 +21,7 @@ class _TacticboardScreenTabletV3State extends State<TacticboardScreenTabletV3> {
       listener: (BuildContext context, AuthState state) {},
       builder: (context, state) {
         if (state is AuthStatusSuccess) {
+          zlog(data: "User id found for the tactics ${state.userEntity.uid}");
           return TacticPage(userId: state.userEntity.uid);
         } else {
           return Center(

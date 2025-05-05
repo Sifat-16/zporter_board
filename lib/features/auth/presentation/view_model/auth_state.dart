@@ -11,6 +11,8 @@ sealed class AuthState extends Equatable {
 
 final class AuthStateInitial extends AuthState {}
 
+final class LogoutState extends AuthState {}
+
 final class GoogleSignInProgress extends AuthStateInitial {}
 
 // final class GoogleSignInSuccess extends AuthState{

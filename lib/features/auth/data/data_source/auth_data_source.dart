@@ -6,4 +6,5 @@ abstract class AuthDataSource {
   Future<bool> signOutFromGoogle();
   Future<UserModel?> fetchUser({required String uid});
   Future<UserModel> createUser({required UserModel userModel});
+  Future<String> guestLogin();
 }
