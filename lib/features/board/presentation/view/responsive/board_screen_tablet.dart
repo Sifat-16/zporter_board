@@ -353,7 +353,9 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
 
                 labelColor: ColorManager.yellow,
                 unselectedLabelColor: ColorManager.grey,
-                labelStyle: Theme.of(context).textTheme.labelLarge,
+                labelStyle: Theme.of(
+                  context,
+                ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.bold),
                 unselectedLabelStyle: Theme.of(context).textTheme.labelMedium,
                 tabs:
                     _menuItems.map((item) {
@@ -368,6 +370,7 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
                                 : null, // Ensure tab fits within allocated space
                         child: Text(
                           item.label,
+
                           overflow: TextOverflow.ellipsis,
                         ),
                       );
