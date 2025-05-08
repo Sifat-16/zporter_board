@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/helper/board_container_space_helper.dart';
 import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
@@ -26,7 +27,7 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    double height = getBoardHeightLeft(context);
+    double height = getBoardHeightLeft(context) - context.screenHeight * .08;
     return BlocConsumer<MatchBloc, MatchState>(
       builder: (context, state) {
         return Column(

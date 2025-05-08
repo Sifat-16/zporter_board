@@ -166,6 +166,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/board_container.dart';
+import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/helper/board_container_space_helper.dart';
 import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
@@ -242,9 +243,9 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
           child: Builder(
             // Keep Builder if needed for context down the tree
             builder: (context) {
-              double height = getBoardHeightLeft(
-                context,
-              ); // Keep height calculation
+              double height =
+                  getBoardHeightLeft(context) -
+                  context.screenHeight * .08; // Keep height calculation
 
               // Keep null check for the overall match data
               if (state.match == null) {

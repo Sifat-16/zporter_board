@@ -69,7 +69,7 @@ class _PeriodPaginationComponentState extends State<PeriodPaginationComponent>
                             config: CompactPaginatorUiConfig(
                               navButtonPadding: EdgeInsets.zero,
                               pageNumberPadding: EdgeInsets.zero,
-                              navIconSize: AppSize.s32,
+                              navIconSize: AppSize.s28,
                               pageNumberFontSize: AppSize.s18,
                             ),
                             totalPages: (state.match?.matchPeriod ?? []).length,

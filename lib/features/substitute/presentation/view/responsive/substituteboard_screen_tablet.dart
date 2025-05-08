@@ -111,7 +111,6 @@ class _SubstituteboardScreenTabletState
                               ],
                             ),
                             Container(
-                              padding: EdgeInsets.only(top: AppSize.s20),
                               child: SubstituteComponent(
                                 substitution: subs[_selectedIndex],
                                 onSubUpdate: (sub) {
