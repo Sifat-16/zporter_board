@@ -333,63 +333,65 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
     // Standard layout with TabBar
     return Material(
       color: ColorManager.black,
-      child: Column(
+      child: Stack(
         children: [
-          // TabBar Container
-          Container(
-            height: tabBarHeight,
-            padding: EdgeInsets.only(top: topPadding),
-            width: double.infinity,
-            color: ColorManager.black, // Or another distinct tab bar background
-            child: Center(
-              child: TabBar(
-                controller: _tabController,
-                isScrollable:
-                    false, // Fit all tabs if possible, adjust if too many
-                tabAlignment: TabAlignment.center, // Requires Flutter 3.13+
-                indicatorColor: ColorManager.yellow,
-                indicatorWeight: 3.0,
-                dividerColor: ColorManager.transparent,
-
-                labelColor: ColorManager.yellow,
-                unselectedLabelColor: ColorManager.grey,
-                labelStyle: Theme.of(
-                  context,
-                ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.bold),
-                unselectedLabelStyle: Theme.of(context).textTheme.labelMedium,
-                tabs:
-                    _menuItems.map((item) {
-                      final bool isActive = selectedScreen == item.screen;
-                      final Color iconColor =
-                          isActive ? ColorManager.yellow : ColorManager.grey;
-
-                      return Tab(
-                        height:
-                            actualTabBarContentHeight > 0
-                                ? actualTabBarContentHeight
-                                : null, // Ensure tab fits within allocated space
-                        child: Text(
-                          item.label,
-
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    }).toList(),
-              ),
+          // Content Area
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+              height:
+                  screenDisplayWidget is! TacticboardScreen
+                      ? context.screenHeight * .92
+                      : null,
+              child: screenDisplayWidget,
             ),
           ),
-          // Content Area
-          Expanded(
-            child: SafeArea(
-              top:
-                  false, // Top safe area is handled by the TabBar container's padding
-              left:
-                  selectedScreen !=
-                  Screens.TACTICS, // Original conditional safe area
-              bottom: selectedScreen != Screens.TACTICS,
-              right: selectedScreen != Screens.TACTICS,
-              child: Stack(
-                children: [Positioned.fill(child: screenDisplayWidget)],
+
+          // TabBar Container
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              height: tabBarHeight,
+              padding: EdgeInsets.only(top: topPadding),
+              // width: double.infinity,
+              color:
+                  ColorManager
+                      .transparent, // Or another distinct tab bar background
+              child: Center(
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable:
+                      false, // Fit all tabs if possible, adjust if too many
+                  tabAlignment: TabAlignment.center, // Requires Flutter 3.13+
+                  indicatorColor: ColorManager.yellow,
+                  indicatorWeight: 3.0,
+                  dividerColor: ColorManager.transparent,
+
+                  labelColor: ColorManager.yellow,
+                  unselectedLabelColor: ColorManager.grey,
+                  labelStyle: Theme.of(
+                    context,
+                  ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.bold),
+                  unselectedLabelStyle: Theme.of(context).textTheme.labelMedium,
+                  tabs:
+                      _menuItems.map((item) {
+                        final bool isActive = selectedScreen == item.screen;
+                        final Color iconColor =
+                            isActive ? ColorManager.yellow : ColorManager.grey;
+
+                        return Tab(
+                          height:
+                              actualTabBarContentHeight > 0
+                                  ? actualTabBarContentHeight
+                                  : null, // Ensure tab fits within allocated space
+                          child: Text(
+                            item.label,
+
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                ),
               ),
             ),
           ),
