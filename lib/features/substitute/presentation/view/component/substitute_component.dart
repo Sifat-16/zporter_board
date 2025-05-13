@@ -4,7 +4,6 @@ import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/substitute/data/model/substitution.dart';
-import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class SubstituteComponent extends StatefulWidget {
   const SubstituteComponent({
@@ -116,15 +115,7 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                   child: Column(
                     children: [
                       Expanded(child: _buildFlipperCounter(_outFirstDigit)),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          zlog(
-                            data:
-                                "Available button width ${constraints.maxWidth}",
-                          );
-                          return _buildButtonColumn(1, 'first');
-                        },
-                      ),
+                      _buildButtonColumn(1, 'first'),
                     ],
                   ),
                 ),
@@ -167,118 +158,6 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
         ],
       ),
     );
-    return Container(
-      padding: EdgeInsets.only(top: 30),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // // Scores Row (Team A — Team B)
-          // Row(
-          //   children: [
-          //     // Team A Score
-          //     Flexible(
-          //       flex: 1,
-          //       child: Container(
-          //         width: context.widthPercent(50),
-          //         height: context.heightPercent(45),
-          //         padding: EdgeInsets.symmetric(horizontal: 5),
-          //         child: FittedBox(
-          //           fit: BoxFit.fitWidth,
-          //           child: Row(
-          //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //             children: [
-          //               AnimatedFlipCounter(
-          //                 value: _outFirstDigit,
-          //                 textStyle: Theme.of(
-          //                   context,
-          //                 ).textTheme.titleLarge!.copyWith(
-          //                   fontSize: AppSize.s128,
-          //                   fontWeight: FontWeight.bold,
-          //                   color:
-          //                       _outFirstDigit == 0
-          //                           ? ColorManager.transparent
-          //                           : ColorManager.white,
-          //                 ),
-          //               ),
-          //               const SizedBox(width: 10), // Space between digits
-          //               AnimatedFlipCounter(
-          //                 value: _outSecondDigit,
-          //                 textStyle: Theme.of(
-          //                   context,
-          //                 ).textTheme.titleLarge!.copyWith(
-          //                   fontSize: AppSize.s128,
-          //                   fontWeight: FontWeight.bold,
-          //                   color: ColorManager.white,
-          //                 ),
-          //               ),
-          //             ],
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //
-          //     // Team B Score
-          //     Flexible(
-          //       flex: 1,
-          //       child: Container(
-          //         width: context.widthPercent(50),
-          //         height: context.heightPercent(45),
-          //         padding: EdgeInsets.symmetric(horizontal: 10),
-          //         child: FittedBox(
-          //           fit: BoxFit.fitWidth,
-          //           child: Row(
-          //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //             children: [
-          //               AnimatedFlipCounter(
-          //                 value: _inFirstDigit,
-          //                 textStyle: Theme.of(
-          //                   context,
-          //                 ).textTheme.titleLarge!.copyWith(
-          //                   fontSize: AppSize.s128,
-          //                   fontWeight: FontWeight.bold,
-          //                   color:
-          //                       _inFirstDigit == 0
-          //                           ? ColorManager.transparent
-          //                           : ColorManager.white,
-          //                 ),
-          //               ),
-          //               const SizedBox(width: 10), // Space between digits
-          //               AnimatedFlipCounter(
-          //                 value: _inSecondDigit,
-          //                 textStyle: Theme.of(
-          //                   context,
-          //                 ).textTheme.titleLarge!.copyWith(
-          //                   fontSize: AppSize.s128,
-          //                   fontWeight: FontWeight.bold,
-          //                   color: ColorManager.white,
-          //                 ),
-          //               ),
-          //             ],
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          //
-          // // Buttons Row (Team A and Team B buttons)
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //   children: [
-          //     // Team A Buttons
-          //     _buildButtonColumn(1, 'first'),
-          //     const SizedBox(width: 30), // Space between buttons
-          //     _buildButtonColumn(1, 'second'),
-          //     const SizedBox(width: 120), // Space between teams
-          //     // Team B Buttons
-          //     _buildButtonColumn(2, 'first'),
-          //     const SizedBox(width: 30), // Space between buttons
-          //     _buildButtonColumn(2, 'second'),
-          //   ],
-          // ),
-        ],
-      ),
-    );
   }
 
   // Helper widget to create buttons for each digit
@@ -308,53 +187,57 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
 
   Widget _buildFlipperCounter(int digit) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final double currentAvailableWidth = constraints.maxWidth;
-        final double currentAvailableHeight = constraints.maxHeight;
-
-        // Ensure constraints are valid before passing to SizedBox/FittedBox
-        if (!currentAvailableWidth.isFinite ||
-            currentAvailableWidth <= 0 ||
-            !currentAvailableHeight.isFinite ||
-            currentAvailableHeight <= 0) {
-          print(
-            '[FittedBox Approach] Constraints are not valid. Rendering empty. W: $currentAvailableWidth, H: $currentAvailableHeight',
-          );
-          // Return an empty SizedBox or the unscaled counter if constraints are bad
-          return AnimatedFlipCounter(
-            value: digit, // Default unscaled
-            textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontSize: AppSize.s128,
-              fontWeight: FontWeight.bold,
-              color: digit == 0 ? ColorManager.transparent : ColorManager.white,
-            ),
-          );
-        }
-
-        return SizedBox(
-          width: currentAvailableWidth,
-          height: currentAvailableHeight,
-          child: FittedBox(
-            alignment: Alignment.topCenter,
-            fit:
-                BoxFit
-                    .fitWidth, // This is key: stretches to fill both dimensions
-            child: AnimatedFlipCounter(
-              value: digit,
-              textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-                fontSize:
-                    AppSize.s128, // Provide a good base font size for quality
-                fontWeight: FontWeight.bold,
-                // For FittedBox, TextStyle.height: 1.0 can sometimes help ensure a tighter intrinsic bound
-                // You can also try null (default) to see if it behaves differently.
-                height: 1.0,
-                color:
-                    digit == 0 ? ColorManager.transparent : ColorManager.white,
-              ),
-            ),
+      builder: (context, constraints) {
+        double height = constraints.maxHeight;
+        return AnimatedFlipCounter(
+          value: digit,
+          textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+            fontSize: height, // Provide a good base font size for quality
+            fontWeight: FontWeight.bold,
+            // For FittedBox, TextStyle.height: 1.0 can sometimes help ensure a tighter intrinsic bound
+            // You can also try null (default) to see if it behaves differently.
+            height: 1.0,
+            color: digit == 0 ? ColorManager.transparent : ColorManager.white,
           ),
         );
       },
     );
+    // return LayoutBuilder(
+    //   builder: (BuildContext context, BoxConstraints constraints) {
+    //     final double currentAvailableWidth = constraints.maxWidth;
+    //     final double currentAvailableHeight = constraints.maxHeight;
+    //
+    //     // Ensure constraints are valid before passing to SizedBox/FittedBox
+    //     if (!currentAvailableWidth.isFinite ||
+    //         currentAvailableWidth <= 0 ||
+    //         !currentAvailableHeight.isFinite ||
+    //         currentAvailableHeight <= 0) {
+    //       print(
+    //         '[FittedBox Approach] Constraints are not valid. Rendering empty. W: $currentAvailableWidth, H: $currentAvailableHeight',
+    //       );
+    //       // Return an empty SizedBox or the unscaled counter if constraints are bad
+    //       return AnimatedFlipCounter(
+    //         value: digit, // Default unscaled
+    //         textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+    //           fontSize: AppSize.s128,
+    //           fontWeight: FontWeight.bold,
+    //           color: digit == 0 ? ColorManager.transparent : ColorManager.white,
+    //         ),
+    //       );
+    //     }
+    //
+    //     return SizedBox(
+    //       width: currentAvailableWidth,
+    //       height: currentAvailableHeight,
+    //       child: FittedBox(
+    //         alignment: Alignment.topCenter,
+    //         fit:
+    //             BoxFit
+    //                 .fitWidth, // This is key: stretches to fill both dimensions
+    //         child:
+    //       ),
+    //     );
+    //   },
+    // );
   }
 }
