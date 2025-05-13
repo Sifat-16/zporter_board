@@ -186,58 +186,66 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
   }
 
   Widget _buildFlipperCounter(int digit) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double height = constraints.maxHeight;
-        return AnimatedFlipCounter(
-          value: digit,
-          textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-            fontSize: height, // Provide a good base font size for quality
-            fontWeight: FontWeight.bold,
-            // For FittedBox, TextStyle.height: 1.0 can sometimes help ensure a tighter intrinsic bound
-            // You can also try null (default) to see if it behaves differently.
-            height: 1.0,
-            color: digit == 0 ? ColorManager.transparent : ColorManager.white,
-          ),
-        );
-      },
-    );
     // return LayoutBuilder(
-    //   builder: (BuildContext context, BoxConstraints constraints) {
-    //     final double currentAvailableWidth = constraints.maxWidth;
-    //     final double currentAvailableHeight = constraints.maxHeight;
-    //
-    //     // Ensure constraints are valid before passing to SizedBox/FittedBox
-    //     if (!currentAvailableWidth.isFinite ||
-    //         currentAvailableWidth <= 0 ||
-    //         !currentAvailableHeight.isFinite ||
-    //         currentAvailableHeight <= 0) {
-    //       print(
-    //         '[FittedBox Approach] Constraints are not valid. Rendering empty. W: $currentAvailableWidth, H: $currentAvailableHeight',
-    //       );
-    //       // Return an empty SizedBox or the unscaled counter if constraints are bad
-    //       return AnimatedFlipCounter(
-    //         value: digit, // Default unscaled
-    //         textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-    //           fontSize: AppSize.s128,
-    //           fontWeight: FontWeight.bold,
-    //           color: digit == 0 ? ColorManager.transparent : ColorManager.white,
-    //         ),
-    //       );
-    //     }
-    //
-    //     return SizedBox(
-    //       width: currentAvailableWidth,
-    //       height: currentAvailableHeight,
-    //       child: FittedBox(
-    //         alignment: Alignment.topCenter,
-    //         fit:
-    //             BoxFit
-    //                 .fitWidth, // This is key: stretches to fill both dimensions
-    //         child:
+    //   builder: (context, constraints) {
+    //     double height = constraints.maxHeight;
+    //     return AnimatedFlipCounter(
+    //       value: digit,
+    //       textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+    //         fontSize: height, // Provide a good base font size for quality
+    //         fontWeight: FontWeight.bold,
+    //         height: 1.0,
+    //         color: digit == 0 ? ColorManager.transparent : ColorManager.white,
     //       ),
     //     );
     //   },
     // );
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double currentAvailableWidth = constraints.maxWidth;
+        final double currentAvailableHeight = constraints.maxHeight;
+
+        // Ensure constraints are valid before passing to SizedBox/FittedBox
+        if (!currentAvailableWidth.isFinite ||
+            currentAvailableWidth <= 0 ||
+            !currentAvailableHeight.isFinite ||
+            currentAvailableHeight <= 0) {
+          print(
+            '[FittedBox Approach] Constraints are not valid. Rendering empty. W: $currentAvailableWidth, H: $currentAvailableHeight',
+          );
+          // Return an empty SizedBox or the unscaled counter if constraints are bad
+          return AnimatedFlipCounter(
+            value: digit, // Default unscaled
+            textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+              fontSize: AppSize.s128,
+              fontWeight: FontWeight.bold,
+              color: digit == 0 ? ColorManager.transparent : ColorManager.white,
+            ),
+          );
+        }
+
+        return SizedBox(
+          width: currentAvailableWidth,
+          height: currentAvailableHeight,
+          child: FittedBox(
+            alignment: Alignment.topCenter,
+            fit:
+                BoxFit
+                    .fitWidth, // This is key: stretches to fill both dimensions
+            child: AnimatedFlipCounter(
+              value: digit,
+              textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+                fontSize:
+                    AppSize.s128, // Provide a good base font size for quality
+                fontWeight: FontWeight.bold,
+                height: 1.0,
+                color:
+                    digit == 0 ? ColorManager.transparent : ColorManager.white,
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
