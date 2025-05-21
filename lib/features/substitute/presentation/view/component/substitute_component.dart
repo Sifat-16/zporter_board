@@ -4,6 +4,7 @@ import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/substitute/data/model/substitution.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 class SubstituteComponent extends StatefulWidget {
   const SubstituteComponent({
@@ -88,6 +89,7 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
         if (digit == 'first' && _outFirstDigit > 0) {
           _outFirstDigit--;
         } else if (digit == 'second' && _outSecondDigit > 0) {
+          zlog(data: "Out first is decrementing");
           _outSecondDigit--;
         }
       } else {
@@ -114,7 +116,12 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                   width: context.widthPercent(25),
                   child: Column(
                     children: [
-                      Expanded(child: _buildFlipperCounter(_outFirstDigit)),
+                      Expanded(
+                        child: _buildFlipperCounter(
+                          _outFirstDigit,
+                          isZeroAllowed: false,
+                        ),
+                      ),
                       _buildButtonColumn(1, 'first'),
                     ],
                   ),
@@ -123,7 +130,12 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                   width: context.widthPercent(25),
                   child: Column(
                     children: [
-                      Expanded(child: _buildFlipperCounter(_outSecondDigit)),
+                      Expanded(
+                        child: _buildFlipperCounter(
+                          _outSecondDigit,
+                          isZeroAllowed: true,
+                        ),
+                      ),
                       _buildButtonColumn(1, 'second'),
                     ],
                   ),
@@ -138,7 +150,12 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                   width: context.widthPercent(25),
                   child: Column(
                     children: [
-                      Expanded(child: _buildFlipperCounter(_inFirstDigit)),
+                      Expanded(
+                        child: _buildFlipperCounter(
+                          _inFirstDigit,
+                          isZeroAllowed: false,
+                        ),
+                      ),
                       _buildButtonColumn(2, 'first'),
                     ],
                   ),
@@ -147,7 +164,12 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
                   width: context.widthPercent(25),
                   child: Column(
                     children: [
-                      Expanded(child: _buildFlipperCounter(_inSecondDigit)),
+                      Expanded(
+                        child: _buildFlipperCounter(
+                          _inSecondDigit,
+                          isZeroAllowed: true,
+                        ),
+                      ),
                       _buildButtonColumn(2, 'second'),
                     ],
                   ),
@@ -185,7 +207,7 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
     );
   }
 
-  Widget _buildFlipperCounter(int digit) {
+  Widget _buildFlipperCounter(int digit, {required bool isZeroAllowed}) {
     // return LayoutBuilder(
     //   builder: (context, constraints) {
     //     double height = constraints.maxHeight;
@@ -200,6 +222,7 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
     //     );
     //   },
     // );
+
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double currentAvailableWidth = constraints.maxWidth;
@@ -218,8 +241,12 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
             value: digit, // Default unscaled
             textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontSize: AppSize.s128,
+              fontFamily: 'monospaced',
               fontWeight: FontWeight.bold,
-              color: digit == 0 ? ColorManager.transparent : ColorManager.white,
+              color:
+                  (!isZeroAllowed && digit == 0)
+                      ? ColorManager.transparent
+                      : ColorManager.white,
             ),
           );
         }
@@ -235,12 +262,15 @@ class _SubstituteComponentState extends State<SubstituteComponent> {
             child: AnimatedFlipCounter(
               value: digit,
               textStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+                fontFamily: 'monospaced',
                 fontSize:
                     AppSize.s128, // Provide a good base font size for quality
                 fontWeight: FontWeight.bold,
                 height: 1.0,
                 color:
-                    digit == 0 ? ColorManager.transparent : ColorManager.white,
+                    (!isZeroAllowed && digit == 0)
+                        ? ColorManager.transparent
+                        : ColorManager.white,
               ),
             ),
           ),
