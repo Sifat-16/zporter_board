@@ -58,6 +58,9 @@ android {
         release {
 //            signingConfig signingConfigs.release
             signingConfig = signingConfigs.getByName("release")
+            isShrinkResources = false
+            isMinifyEnabled = false
+            isCrunchPngs = false
         }
 
     }

@@ -335,18 +335,6 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
       color: ColorManager.black,
       child: Stack(
         children: [
-          // Content Area
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: SizedBox(
-              height:
-                  screenDisplayWidget is! TacticboardScreen
-                      ? context.screenHeight * .92
-                      : null,
-              child: screenDisplayWidget,
-            ),
-          ),
-
           // TabBar Container
           Align(
             alignment: Alignment.topCenter,
@@ -393,6 +381,17 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
                       }).toList(),
                 ),
               ),
+            ),
+          ),
+          // Content Area
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+              height:
+                  screenDisplayWidget is! TacticboardScreen
+                      ? context.screenHeight * .92
+                      : null,
+              child: screenDisplayWidget,
             ),
           ),
         ],
