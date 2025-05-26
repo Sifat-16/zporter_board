@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/dialog/confirmation_dialog.dart';
+import 'package:zporter_board/core/common/components/z_loader.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_event.dart';
@@ -49,7 +50,9 @@ class _PeriodAddMatchDeleteComponentState
       },
       builder: (context, state) {
         if (state.isLoading) {
-          return Center(child: CircularProgressIndicator());
+          return Center(
+            child: ZLoader(logoAssetPath: "assets/image/logo.png"),
+          );
         }
 
         return Padding(
@@ -69,7 +72,6 @@ class _PeriodAddMatchDeleteComponentState
                       color: ColorManager.white,
                     ),
                   ),
-
                 if (widget.showDelete)
                   IconButton(
                     onPressed: () async {

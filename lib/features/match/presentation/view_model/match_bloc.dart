@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/timer/timer_contol_buttons.dart';
+import 'package:zporter_board/core/common/components/z_loader.dart';
 import 'package:zporter_board/core/services/navigation_service.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
 import 'package:zporter_board/core/utils/match/match_utils.dart';
@@ -46,16 +47,16 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     required UpdateSubUseCase updateSubUseCase,
     required CreatePeriodUseCase createPeriodUseCase,
     required UpdateMatchPeriodUseCase updateMatchPeriodUseCase,
-  }) : _fetchMatchUsecase = fetchMatchUsecase,
-       _updateMatchScoreUsecase = updateMatchScoreUsecase,
-       _updateMatchTimeUsecase = updateMatchTimeUsecase,
-       _createNewMatchUseCase = createNewMatchUseCase,
-       _deleteMatchUseCase = deleteMatchUseCase,
-       _clearMatchDbUseCase = clearMatchDbUseCase,
-       _updateSubUseCase = updateSubUseCase,
-       _createPeriodUseCase = createPeriodUseCase,
-       _updateMatchPeriodUseCase = updateMatchPeriodUseCase,
-       super(MatchState.initial()) {
+  })  : _fetchMatchUsecase = fetchMatchUsecase,
+        _updateMatchScoreUsecase = updateMatchScoreUsecase,
+        _updateMatchTimeUsecase = updateMatchTimeUsecase,
+        _createNewMatchUseCase = createNewMatchUseCase,
+        _deleteMatchUseCase = deleteMatchUseCase,
+        _clearMatchDbUseCase = clearMatchDbUseCase,
+        _updateSubUseCase = updateSubUseCase,
+        _createPeriodUseCase = createPeriodUseCase,
+        _updateMatchPeriodUseCase = updateMatchPeriodUseCase,
+        super(MatchState.initial()) {
     on<MatchLoadEvent>(_onLoadMatches);
     on<MatchPeriodSelectEvent>(_onMatchPeriodSelected);
     on<MatchScoreUpdateEvent>(_onMatchScoreUpdate);
@@ -163,13 +164,11 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
                 "Another timer ($runningTimersString) is currently active. Starting this timer will automatically stop the running one. Do you want to continue?";
           } else {
             // Message for multiple running timers
-            runningTimersString = runningPeriods
-                .map((period) {
-                  return "Period ${period.periodNumber + 1}${period.extraPeriodStatus == TimeActiveStatus.RUNNING ? " (extra)" : ""}";
-                })
-                .join(
-                  ", ",
-                ); // Join with commas, e.g., "Period 1, Period 2 (extra)"
+            runningTimersString = runningPeriods.map((period) {
+              return "Period ${period.periodNumber + 1}${period.extraPeriodStatus == TimeActiveStatus.RUNNING ? " (extra)" : ""}";
+            }).join(
+              ", ",
+            ); // Join with commas, e.g., "Period 1, Period 2 (extra)"
             dialogTitle = "Multiple Timers Running!";
             dialogContent =
                 "The following timers are currently active: $runningTimersString. Starting this timer will automatically stop all running timers. Do you want to continue?";
@@ -215,12 +214,11 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
                     matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
                     matchPeriodId:
                         periodToStop.periodNumber, // ID of the period to stop
-                    timerMode:
-                        periodToStop.extraPeriodStatus ==
-                                TimeActiveStatus.RUNNING
-                            ? TimerMode
-                                .EXTRA // Determine mode from the period being stopped
-                            : TimerMode.UP,
+                    timerMode: periodToStop.extraPeriodStatus ==
+                            TimeActiveStatus.RUNNING
+                        ? TimerMode
+                            .EXTRA // Determine mode from the period being stopped
+                        : TimerMode.UP,
                   ),
                 );
                 zlog(
@@ -290,7 +288,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     CreateNewMatchEvent event,
     Emitter<MatchState> emit,
   ) async {
-    BotToast.showLoading();
+    showZLoader();
     try {
       FootballMatch newMatch = await _createNewMatchUseCase.call(null);
 
@@ -311,7 +309,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     DeleteMatchEvent event,
     Emitter<MatchState> emit,
   ) async {
-    BotToast.showLoading();
+    showZLoader();
     try {
       bool isDeleted = await _deleteMatchUseCase.call(state.match?.id ?? "");
       if (isDeleted) {

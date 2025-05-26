@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ class RouteGenerator {
   RouteGenerator() {
     router = GoRouter(
       navigatorKey: _rootNavigatorKey,
-      observers: [],
+      observers: [BotToastNavigatorObserver()],
       initialLocation: '/',
       errorBuilder: (context, state) {
         return PageUnderConstructionScreen(error: state.error.toString());
@@ -30,17 +31,14 @@ class RouteGenerator {
       routes: [
         GoRoute(
           path: '/',
-          pageBuilder:
-              (context, state) =>
-                  NoTransitionPage(child: SplashScreen(key: state.pageKey)),
+          pageBuilder: (context, state) =>
+              NoTransitionPage(child: SplashScreen(key: state.pageKey)),
         ),
-
         GoRoute(
           name: Routes.auth,
           path: '/auth',
           builder: (context, state) => const AuthScreen(),
         ),
-
         GoRoute(
           name: Routes.board,
           path: '/board',
