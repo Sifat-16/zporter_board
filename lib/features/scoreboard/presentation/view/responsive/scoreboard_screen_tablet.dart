@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:zporter_board/core/helper/board_container_space_helper.dart';
 import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/match/presentation/view/component/match_pagination_component.dart';
@@ -26,61 +25,66 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    double height = getBoardHeightLeft(context);
+
     return BlocConsumer<MatchBloc, MatchState>(
       builder: (context, state) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(
-              height: height * .15,
-              child: ScoreBoardHeader(matchPeriod: state.selectedPeriod),
-            ),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            double height = constraints.maxHeight;
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  height: height * .15,
+                  child: ScoreBoardHeader(matchPeriod: state.selectedPeriod),
+                ),
 
-            SizedBox(
-              height: height * .75,
-              child: ScoreCard(
-                matchScore: state.match?.matchScore,
-                updateMatchScore: (matchScore) {
-                  if (state.match != null) {
-                    context.read<MatchBloc>().add(
-                      MatchScoreUpdateEvent(
-                        newScore: matchScore,
-                        matchId: state.match?.id ?? "",
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
-
-            SizedBox(
-              height: height * .1,
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 10.0),
-                      child: Image.asset(
-                        AssetsManager.logo,
-                        height: AppSize.s40,
-                        width: AppSize.s40,
-                      ),
-                    ),
+                SizedBox(
+                  height: height * .75,
+                  child: ScoreCard(
+                    matchScore: state.match?.matchScore,
+                    updateMatchScore: (matchScore) {
+                      if (state.match != null) {
+                        context.read<MatchBloc>().add(
+                          MatchScoreUpdateEvent(
+                            newScore: matchScore,
+                            matchId: state.match?.id ?? "",
+                          ),
+                        );
+                      }
+                    },
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                ),
+
+                SizedBox(
+                  height: height * .1,
+                  child: Stack(
                     children: [
-                      LockRotateButtonWidget(),
-                      PeriodPaginationComponent(),
-                      PeriodAddMatchDeleteComponent(),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 10.0),
+                          child: Image.asset(
+                            AssetsManager.logo,
+                            height: AppSize.s40,
+                            width: AppSize.s40,
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          LockRotateButtonWidget(),
+                          PeriodPaginationComponent(),
+                          PeriodAddMatchDeleteComponent(),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         );
       },
       listener: (BuildContext context, MatchState state) {},

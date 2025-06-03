@@ -39,8 +39,8 @@ class _AppState extends State<App> {
             locale: DevicePreview.locale(context),
             builder: (context, child) {
               final botToastBuilder = BotToastInit();
-              child = botToastBuilder(context, child);
               child = DevicePreview.appBuilder(context, child);
+              child = botToastBuilder(context, child);
               return child;
             },
             debugShowCheckedModeBanner: false,

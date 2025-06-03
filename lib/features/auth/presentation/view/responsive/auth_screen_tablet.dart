@@ -2,6 +2,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:zporter_board/core/common/components/z_loader.dart';
 import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/resource_manager/route_manager.dart';
@@ -52,10 +53,7 @@ class _AuthScreenTabletState extends State<AuthScreenTablet> {
                   return SizedBox(
                     height: AppSize.s24, // Set proper height
                     width: AppSize.s24, // Set proper width
-                    child: CircularProgressIndicator(
-                      color: ColorManager.white,
-                      strokeWidth: 2, // Adjust thickness
-                    ),
+                    child: ZLoader(logoAssetPath: "assets/image/logo.png"),
                   );
                 }
 
@@ -72,8 +70,8 @@ class _AuthScreenTabletState extends State<AuthScreenTablet> {
                     Text(
                       "Login with Zporter",
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 );

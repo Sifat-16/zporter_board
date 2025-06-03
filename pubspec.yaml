@@ -16,10 +16,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+5
+version: 1.0.0+10
 
 environment:
-  sdk: ^3.7.0-323.0.dev
+  sdk: '>=3.4.3 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -58,7 +58,7 @@ dependencies:
   uuid: ^4.5.1
   flutter_drawing_board: ^0.9.5
   visibility_detector: ^0.4.0+2
-  intl: ^0.19.0
+  intl: ^0.20.2
   angle_utils: ^0.0.4
   matrix_gesture_detector_pro: ^1.0.0
   input_quantity: ^2.5.1
@@ -69,7 +69,6 @@ dependencies:
     git:
       url: https://github.com/Sifat-16/zporter_tactical_board.git
       ref: app
-
   flutter_launcher_icons: ^0.14.3
   flutter_slider_drawer: ^3.0.2
   font_awesome_flutter: ^10.8.0
@@ -80,6 +79,8 @@ dependencies:
   firebase_performance: ^0.10.1+5
   firebase_crashlytics: ^4.3.5
   firebase_analytics: ^11.4.5
+  share_plus: ^11.0.0
+  screen_recorder: ^0.3.0
 
 
 
