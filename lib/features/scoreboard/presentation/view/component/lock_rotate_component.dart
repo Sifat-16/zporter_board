@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:zporter_board/core/common/components/button/button_with_divider.dart';
 
 class LockRotateButtonWidget extends StatefulWidget {
-  const LockRotateButtonWidget({super.key});
+  const LockRotateButtonWidget({super.key, required this.onLocked});
+
+  final Function(bool isLocked) onLocked;
 
   @override
   _LockRotateButtonWidgetState createState() => _LockRotateButtonWidgetState();
 }
 
 class _LockRotateButtonWidgetState extends State<LockRotateButtonWidget> {
-  String selected = "lock"; // Track the selected button
+  String selected = "rotate"; // Track the selected button
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +26,7 @@ class _LockRotateButtonWidgetState extends State<LockRotateButtonWidget> {
             setState(() {
               selected = "lock";
             });
+            widget.onLocked.call(true);
           },
         ),
         // Down Button
@@ -34,6 +37,7 @@ class _LockRotateButtonWidgetState extends State<LockRotateButtonWidget> {
             setState(() {
               selected = "rotate";
             });
+            widget.onLocked.call(false);
           },
         ),
       ],

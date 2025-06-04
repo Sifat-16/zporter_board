@@ -49,12 +49,12 @@ class _TimerUpComponentState extends State<TimerUpComponent> {
                   letterSpacing: 20,
                   onRunOut: () {
                     context.read<MatchBloc>().add(
-                      MatchTimeUpdateEvent(
-                        periodId: selectedPeriod!.periodNumber,
-                        timerMode: TimerMode.UP,
-                        matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
-                      ),
-                    );
+                          MatchTimeUpdateEvent(
+                            periodId: selectedPeriod!.periodNumber,
+                            timerMode: TimerMode.UP,
+                            matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
+                          ),
+                        );
                   },
                   isRunning: matchTimeStatus.isRunning,
                   textSize: AppSize.s180,
@@ -75,30 +75,39 @@ class _TimerUpComponentState extends State<TimerUpComponent> {
                 status: state.selectedPeriod?.upPeriodStatus,
                 onStart: () {
                   context.read<MatchBloc>().add(
-                    MatchTimeUpdateEvent(
-                      matchTimeUpdateStatus: MatchTimeUpdateStatus.START,
-                      periodId: state.selectedPeriod?.periodNumber ?? -1,
-                      timerMode: TimerMode.UP,
-                    ),
-                  );
+                        MatchTimeUpdateEvent(
+                          matchTimeUpdateStatus: MatchTimeUpdateStatus.START,
+                          periodId: state.selectedPeriod?.periodNumber ?? -1,
+                          timerMode: TimerMode.UP,
+                        ),
+                      );
                 },
                 onPause: () {
                   context.read<MatchBloc>().add(
-                    MatchTimeUpdateEvent(
-                      matchTimeUpdateStatus: MatchTimeUpdateStatus.PAUSE,
-                      periodId: state.selectedPeriod?.periodNumber ?? -1,
-                      timerMode: TimerMode.UP,
-                    ),
-                  );
+                        MatchTimeUpdateEvent(
+                          matchTimeUpdateStatus: MatchTimeUpdateStatus.PAUSE,
+                          periodId: state.selectedPeriod?.periodNumber ?? -1,
+                          timerMode: TimerMode.UP,
+                        ),
+                      );
                 },
                 onStop: () {
                   context.read<MatchBloc>().add(
-                    MatchTimeUpdateEvent(
-                      periodId: state.selectedPeriod?.periodNumber ?? -1,
-                      matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
-                      timerMode: TimerMode.UP,
-                    ),
-                  );
+                        MatchTimeUpdateEvent(
+                          periodId: state.selectedPeriod?.periodNumber ?? -1,
+                          matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
+                          timerMode: TimerMode.UP,
+                        ),
+                      );
+                },
+                onReset: () {
+                  context.read<MatchBloc>().add(
+                        MatchTimeUpdateEvent(
+                          periodId: state.selectedPeriod?.periodNumber ?? -1,
+                          matchTimeUpdateStatus: MatchTimeUpdateStatus.RESET,
+                          timerMode: TimerMode.UP,
+                        ),
+                      );
                 },
               ),
             ),

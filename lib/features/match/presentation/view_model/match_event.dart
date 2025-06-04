@@ -5,7 +5,7 @@ import 'package:zporter_board/features/substitute/data/model/substitution.dart';
 import 'package:zporter_board/features/time/data/model/match_time.dart';
 import 'package:zporter_board/features/time/presentation/view/component/timer_mode_widget.dart';
 
-enum MatchTimeUpdateStatus { START, PAUSE, STOP }
+enum MatchTimeUpdateStatus { START, PAUSE, STOP, RESET }
 
 class MatchEvent extends Equatable {
   @override

@@ -20,6 +20,7 @@ class ScoreboardScreenTablet extends StatefulWidget {
 
 class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet>
     with AutomaticKeepAliveClientMixin {
+  bool isLocked = false;
   // FootballMatch? footballMatch;
 
   @override
@@ -38,24 +39,23 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet>
                   height: height * .15,
                   child: ScoreBoardHeader(matchPeriod: state.selectedPeriod),
                 ),
-
                 SizedBox(
                   height: height * .75,
                   child: ScoreCard(
                     matchScore: state.match?.matchScore,
+                    isLocked: isLocked,
                     updateMatchScore: (matchScore) {
                       if (state.match != null) {
                         context.read<MatchBloc>().add(
-                          MatchScoreUpdateEvent(
-                            newScore: matchScore,
-                            matchId: state.match?.id ?? "",
-                          ),
-                        );
+                              MatchScoreUpdateEvent(
+                                newScore: matchScore,
+                                matchId: state.match?.id ?? "",
+                              ),
+                            );
                       }
                     },
                   ),
                 ),
-
                 SizedBox(
                   height: height * .1,
                   child: Stack(
@@ -74,7 +74,13 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          LockRotateButtonWidget(),
+                          LockRotateButtonWidget(
+                            onLocked: (b) {
+                              setState(() {
+                                isLocked = b;
+                              });
+                            },
+                          ),
                           PeriodPaginationComponent(),
                           PeriodAddMatchDeleteComponent(),
                         ],

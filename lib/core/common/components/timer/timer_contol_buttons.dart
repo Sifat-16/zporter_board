@@ -1,12 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 
-enum TimeActiveStatus { RUNNING, PAUSED, STOPPED }
+enum TimeActiveStatus { RUNNING, PAUSED, STOPPED, RESET }
 
 class TimerControlButtons extends StatefulWidget {
   final VoidCallback onStart;
   final VoidCallback onPause;
   final VoidCallback onStop;
+  final VoidCallback onReset;
   final TimeActiveStatus initialStatus;
 
   const TimerControlButtons({
@@ -14,6 +16,7 @@ class TimerControlButtons extends StatefulWidget {
     required this.onStart,
     required this.onPause,
     required this.onStop,
+    required this.onReset,
     this.initialStatus = TimeActiveStatus.PAUSED,
   });
 
@@ -50,6 +53,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 20,
       children: [
         // Start Button
         TimerButton(
@@ -61,8 +65,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
             // _setActiveButton(TimeActiveStatus.RUNNING);
           },
         ),
-        SizedBox(width: 20),
-        // Pause Button
+
         TimerButton(
           icon: Icons.pause_circle_outline,
           label: 'Pause',
@@ -72,14 +75,23 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
             // _setActiveButton(TimeActiveStatus.PAUSED);
           },
         ),
-        SizedBox(width: 20),
-        // Stop Button
+
         TimerButton(
           icon: Icons.stop,
           label: 'Stop',
           isActive: _activeStatus == TimeActiveStatus.STOPPED,
           onPressed: () {
             widget.onStop();
+            // _setActiveButton(TimeActiveStatus.STOPPED);
+          },
+        ),
+
+        TimerButton(
+          icon: CupertinoIcons.restart,
+          label: 'Reset',
+          isActive: _activeStatus == TimeActiveStatus.RESET,
+          onPressed: () {
+            widget.onReset();
             // _setActiveButton(TimeActiveStatus.STOPPED);
           },
         ),
@@ -114,14 +126,13 @@ class TimerButton extends StatelessWidget {
             color: isActive ? ColorManager.green : ColorManager.grey,
           ),
         ),
-
         SizedBox(height: 5),
         Text(
           label,
           style: Theme.of(context).textTheme.titleMedium!.copyWith(
-            color: ColorManager.white,
-            fontWeight: FontWeight.bold,
-          ),
+                color: ColorManager.white,
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );

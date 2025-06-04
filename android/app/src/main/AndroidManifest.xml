@@ -4,9 +4,7 @@
     <application
         android:label="Football Pad"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon"
-
-        >
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"

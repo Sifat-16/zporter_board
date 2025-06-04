@@ -12,11 +12,13 @@ class TimeManagerComponent extends StatelessWidget {
     required this.onStart,
     required this.onPause,
     required this.onStop,
+    required this.onReset,
     this.status,
   });
   final VoidCallback onStart;
   final VoidCallback onPause;
   final VoidCallback onStop;
+  final VoidCallback onReset;
 
   final MatchPeriod? matchPeriod;
   final TimeActiveStatus? status;
@@ -31,13 +33,13 @@ class TimeManagerComponent extends StatelessWidget {
             onStart: onStart,
             onPause: onPause,
             onStop: onStop,
-            initialStatus:
-                MatchUtils.getMatchTime(
-                          matchPeriod?.intervals ?? [],
-                        ).isRunning ==
-                        true
-                    ? TimeActiveStatus.RUNNING
-                    : status == null
+            onReset: onReset,
+            initialStatus: MatchUtils.getMatchTime(
+                      matchPeriod?.intervals ?? [],
+                    ).isRunning ==
+                    true
+                ? TimeActiveStatus.RUNNING
+                : status == null
                     ? TimeActiveStatus.PAUSED
                     : status!,
           ),
