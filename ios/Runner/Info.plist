@@ -47,6 +47,13 @@
 		<key>UIStatusBarHidden</key>
 		<false/>
 
+		<key>LSApplicationQueriesSchemes</key>
+        <array>
+          <string>sms</string>
+          <string>tel</string>
+        </array>
+
+
 		<key>GIDClientID</key>
         <string>623338569626-bcgqsjoncdn99ttgldebae78k7j91mcp.apps.googleusercontent.com</string>
         <key>CFBundleURLTypes</key>

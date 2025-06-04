@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/board_container.dart';
+import 'package:zporter_board/core/common/components/links/zporter_logo_launcher.dart';
 import 'package:zporter_board/core/extension/size_extension.dart';
-import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
-import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/presentation/view/component/period_add_match_delete_component.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
@@ -145,11 +144,12 @@ class _SubstituteboardScreenTabletState
                           alignment: Alignment.centerRight,
                           child: Padding(
                             padding: const EdgeInsets.only(right: 10.0),
-                            child: Image.asset(
-                              AssetsManager.logo,
-                              height: AppSize.s40,
-                              width: AppSize.s40,
-                            ),
+                            // child: Image.asset(
+                            //   AssetsManager.logo,
+                            //   height: AppSize.s40,
+                            //   width: AppSize.s40,
+                            // ),
+                            child: ZporterLogoLauncher(),
                           ),
                         ),
                         Row(

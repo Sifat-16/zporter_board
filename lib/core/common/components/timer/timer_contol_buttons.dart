@@ -87,7 +87,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
         ),
 
         TimerButton(
-          icon: CupertinoIcons.restart,
+          icon: CupertinoIcons.refresh,
           label: 'Reset',
           isActive: _activeStatus == TimeActiveStatus.RESET,
           onPressed: () {
