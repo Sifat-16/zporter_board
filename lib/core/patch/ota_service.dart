@@ -201,13 +201,15 @@ class OTAService {
     // Check whether a new update is available.
     final status = await updater.checkForUpdate();
 
+    print("Check the status of updater on thji ${status}");
+
     if (status == UpdateStatus.outdated) {
       try {
-        // Perform the update
         showUpdatingStickySnackbar();
         updater.update().then((t) {
           showRestartStickySnackbar();
         });
+        // Perform the update
       } on UpdateException catch (error) {
         // Handle any errors that occur while updating.
       }

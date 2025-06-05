@@ -88,6 +88,7 @@ class _TimerControlButtonsState extends State<TimerControlButtons> {
 
         TimerButton(
           icon: CupertinoIcons.refresh,
+          scale: .8,
           label: 'Reset',
           isActive: _activeStatus == TimeActiveStatus.RESET,
           onPressed: () {
@@ -105,13 +106,14 @@ class TimerButton extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onPressed;
+  final double scale;
 
-  const TimerButton({
-    required this.icon,
-    required this.label,
-    required this.isActive,
-    required this.onPressed,
-  });
+  const TimerButton(
+      {required this.icon,
+      required this.label,
+      required this.isActive,
+      required this.onPressed,
+      this.scale = 1});
 
   @override
   Widget build(BuildContext context) {
@@ -120,10 +122,13 @@ class TimerButton extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: onPressed,
-          child: Icon(
-            icon,
-            size: 40,
-            color: isActive ? ColorManager.green : ColorManager.grey,
+          child: Transform.scale(
+            scale: scale,
+            child: Icon(
+              icon,
+              size: 40,
+              color: isActive ? ColorManager.green : ColorManager.grey,
+            ),
           ),
         ),
         SizedBox(height: 5),

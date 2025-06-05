@@ -54,6 +54,8 @@
         </array>
 
 
+
+
 		<key>GIDClientID</key>
         <string>623338569626-bcgqsjoncdn99ttgldebae78k7j91mcp.apps.googleusercontent.com</string>
         <key>CFBundleURLTypes</key>
@@ -69,5 +71,12 @@
         		</array>
         	</dict>
         </array>
+
+        <key>UIFileSharingEnabled</key>
+        <true/>
+        <key>NSPhotoLibraryUsageDescription</key>
+        <string>Load photos for sharing functionality</string>
+        <key>UIViewControllerBasedStatusBarAppearance</key>
+        <false/>
 	</dict>
 </plist>
