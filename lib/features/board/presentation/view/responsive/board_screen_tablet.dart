@@ -203,13 +203,13 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
     Widget screenDisplayWidget = _buildScreens(selectedScreen);
 
     // Full screen mode for tactics
-    if (isFullScreenTactics && selectedScreen == Screens.TACTICS) {
-      return Material(
-        color: ColorManager.black,
-        child:
-            screenDisplayWidget, // TacticboardScreen handles its own layout fully
-      );
-    }
+    // if (isFullScreenTactics && selectedScreen == Screens.TACTICS) {
+    //   return Material(
+    //     color: ColorManager.black,
+    //     child:
+    //         screenDisplayWidget, // TacticboardScreen handles its own layout fully
+    //   );
+    // }
 
     // Standard layout with TabBar
     return Material(
