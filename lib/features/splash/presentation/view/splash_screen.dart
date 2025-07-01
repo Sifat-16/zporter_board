@@ -44,7 +44,10 @@ class _SplashScreenState extends ResponsiveScreenState<SplashScreen>
       begin: const Offset(0, 0),
       end: const Offset(1.5, -1.5),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutExpo));
-    context.read<AuthBloc>().add(AuthStatusEvent());
+    // context.read<AuthBloc>().add(AuthStatusEvent());
+
+    // MODIFIED: Dispatch the new AppOpened event to start the auth flow.
+    context.read<AuthBloc>().add(AppOpened());
   }
 
   @override

@@ -27,16 +27,28 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
+        // BlocListener<AuthBloc, AuthState>(
+        //   listener: (context, state) {
+        //     if (state is AuthStatusFailure) {
+        //       Future.delayed(Duration(seconds: 2), () {
+        //         // _navigateToBoard();
+        //         // _navigateToAuth();
+        //         _guestLogin();
+        //       });
+        //     } else if (state is AuthStatusSuccess) {
+        //       Future.delayed(Duration(seconds: 1), () {
+        //         _navigateToBoard();
+        //       });
+        //     }
+        //   },
+        // ),
+
         BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is AuthStatusFailure) {
-              Future.delayed(Duration(seconds: 2), () {
-                // _navigateToBoard();
-                // _navigateToAuth();
-                _guestLogin();
-              });
-            } else if (state is AuthStatusSuccess) {
-              Future.delayed(Duration(seconds: 1), () {
+            // Our new AuthBloc guarantees an authenticated state (guest or Google).
+            // We just wait for the status to no longer be 'unknown'.
+            if (state.status == AuthStatus.authenticated) {
+              Future.delayed(const Duration(seconds: 1), () {
                 _navigateToBoard();
               });
             }
@@ -98,9 +110,9 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
     }
   }
 
-  void _guestLogin() {
-    context.read<AuthBloc>().add(GuestLoginEvent());
-  }
+  // void _guestLogin() {
+  //   context.read<AuthBloc>().add(GuestLoginEvent());
+  // }
 
   Widget _buildAppInfo() {
     return Column(

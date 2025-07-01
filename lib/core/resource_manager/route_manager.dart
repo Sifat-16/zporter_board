@@ -34,11 +34,11 @@ class RouteGenerator {
           pageBuilder: (context, state) =>
               NoTransitionPage(child: SplashScreen(key: state.pageKey)),
         ),
-        GoRoute(
-          name: Routes.auth,
-          path: '/auth',
-          builder: (context, state) => const AuthScreen(),
-        ),
+        // GoRoute(
+        //   name: Routes.auth,
+        //   path: '/auth',
+        //   builder: (context, state) => const AuthScreen(),
+        // ),
         GoRoute(
           name: Routes.board,
           path: '/board',

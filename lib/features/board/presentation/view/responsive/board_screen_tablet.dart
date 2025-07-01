@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/extension/size_extension.dart';
@@ -12,6 +13,9 @@ import 'package:zporter_board/features/board/presentation/view/components/board_
 import 'package:zporter_board/features/board/presentation/view_model/board_bloc.dart';
 import 'package:zporter_board/features/board/presentation/view_model/board_event.dart';
 import 'package:zporter_board/features/board/presentation/view_model/board_state.dart';
+import 'package:zporter_board/features/notification/presentation/view/notification_drawer.dart';
+import 'package:zporter_board/features/notification/presentation/view_model/unread_count_bloc.dart';
+import 'package:zporter_board/features/notification/presentation/view_model/unread_count_state.dart';
 import 'package:zporter_board/features/scoreboard/presentation/view/scoreboard_screen.dart';
 import 'package:zporter_board/features/substitute/presentation/view/substituteboard_screen.dart';
 import 'package:zporter_board/features/time/presentation/view/timeboard_screen.dart';
@@ -28,7 +32,6 @@ class BoardScreenTablet extends StatefulWidget {
 class _BoardScreenTabletState extends State<BoardScreenTablet>
     with SingleTickerProviderStateMixin {
   Screens selectedScreen = Screens.TACTICS; // Initial default screen
-  final UserIdService _userIdService = sl.get();
   bool isFullScreenTactics = false;
 
   late TabController _tabController;
@@ -137,7 +140,11 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
   Widget _buildScreens(Screens currentScreen) {
     if (currentScreen == Screens.TACTICS) {
       return TacticboardScreen(
-        userId: _userIdService.getCurrentUserId(),
+        userId: context
+            .read<AuthBloc>()
+            .state
+            .user
+            .uid, // Get the ID from the BLoC state
         onFullScreenChanged: (isFull) {
           if (mounted) {
             setState(() {
@@ -146,6 +153,26 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
           }
         },
       );
+      // return BlocBuilder<AuthBloc, AuthState>(
+      //   builder: (context, authState) {
+      //     // Only build the TacticboardScreen when we have a valid user ID
+      //     if (authState.status == AuthStatus.authenticated) {
+      //       return TacticboardScreen(
+      //         userId: authState.user.uid, // Get the ID from the BLoC state
+      //         onFullScreenChanged: (isFull) {
+      //           if (mounted) {
+      //             setState(() {
+      //               isFullScreenTactics = isFull;
+      //             });
+      //           }
+      //         },
+      //       );
+      //     }
+      //     // Show a loader while waiting for the user ID
+      //     return const Center(
+      //         child: CircularProgressIndicator(color: ColorManager.yellow));
+      //   },
+      // );
     } else if (currentScreen == Screens.TIME) {
       return TimeboardScreen();
     } else if (currentScreen == Screens.SCOREBOARD) {
@@ -171,9 +198,9 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
       listeners: [
         BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is AuthStatusSuccess || state is LogoutState) {
-              _resetApp();
-            }
+            // if (state is AuthStatusSuccess || state is LogoutState) {
+            //   _resetApp();
+            // }
           },
         ),
         BlocListener<BoardBloc, BoardState>(
@@ -212,9 +239,10 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
     // }
 
     // Standard layout with TabBar
-    return Material(
-      color: ColorManager.black,
-      child: Stack(
+    return Scaffold(
+      backgroundColor: ColorManager.black,
+      endDrawer: const NotificationDrawer(),
+      body: Stack(
         children: [
           // TabBar Container
           Align(
@@ -268,6 +296,36 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
                   ? context.screenHeight * .92
                   : null,
               child: screenDisplayWidget,
+            ),
+          ),
+
+          Align(
+            alignment: Alignment.topRight,
+            child: BlocBuilder<UnreadCountBloc, UnreadCountState>(
+              builder: (context, unreadState) {
+                return Container(
+                  height: tabBarHeight,
+                  padding: EdgeInsets.only(top: topPadding),
+                  child: badges.Badge(
+                    showBadge: unreadState.count > 0,
+                    badgeContent: Text(
+                      unreadState.count.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                    position: badges.BadgePosition.topEnd(top: 2, end: -4),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.notifications_none_outlined,
+                        color: ColorManager.white,
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        Scaffold.of(context).openEndDrawer();
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
