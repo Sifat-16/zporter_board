@@ -1,8 +1,14 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:zporter_board/core/services/injection_container.dart';
+import 'package:zporter_board/core/services/random_service.dart';
+import 'package:zporter_board/features/notification/data/model/notification_model.dart';
+import 'package:zporter_board/features/notification/domain/repository/notification_repository.dart';
+import 'package:zporter_board/features/notification/presentation/view_model/notification_bloc.dart';
+import 'package:zporter_board/features/notification/presentation/view_model/notification_event.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/unread_count_bloc.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/unread_count_event.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 /// A service that handles all Firebase Cloud Messaging (FCM) logic.
 ///
@@ -11,8 +17,14 @@ import 'package:zporter_board/features/notification/presentation/view_model/unre
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin;
+  // ⭐️ ADD THIS REPOSITORY
+  // final NotificationRepository _notificationRepository;
 
-  NotificationService(this._firebaseMessaging, this._localNotificationsPlugin);
+  NotificationService(
+    this._firebaseMessaging,
+    this._localNotificationsPlugin,
+    // this._notificationRepository,
+  );
 
   /// Initializes the notification service.
   ///
@@ -22,7 +34,27 @@ class NotificationService {
     await _requestPermissions();
     await _configureForegroundNotifications();
     _configureMessageListeners();
+    // ⭐️ ADD THIS CALL TO SYNC SUBSCRIPTIONS ON STARTUP
+    await _syncInitialTopicSubscriptions();
     print("Notification Service Initialized FCM token ${await getFCMToken()}");
+  }
+
+  Future<void> _syncInitialTopicSubscriptions() async {
+    try {
+      print('Syncing initial topic subscriptions...');
+      final NotificationRepository _notificationRepository =
+          sl.get<NotificationRepository>();
+      final settings = await _notificationRepository.getNotificationSettings();
+      for (final entry in settings.entries) {
+        // If the setting is true (e.g., {'zporter_news': true}), subscribe.
+        if (entry.value) {
+          zlog(data: "Subscribing to topic ${entry.key}");
+          await subscribeToTopic(entry.key);
+        }
+      }
+    } catch (e) {
+      print('Error syncing topic subscriptions: $e');
+    }
   }
 
   /// Requests notification permissions from the user.
@@ -62,6 +94,7 @@ class NotificationService {
     // Handles messages received while the app is in the foreground.
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("Foreground Message Received: ${message.notification?.title}");
+      _saveNotification(message);
       // Add event to update the unread count
       sl<UnreadCountBloc>().add(IncrementUnreadCount());
 
@@ -92,7 +125,34 @@ class NotificationService {
       print('Message opened from background: ${message.notification?.title}');
       // Here you would typically navigate to the notification screen.
       // We will implement navigation later.
+      // _saveNotification(message);
     });
+  }
+
+  // NEW METHOD: Handles creating and saving the notification model
+  Future<void> _saveNotification(RemoteMessage message) async {
+    final notification = message.notification;
+    if (notification == null) return;
+
+    final NotificationRepository _notificationRepository =
+        sl.get<NotificationRepository>();
+    final newNotification = NotificationModel(
+      // Use a random ID for simplicity, or get one from the message data payload
+      id: RandomGenerator.generateId(),
+      title: notification.title ?? 'No Title',
+      body: notification.body ?? 'No Body',
+      sentTime: message.sentTime ?? DateTime.now(),
+      // You should send the category in the `data` payload from your admin panel
+      category: message.data['category'] ?? 'general',
+      isRead: false,
+    );
+
+    await _notificationRepository.saveNotification(newNotification);
+
+    // Tell the notification drawer to refresh its list
+    if (sl.isRegistered<NotificationBloc>()) {
+      sl<NotificationBloc>().add(NotificationsUpdated());
+    }
   }
 
   /// Retrieves the unique FCM token for the device.
