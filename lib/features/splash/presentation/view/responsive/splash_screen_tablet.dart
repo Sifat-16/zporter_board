@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:zporter_board/config/version/version_info.dart';
+import 'package:zporter_board/core/common/components/links/link_text.dart';
 import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/resource_manager/assets_manager.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
@@ -21,22 +23,32 @@ class SplashScreenTablet extends StatefulWidget {
 }
 
 class _SplashScreenTabletState extends State<SplashScreenTablet> {
-  final String _zporter_url = "https://onelink.to/zporter";
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
+        // BlocListener<AuthBloc, AuthState>(
+        //   listener: (context, state) {
+        //     if (state is AuthStatusFailure) {
+        //       Future.delayed(Duration(seconds: 2), () {
+        //         // _navigateToBoard();
+        //         // _navigateToAuth();
+        //         _guestLogin();
+        //       });
+        //     } else if (state is AuthStatusSuccess) {
+        //       Future.delayed(Duration(seconds: 1), () {
+        //         _navigateToBoard();
+        //       });
+        //     }
+        //   },
+        // ),
+
         BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is AuthStatusFailure) {
-              Future.delayed(Duration(seconds: 2), () {
-                // _navigateToBoard();
-                // _navigateToAuth();
-                _guestLogin();
-              });
-            } else if (state is AuthStatusSuccess) {
-              Future.delayed(Duration(seconds: 1), () {
+            // Our new AuthBloc guarantees an authenticated state (guest or Google).
+            // We just wait for the status to no longer be 'unknown'.
+            if (state.status == AuthStatus.authenticated) {
+              Future.delayed(const Duration(seconds: 1), () {
                 _navigateToBoard();
               });
             }
@@ -55,14 +67,17 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
                   width: context.widthPercent(50),
                 ),
               ),
-
               Align(
                 alignment: Alignment.bottomRight,
                 child: QrImageView(
-                  data: _zporter_url,
+                  data: AppInfo.zporter_url,
                   size: AppSize.s96,
                   backgroundColor: ColorManager.white,
                 ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: _buildAppInfo(),
               ),
             ],
           ),
@@ -95,7 +110,44 @@ class _SplashScreenTabletState extends State<SplashScreenTablet> {
     }
   }
 
-  void _guestLogin() {
-    context.read<AuthBloc>().add(GuestLoginEvent());
+  // void _guestLogin() {
+  //   context.read<AuthBloc>().add(GuestLoginEvent());
+  // }
+
+  Widget _buildAppInfo() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 10,
+      children: [
+        LinkText(
+          text: AppInfo.supportLinkName,
+          url: AppInfo.supportLink,
+          style: Theme.of(context)
+              .textTheme
+              .labelMedium!
+              .copyWith(color: ColorManager.white),
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 2,
+          children: [
+            Text(
+              "Version ${AppInfo.version}",
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium!
+                  .copyWith(color: ColorManager.white),
+            ),
+            Text(
+              "Last updated ${AppInfo.lastUpdated}",
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium!
+                  .copyWith(color: ColorManager.white),
+            ),
+          ],
+        )
+      ],
+    );
   }
 }

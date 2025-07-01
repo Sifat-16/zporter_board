@@ -315,12 +315,13 @@ class CountdownTimeManagerComponent extends StatelessWidget {
     required this.onStart,
     required this.onPause,
     required this.onStop,
+    required this.onReset,
     this.status,
   });
   final VoidCallback onStart;
   final VoidCallback onPause;
   final VoidCallback onStop;
-
+  final VoidCallback onReset;
   final MatchPeriod? matchPeriod;
   final TimeActiveStatus? status;
   @override
@@ -331,13 +332,13 @@ class CountdownTimeManagerComponent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           LiveClockComponent(),
-
           Row(
             children: [
               TimerControlButtons(
                 onStart: onStart,
                 onPause: onPause,
                 onStop: onStop,
+                onReset: onReset,
                 initialStatus: status ?? TimeActiveStatus.STOPPED,
               ),
             ],

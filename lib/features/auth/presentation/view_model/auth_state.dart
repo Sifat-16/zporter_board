@@ -1,46 +1,43 @@
 import 'package:equatable/equatable.dart';
 import 'package:zporter_board/features/auth/domain/entity/user_entity.dart';
 
-sealed class AuthState extends Equatable {
-  const AuthState();
+/// An enumeration of the possible authentication statuses.
+enum AuthStatus {
+  /// The initial state before any authentication check has been performed.
+  unknown,
 
-  @override
-  // TODO: implement props
-  List<Object?> get props => [];
+  /// The state when a user (guest or registered) is authenticated.
+  authenticated,
+
+  /// The state when there is no user, not even a guest.
+  /// This occurs on first launch before a guest ID is created, or after logout.
+  unauthenticated,
 }
 
-final class AuthStateInitial extends AuthState {}
+/// The state class for the [AuthBloc].
+///
+/// It holds the current authentication status and the user object.
+/// This single-class approach simplifies state management.
+class AuthState extends Equatable {
+  final AuthStatus status;
+  final UserEntity user;
 
-final class LogoutState extends AuthState {}
+  const AuthState._({
+    required this.status,
+    this.user = UserEntity.empty,
+  });
 
-final class GoogleSignInProgress extends AuthStateInitial {}
+  /// The initial state of the application.
+  const AuthState.unknown() : this._(status: AuthStatus.unknown);
 
-// final class GoogleSignInSuccess extends AuthState{
-//   final UserEntity userEntity;
-//   const GoogleSignInSuccess({required this.userEntity});
-//   @override
-//   List<Object?> get props => [userEntity];
-// }
+  /// The state for an authenticated user.
+  const AuthState.authenticated(UserEntity user)
+      : this._(status: AuthStatus.authenticated, user: user);
 
-final class GoogleSignInFailure extends AuthState {
-  final String message;
-  const GoogleSignInFailure({required this.message});
+  /// The state for an unauthenticated user.
+  const AuthState.unauthenticated()
+      : this._(status: AuthStatus.unauthenticated);
+
   @override
-  List<Object?> get props => [message];
-}
-
-final class AuthStatusInProgress extends AuthStateInitial {}
-
-final class AuthStatusSuccess extends AuthState {
-  final UserEntity userEntity;
-  const AuthStatusSuccess({required this.userEntity});
-  @override
-  List<Object?> get props => [userEntity];
-}
-
-final class AuthStatusFailure extends AuthState {
-  final String message;
-  const AuthStatusFailure({required this.message});
-  @override
-  List<Object?> get props => [message];
+  List<Object> get props => [status, user];
 }

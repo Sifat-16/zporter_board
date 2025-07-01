@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/board_container.dart';
-import 'package:zporter_board/core/resource_manager/assets_manager.dart';
+import 'package:zporter_board/core/common/components/links/zporter_logo_launcher.dart';
+import 'package:zporter_board/core/extension/size_extension.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
-import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/features/match/data/model/football_match.dart';
 import 'package:zporter_board/features/match/presentation/view/component/period_add_match_delete_component.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
@@ -56,10 +56,9 @@ class _SubstituteboardScreenTabletState
         MatchSubstitutions? matchSubstitutions = selectedMatch?.substitutions;
 
         zlog(data: "Match subs are ${matchSubstitutions}");
-        List<Substitution> subs =
-            isHome
-                ? (matchSubstitutions?.homeSubs ?? [])
-                : (matchSubstitutions?.awaySubs ?? []);
+        List<Substitution> subs = isHome
+            ? (matchSubstitutions?.homeSubs ?? [])
+            : (matchSubstitutions?.awaySubs ?? []);
 
         return BoardContainer(
           zeroPadding: true,
@@ -119,12 +118,13 @@ class _SubstituteboardScreenTabletState
 
                                       if (matchSubstitutions != null) {
                                         context.read<MatchBloc>().add(
-                                          SubUpdateEvent(
-                                            matchId: selectedMatch?.id ?? "",
-                                            matchSubstitutions:
-                                                matchSubstitutions!,
-                                          ),
-                                        );
+                                              SubUpdateEvent(
+                                                matchId:
+                                                    selectedMatch?.id ?? "",
+                                                matchSubstitutions:
+                                                    matchSubstitutions!,
+                                              ),
+                                            );
                                       }
                                     }
                                   },
@@ -144,31 +144,46 @@ class _SubstituteboardScreenTabletState
                           alignment: Alignment.centerRight,
                           child: Padding(
                             padding: const EdgeInsets.only(right: 10.0),
-                            child: Image.asset(
-                              AssetsManager.logo,
-                              height: AppSize.s40,
-                              width: AppSize.s40,
-                            ),
+                            // child: Image.asset(
+                            //   AssetsManager.logo,
+                            //   height: AppSize.s40,
+                            //   width: AppSize.s40,
+                            // ),
+                            child: ZporterLogoLauncher(),
                           ),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            HomeAwayComponent(
-                              isHome: (b) {
-                                zlog(data: "isHomeChanging");
-                                setState(() {
-                                  isHome = b;
-                                });
-                              },
+                            SizedBox(
+                              width: context.widthPercent(25),
+                              child: Center(
+                                child: HomeAwayComponent(
+                                  isHome: (b) {
+                                    zlog(data: "isHomeChanging");
+                                    setState(() {
+                                      isHome = b;
+                                    });
+                                  },
+                                ),
+                              ),
                             ),
-                            SubstitutePaginationComponent(
-                              total: subs.length,
-                              onSubChange: (s) {
-                                _updateSelectedIndex(s);
-                              },
+                            SizedBox(
+                              width: context.widthPercent(50),
+                              child: Center(
+                                child: SubstitutePaginationComponent(
+                                  total: subs.length,
+                                  onSubChange: (s) {
+                                    _updateSelectedIndex(s);
+                                  },
+                                ),
+                              ),
                             ),
-                            PeriodAddMatchDeleteComponent(showAdd: false),
+                            SizedBox(
+                              width: context.widthPercent(25),
+                              child:
+                                  PeriodAddMatchDeleteComponent(showAdd: false),
+                            ),
                           ],
                         ),
                       ],

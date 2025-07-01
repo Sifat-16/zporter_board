@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:zporter_board/core/resource_manager/assets_manager.dart';
-import 'package:zporter_board/core/resource_manager/values_manager.dart';
+import 'package:zporter_board/core/common/components/links/zporter_logo_launcher.dart';
 import 'package:zporter_board/features/match/presentation/view/component/match_pagination_component.dart';
 import 'package:zporter_board/features/match/presentation/view/component/period_add_match_delete_component.dart';
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
@@ -20,6 +19,7 @@ class ScoreboardScreenTablet extends StatefulWidget {
 
 class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet>
     with AutomaticKeepAliveClientMixin {
+  bool isLocked = false;
   // FootballMatch? footballMatch;
 
   @override
@@ -38,24 +38,23 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet>
                   height: height * .15,
                   child: ScoreBoardHeader(matchPeriod: state.selectedPeriod),
                 ),
-
                 SizedBox(
                   height: height * .75,
                   child: ScoreCard(
                     matchScore: state.match?.matchScore,
+                    isLocked: isLocked,
                     updateMatchScore: (matchScore) {
                       if (state.match != null) {
                         context.read<MatchBloc>().add(
-                          MatchScoreUpdateEvent(
-                            newScore: matchScore,
-                            matchId: state.match?.id ?? "",
-                          ),
-                        );
+                              MatchScoreUpdateEvent(
+                                newScore: matchScore,
+                                matchId: state.match?.id ?? "",
+                              ),
+                            );
                       }
                     },
                   ),
                 ),
-
                 SizedBox(
                   height: height * .1,
                   child: Stack(
@@ -64,17 +63,24 @@ class _ScoreboardScreenTabletState extends State<ScoreboardScreenTablet>
                         alignment: Alignment.centerRight,
                         child: Padding(
                           padding: const EdgeInsets.only(right: 10.0),
-                          child: Image.asset(
-                            AssetsManager.logo,
-                            height: AppSize.s40,
-                            width: AppSize.s40,
-                          ),
+                          // child: Image.asset(
+                          //   AssetsManager.logo,
+                          //   height: AppSize.s40,
+                          //   width: AppSize.s40,
+                          // ),
+                          child: ZporterLogoLauncher(),
                         ),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          LockRotateButtonWidget(),
+                          LockRotateButtonWidget(
+                            onLocked: (b) {
+                              setState(() {
+                                isLocked = b;
+                              });
+                            },
+                          ),
                           PeriodPaginationComponent(),
                           PeriodAddMatchDeleteComponent(),
                         ],

@@ -11,6 +11,11 @@ import 'package:zporter_board/features/board/presentation/view_model/board_event
 import 'package:zporter_board/features/match/presentation/view_model/match_bloc.dart';
 
 import 'core/services/injection_container.dart';
+import 'features/notification/presentation/view_model/notification_bloc.dart';
+import 'features/notification/presentation/view_model/notification_event.dart';
+import 'features/notification/presentation/view_model/notification_settings_bloc.dart';
+import 'features/notification/presentation/view_model/unread_count_bloc.dart';
+import 'features/notification/presentation/view_model/unread_count_event.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -28,6 +33,18 @@ class _AppState extends State<App> {
         BlocProvider<MatchBloc>(create: (context) => sl<MatchBloc>()),
         BlocProvider<BoardBloc>(
           create: (context) => sl<BoardBloc>()..add(BoardInitialized()),
+        ),
+
+        // Provide the UnreadCountBloc globally
+        BlocProvider<UnreadCountBloc>(
+          create: (context) => sl<UnreadCountBloc>()..add(LoadUnreadCount()),
+        ),
+
+        BlocProvider(
+          create: (context) => sl<NotificationBloc>()..add(LoadNotifications()),
+        ),
+        BlocProvider(
+          create: (context) => sl<NotificationSettingsBloc>(),
         ),
       ],
       child: ScreenUtilInit(

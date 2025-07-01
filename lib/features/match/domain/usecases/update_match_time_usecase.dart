@@ -24,6 +24,12 @@ class UpdateMatchTimeUsecase
           footBallMatch: param.footballMatch,
           matchPeriodId: param.matchPeriodId,
         );
+      } else if (param.matchTimeUpdateStatus == MatchTimeUpdateStatus.RESET) {
+        param.footballMatch = resetUpTime(
+          footBallMatch: param.footballMatch,
+          matchPeriodId: param.matchPeriodId,
+          updateStatus: param.matchTimeUpdateStatus,
+        );
       } else {
         param.footballMatch = stopUpTime(
           footBallMatch: param.footballMatch,
@@ -37,6 +43,12 @@ class UpdateMatchTimeUsecase
         param.footballMatch = startExtraTime(
           footBallMatch: param.footballMatch,
           matchPeriodId: param.matchPeriodId,
+        );
+      } else if (param.matchTimeUpdateStatus == MatchTimeUpdateStatus.RESET) {
+        param.footballMatch = resetExtraTime(
+          footBallMatch: param.footballMatch,
+          matchPeriodId: param.matchPeriodId,
+          updateStatus: param.matchTimeUpdateStatus,
         );
       } else {
         param.footballMatch = stopExtraTime(
@@ -106,10 +118,30 @@ class UpdateMatchTimeUsecase
     times[alreadyRunningTimeIndex].endTime = DateTime.now();
     footBallMatch.matchPeriod[index].intervals = times;
     footBallMatch.matchPeriod[index].timerMode = TimerMode.UP;
-    TimeActiveStatus status =
-        updateStatus == MatchTimeUpdateStatus.PAUSE
-            ? TimeActiveStatus.PAUSED
-            : TimeActiveStatus.STOPPED;
+    TimeActiveStatus status = updateStatus == MatchTimeUpdateStatus.PAUSE
+        ? TimeActiveStatus.PAUSED
+        : TimeActiveStatus.STOPPED;
+    footBallMatch.matchPeriod[index].upPeriodStatus = status;
+
+    return footBallMatch;
+  }
+
+  FootballMatch resetUpTime({
+    required FootballMatch footBallMatch,
+    required int matchPeriodId,
+    required MatchTimeUpdateStatus updateStatus,
+  }) {
+    // Look for end time null object which is considered running and set to date - now
+    // if not found throw can't be stop cause already stopped
+
+    int index = footBallMatch.matchPeriod.indexWhere(
+      (t) => t.periodNumber == matchPeriodId,
+    );
+    List<MatchTimeBloc> times = [];
+
+    footBallMatch.matchPeriod[index].intervals = times;
+    footBallMatch.matchPeriod[index].timerMode = TimerMode.UP;
+    TimeActiveStatus status = TimeActiveStatus.RESET;
     footBallMatch.matchPeriod[index].upPeriodStatus = status;
 
     return footBallMatch;
@@ -191,18 +223,36 @@ class UpdateMatchTimeUsecase
     if (totalDuration > presetDuration) {
       zlog(data: "Special case where timer runout when user was not online");
       end = times[alreadyRunningTimeIndex].startTime.add(
-        presetDuration - remaining,
-      );
+            presetDuration - remaining,
+          );
     }
 
     times[alreadyRunningTimeIndex].endTime = end;
 
     footBallMatch.matchPeriod[index].extraTime.intervals = times;
     footBallMatch.matchPeriod[index].timerMode = TimerMode.EXTRA;
-    TimeActiveStatus status =
-        updateStatus == MatchTimeUpdateStatus.PAUSE
-            ? TimeActiveStatus.PAUSED
-            : TimeActiveStatus.STOPPED;
+    TimeActiveStatus status = updateStatus == MatchTimeUpdateStatus.PAUSE
+        ? TimeActiveStatus.PAUSED
+        : TimeActiveStatus.STOPPED;
+    footBallMatch.matchPeriod[index].extraPeriodStatus = status;
+    return footBallMatch;
+  }
+
+  FootballMatch resetExtraTime({
+    required FootballMatch footBallMatch,
+    required int matchPeriodId,
+    required MatchTimeUpdateStatus updateStatus,
+  }) {
+    // Look for end time null object which is considered running and set to date - now
+    // if not found throw can't be stop cause already stopped
+    int index = footBallMatch.matchPeriod.indexWhere(
+      (t) => t.periodNumber == matchPeriodId,
+    );
+
+    List<MatchTimeBloc> times = [];
+    footBallMatch.matchPeriod[index].extraTime.intervals = times;
+    footBallMatch.matchPeriod[index].timerMode = TimerMode.EXTRA;
+    TimeActiveStatus status = TimeActiveStatus.RESET;
     footBallMatch.matchPeriod[index].extraPeriodStatus = status;
     return footBallMatch;
   }

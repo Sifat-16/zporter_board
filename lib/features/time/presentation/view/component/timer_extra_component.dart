@@ -80,9 +80,8 @@ class _TimerExtraComponentState extends State<TimerExtraComponent> {
                           'extra_timer_${selectedPeriod.periodNumber}_${initialDuration.inSeconds}',
                         ),
                         initialDuration: initialDuration,
-                        isRunning:
-                            matchTimeStatus
-                                .isRunning, // Reflect current running state
+                        isRunning: matchTimeStatus
+                            .isRunning, // Reflect current running state
                         controller:
                             _countDownController, // Pass the countdown controller
                         // --- Pass styling properties ---
@@ -95,41 +94,38 @@ class _TimerExtraComponentState extends State<TimerExtraComponent> {
                           MatchPeriod? period = state.selectedPeriod;
                           if (period != null) {
                             context.read<MatchBloc>().add(
-                              MatchTimeUpdateEvent(
-                                periodId: period.periodNumber,
-                                timerMode: TimerMode.EXTRA,
-                                matchTimeUpdateStatus:
-                                    MatchTimeUpdateStatus.STOP,
-                              ),
-                            );
+                                  MatchTimeUpdateEvent(
+                                    periodId: period.periodNumber,
+                                    timerMode: TimerMode.EXTRA,
+                                    matchTimeUpdateStatus:
+                                        MatchTimeUpdateStatus.STOP,
+                                  ),
+                                );
                           }
                         },
-                        onStart:
-                            () => zlog(
-                              data: "Countdown started via widget callback",
-                            ), // Example
-                        onPause:
-                            () => zlog(
-                              data: "Countdown paused via widget callback",
-                            ),
+                        onStart: () => zlog(
+                          data: "Countdown started via widget callback",
+                        ), // Example
+                        onPause: () => zlog(
+                          data: "Countdown paused via widget callback",
+                        ),
                         onRunOutDetected: () {
                           zlog(data: "RunOut detected need to take action");
                           MatchPeriod? period = state.selectedPeriod;
                           if (period != null) {
                             context.read<MatchBloc>().add(
-                              MatchTimeUpdateEvent(
-                                periodId: period.periodNumber,
-                                timerMode: TimerMode.EXTRA,
-                                matchTimeUpdateStatus:
-                                    MatchTimeUpdateStatus.STOP,
-                              ),
-                            );
+                                  MatchTimeUpdateEvent(
+                                    periodId: period.periodNumber,
+                                    timerMode: TimerMode.EXTRA,
+                                    matchTimeUpdateStatus:
+                                        MatchTimeUpdateStatus.STOP,
+                                  ),
+                                );
                           }
                         }, // Example
                         // onStop callback could be added if needed
                       ),
                     ),
-
                     Container(
                       height: height * 0.85 * .1,
                       child: Row(
@@ -143,8 +139,8 @@ class _TimerExtraComponentState extends State<TimerExtraComponent> {
                                 GestureDetector(
                                   onTap: () {
                                     context.read<MatchBloc>().add(
-                                      IncreaseExtraTimeEvent(),
-                                    );
+                                          IncreaseExtraTimeEvent(),
+                                        );
                                   },
                                   child: Icon(
                                     Icons.add_circle_outline,
@@ -155,8 +151,8 @@ class _TimerExtraComponentState extends State<TimerExtraComponent> {
                                 GestureDetector(
                                   onTap: () {
                                     context.read<MatchBloc>().add(
-                                      DecreaseExtraTimeEvent(),
-                                    );
+                                          DecreaseExtraTimeEvent(),
+                                        );
                                   },
                                   child: Icon(
                                     Icons.remove_circle_outline,
@@ -167,7 +163,6 @@ class _TimerExtraComponentState extends State<TimerExtraComponent> {
                               ],
                             ),
                           ),
-
                           Flexible(child: Container()),
                         ],
                       ),
@@ -188,30 +183,39 @@ class _TimerExtraComponentState extends State<TimerExtraComponent> {
                 status: state.selectedPeriod?.extraPeriodStatus,
                 onStart: () {
                   context.read<MatchBloc>().add(
-                    MatchTimeUpdateEvent(
-                      matchTimeUpdateStatus: MatchTimeUpdateStatus.START,
-                      periodId: state.selectedPeriod?.periodNumber ?? -1,
-                      timerMode: TimerMode.EXTRA,
-                    ),
-                  );
+                        MatchTimeUpdateEvent(
+                          matchTimeUpdateStatus: MatchTimeUpdateStatus.START,
+                          periodId: state.selectedPeriod?.periodNumber ?? -1,
+                          timerMode: TimerMode.EXTRA,
+                        ),
+                      );
                 },
                 onPause: () {
                   context.read<MatchBloc>().add(
-                    MatchTimeUpdateEvent(
-                      matchTimeUpdateStatus: MatchTimeUpdateStatus.PAUSE,
-                      periodId: state.selectedPeriod?.periodNumber ?? -1,
-                      timerMode: TimerMode.EXTRA,
-                    ),
-                  );
+                        MatchTimeUpdateEvent(
+                          matchTimeUpdateStatus: MatchTimeUpdateStatus.PAUSE,
+                          periodId: state.selectedPeriod?.periodNumber ?? -1,
+                          timerMode: TimerMode.EXTRA,
+                        ),
+                      );
                 },
                 onStop: () {
                   context.read<MatchBloc>().add(
-                    MatchTimeUpdateEvent(
-                      periodId: state.selectedPeriod?.periodNumber ?? -1,
-                      matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
-                      timerMode: TimerMode.EXTRA,
-                    ),
-                  );
+                        MatchTimeUpdateEvent(
+                          periodId: state.selectedPeriod?.periodNumber ?? -1,
+                          matchTimeUpdateStatus: MatchTimeUpdateStatus.STOP,
+                          timerMode: TimerMode.EXTRA,
+                        ),
+                      );
+                },
+                onReset: () {
+                  context.read<MatchBloc>().add(
+                        MatchTimeUpdateEvent(
+                          periodId: state.selectedPeriod?.periodNumber ?? -1,
+                          matchTimeUpdateStatus: MatchTimeUpdateStatus.RESET,
+                          timerMode: TimerMode.EXTRA,
+                        ),
+                      );
                 },
               ),
             ),

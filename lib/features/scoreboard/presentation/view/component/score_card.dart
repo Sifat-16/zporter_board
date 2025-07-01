@@ -10,13 +10,14 @@ import 'package:zporter_board/features/scoreboard/data/model/score.dart';
 // --- End of Assumed Imports ---
 
 class ScoreCard extends StatefulWidget {
-  const ScoreCard({
-    super.key, // Use super parameters
-    required this.matchScore,
-    required this.updateMatchScore,
-  });
+  const ScoreCard(
+      {super.key, // Use super parameters
+      required this.matchScore,
+      required this.updateMatchScore,
+      required this.isLocked});
   final MatchScore? matchScore;
   final Function(MatchScore matchScore) updateMatchScore;
+  final bool isLocked;
 
   @override
   State<ScoreCard> createState() => _ScoreCardState();
@@ -102,24 +103,24 @@ class _ScoreCardState extends State<ScoreCard> {
     // Define a base text style - Give it a large font size initially.
     // FittedBox will scale it down. AppSize.s160 is used as the base.
     final baseScoreTextStyle = Theme.of(context).textTheme.titleLarge!.copyWith(
-      // fontSize: context.screenHeight * .80, // Start with a large size
-      fontWeight: FontWeight.bold,
-      color: ColorManager.white,
-      fontFamily: 'monospaced',
-      // height:
-      //     1.0, // Explicitly set line height to prevent issues with large fonts
-    );
+          // fontSize: context.screenHeight * .80, // Start with a large size
+          fontWeight: FontWeight.bold,
+          color: ColorManager.white,
+          fontFamily: 'monospaced',
+          // height:
+          //     1.0, // Explicitly set line height to prevent issues with large fonts
+        );
 
     // Define the style for the dash separately
     // Use a smaller, potentially fixed size if you don't want it to scale with the numbers
     final dashTextStyle = Theme.of(context).textTheme.titleLarge!.copyWith(
-      fontSize: context.widthPercent(
-        10,
-      ), // Example: Smaller fixed size for dash
-      fontWeight: FontWeight.bold,
-      color: ColorManager.white,
-      // height: 1.0,
-    );
+          fontSize: context.widthPercent(
+            10,
+          ), // Example: Smaller fixed size for dash
+          fontWeight: FontWeight.bold,
+          color: ColorManager.white,
+          // height: 1.0,
+        );
 
     return DynamicContainer(
       builder: (context, height, width) {
@@ -135,7 +136,6 @@ class _ScoreCardState extends State<ScoreCard> {
                 // Scores Row (Team A — Team B)
                 SizedBox(
                   height: height * .85,
-
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -197,7 +197,6 @@ class _ScoreCardState extends State<ScoreCard> {
                                     baseScoreTextStyle, // Use the large base style
                                 duration: const Duration(milliseconds: 300),
                               ),
-
                               if (_isSingleDigit(_awayScore))
                                 Opacity(
                                   opacity: 0,
@@ -241,19 +240,23 @@ class _ScoreCardState extends State<ScoreCard> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          onTap: () => _incrementScore(team),
+          onTap: widget.isLocked ? null : () => _incrementScore(team),
           child: Icon(
             Icons.keyboard_arrow_up,
             size: height,
-            color: ColorManager.grey, // Make sure ColorManager.grey is defined
+            color: widget.isLocked
+                ? ColorManager.grey.withValues(alpha: 0.2)
+                : ColorManager.grey, // Make sure ColorManager.grey is defined
           ),
         ),
         GestureDetector(
-          onTap: () => _decrementScore(team),
+          onTap: widget.isLocked ? null : () => _decrementScore(team),
           child: Icon(
             Icons.keyboard_arrow_down,
             size: height,
-            color: ColorManager.grey, // Make sure ColorManager.grey is defined
+            color: widget.isLocked
+                ? ColorManager.grey.withValues(alpha: 0.2)
+                : ColorManager.grey, // Make sure ColorManager.grey is defined
           ),
         ),
       ],

@@ -166,7 +166,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/board_container.dart';
-import 'package:zporter_board/core/resource_manager/assets_manager.dart';
+import 'package:zporter_board/core/common/components/links/zporter_logo_launcher.dart';
 import 'package:zporter_board/core/resource_manager/values_manager.dart';
 import 'package:zporter_board/core/utils/match/match_utils.dart';
 import 'package:zporter_board/features/match/presentation/view/component/match_pagination_component.dart';
@@ -331,11 +331,12 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
                           alignment: Alignment.centerRight,
                           child: Padding(
                             padding: const EdgeInsets.only(right: 10.0),
-                            child: Image.asset(
-                              AssetsManager.logo,
-                              height: AppSize.s40,
-                              width: AppSize.s40,
-                            ),
+                            // child: Image.asset(
+                            //   AssetsManager.logo,
+                            //   height: AppSize.s40,
+                            //   width: AppSize.s40,
+                            // ),
+                            child: ZporterLogoLauncher(),
                           ),
                         ),
                         Row(
@@ -345,20 +346,20 @@ class _TimeboardScreenTabletState extends State<TimeboardScreenTablet>
                               // Pass state and callback - ensure callback dispatches event
                               currentTimerMode:
                                   state.selectedPeriod?.timerMode ??
-                                  TimerMode.UP,
+                                      TimerMode.UP,
                               onModeSelected: (TimerMode value) {
                                 zlog(data: "Timermode value changing ${value}");
                                 // Ensure period exists before dispatching
                                 if (state.selectedPeriod != null) {
                                   // Dispatch event to change mode in Bloc
                                   context.read<MatchBloc>().add(
-                                    ChangePeriodModeEvent(
-                                      periodNumber:
-                                          state.selectedPeriod!.periodNumber,
-                                      newMode: value,
-                                      // Handle potential preset duration setting here too if needed
-                                    ),
-                                  );
+                                        ChangePeriodModeEvent(
+                                          periodNumber: state
+                                              .selectedPeriod!.periodNumber,
+                                          newMode: value,
+                                          // Handle potential preset duration setting here too if needed
+                                        ),
+                                      );
                                 }
                               },
                             ),

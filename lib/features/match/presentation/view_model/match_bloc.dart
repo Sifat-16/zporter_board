@@ -4,6 +4,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/timer/timer_contol_buttons.dart';
 import 'package:zporter_board/core/common/components/z_loader.dart';
+import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/services/navigation_service.dart';
 import 'package:zporter_board/core/utils/log/debugger.dart';
 import 'package:zporter_board/core/utils/match/match_utils.dart';
@@ -141,6 +142,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
     try {
       FootballMatch? footballMatch = state.match;
       bool proceedToStart = true;
+
       if (event.matchTimeUpdateStatus == MatchTimeUpdateStatus.START) {
         // cross check if any timer is running or not
         List<MatchPeriod> runningPeriods = MatchUtils.checkAnyTimerRunning(
@@ -244,6 +246,24 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
             );
             proceedToStart = false; // Do not proceed to start the new timer
           }
+        }
+      } else if (event.matchTimeUpdateStatus == MatchTimeUpdateStatus.RESET) {
+        final context = NavigationService.instance.currentContext;
+        bool? confirm;
+        if (context != null && context.mounted) {
+          // Check context validity
+          confirm = await showConfirmationDialog(
+            confirmButtonColor: ColorManager.green,
+            context: context,
+            title: "Reset Time?",
+            content: "Are you sure you want to reset the clock?",
+            confirmButtonText: "  Yes  ",
+            cancelButtonText: "Cancel",
+          );
+        }
+        if (confirm == true) {
+        } else {
+          return;
         }
       }
 
