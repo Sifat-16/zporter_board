@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zporter_board/core/common/components/dialog/confirmation_dialog.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/services/injection_container.dart';
 import 'package:zporter_board/features/notification/presentation/view/notification_list_view.dart';
@@ -10,6 +11,7 @@ import 'package:zporter_board/features/notification/presentation/view_model/noti
 import 'package:zporter_board/features/notification/presentation/view_model/notification_state.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/unread_count_bloc.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/unread_count_event.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 /// An enumeration to manage the two views within the drawer.
 enum NotificationDrawerView { notifications, settings }
@@ -30,44 +32,19 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
   NotificationDrawerView _currentView = NotificationDrawerView.notifications;
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<NotificationBloc>().add(LoadNotifications());
+  }
+
+  @override
   Widget build(BuildContext context) {
     // When the drawer is opened, reset the unread count.
     context.read<UnreadCountBloc>().add(ResetUnreadCount());
 
-    // return MultiBlocProvider(
-    //   providers: [
-    //     BlocProvider(
-    //       create: (context) {
-    //         context.read<NotificationBloc>().close();
-    //         return sl<NotificationBloc>()..add(LoadNotifications())
-    //       },
-    //     ),
-    //     BlocProvider(
-    //       create: (context) => sl<NotificationSettingsBloc>(),
-    //     ),
-    //   ],
-    //   child: Drawer(
-    //     backgroundColor: ColorManager.black.withValues(alpha: 0.3),
-    //     width: 360, // A fixed width suitable for a side panel on tablets.
-    //     child: SafeArea(
-    //       child: Column(
-    //         children: [
-    //           _buildHeader(),
-    //           Expanded(
-    //             child: AnimatedSwitcher(
-    //               duration: const Duration(milliseconds: 250),
-    //               child: _currentView == NotificationDrawerView.notifications
-    //                   ? const NotificationListView()
-    //                   : const NotificationSettingsView(),
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //     ),
-    //   ),
-    // );
     return Drawer(
-      backgroundColor: ColorManager.black.withValues(alpha: 0.3),
+      backgroundColor: ColorManager.black.withValues(alpha: 0.8),
       width: 360, // A fixed width suitable for a side panel on tablets.
       child: SafeArea(
         child: Column(
@@ -127,10 +104,17 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                       return IconButton(
                         icon: const Icon(Icons.delete_sweep_outlined,
                             color: ColorManager.white),
-                        onPressed: () {
-                          context
-                              .read<NotificationBloc>()
-                              .add(DeleteAllNotifications());
+                        onPressed: () async {
+                          bool? delete = await showConfirmationDialog(
+                              context: context,
+                              title: "Delete Notification",
+                              content:
+                                  "Are you sure you want to delete all the notifications?");
+                          if (delete == true) {
+                            context
+                                .read<NotificationBloc>()
+                                .add(DeleteAllNotifications());
+                          }
                         },
                       );
                     }

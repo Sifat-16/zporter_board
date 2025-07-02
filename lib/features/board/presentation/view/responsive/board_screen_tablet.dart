@@ -312,7 +312,7 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
                       unreadState.count.toString(),
                       style: const TextStyle(color: Colors.white, fontSize: 10),
                     ),
-                    position: badges.BadgePosition.topEnd(top: 2, end: -4),
+                    position: badges.BadgePosition.topEnd(top: 2, end: 4),
                     child: IconButton(
                       icon: const Icon(
                         Icons.notifications_none_outlined,

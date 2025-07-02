@@ -6,6 +6,7 @@ import 'package:zporter_board/features/notification/domain/usecases/get_notifica
 import 'package:zporter_board/features/notification/domain/usecases/mark_notification_as_read_usecase.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/notification_event.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/notification_state.dart';
+import 'package:zporter_tactical_board/app/helper/logger.dart';
 
 /// A BLoC that manages the state of the notification list screen.
 ///
@@ -38,6 +39,10 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     emit(NotificationLoading());
     try {
       final notifications = await getNotifications(null);
+      zlog(
+          data:
+              "Init state of the notification drawer is calling ${notifications.length}",
+          show: true);
       if (notifications.isEmpty) {
         emit(NotificationEmpty());
       } else {

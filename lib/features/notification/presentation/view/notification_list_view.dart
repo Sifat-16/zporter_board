@@ -8,6 +8,7 @@ import 'package:zporter_board/features/notification/data/model/notification_mode
 import 'package:zporter_board/features/notification/presentation/view_model/notification_bloc.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/notification_event.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/notification_state.dart';
+import 'package:zporter_tactical_board/app/core/dialogs/confirmation_dialog.dart';
 
 /// A widget that displays the list of notifications within the drawer.
 ///
@@ -36,7 +37,7 @@ class NotificationListView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             itemCount: state.notifications.length,
             separatorBuilder: (context, index) => const Divider(
-              color: ColorManager.yellowLight,
+              color: ColorManager.white,
               height: 1,
             ),
             itemBuilder: (context, index) {
@@ -68,10 +69,16 @@ class _NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomSlidable(
-      onDelete: () {
-        context
-            .read<NotificationBloc>()
-            .add(DeleteNotification(notification.id));
+      onDelete: () async {
+        bool? delete = await showConfirmationDialog(
+            context: context,
+            title: "Delete Notification",
+            content: "Are you sure you want to delete this notification?");
+        if (delete == true) {
+          context
+              .read<NotificationBloc>()
+              .add(DeleteNotification(notification.id));
+        }
       },
       child: ListTile(
         onTap: () {
@@ -80,6 +87,14 @@ class _NotificationTile extends StatelessWidget {
                 .read<NotificationBloc>()
                 .add(MarkNotificationAsRead(notification.id));
           }
+
+          showDialog(
+            context: context,
+            builder: (_) => NotificationDetailDialog(
+              notification: notification,
+            ),
+          );
+
           // In a future update, this could navigate to a specific screen
           // based on the notification content.
         },
@@ -113,6 +128,63 @@ class _NotificationTile extends StatelessWidget {
         trailing: const Icon(
           Icons.more_horiz,
           color: ColorManager.grey,
+        ),
+      ),
+    );
+  }
+}
+
+/// A dialog that displays the full details of a notification.
+class NotificationDetailDialog extends StatelessWidget {
+  final NotificationModel notification;
+
+  const NotificationDetailDialog({
+    super.key,
+    required this.notification,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: ColorManager.black,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+        side: BorderSide(color: ColorManager.grey.withOpacity(0.5)),
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              notification.title,
+              style: const TextStyle(
+                color: ColorManager.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: ColorManager.grey),
+            onPressed: () => Navigator.of(context).pop(),
+            splashRadius: 20,
+          ),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              notification.body,
+              style: const TextStyle(color: ColorManager.white),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              timeago.format(notification.sentTime),
+              style: const TextStyle(color: ColorManager.grey, fontSize: 12),
+            ),
+          ],
         ),
       ),
     );
