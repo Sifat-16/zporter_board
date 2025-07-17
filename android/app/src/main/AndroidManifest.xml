@@ -35,6 +35,12 @@
         <!--#docregion android-queries-->
     </queries>
     <!--#enddocregion android-queries-->
+
+    <supports-screens
+        android:smallScreens="false"
+        android:normalScreens="false"
+        android:largeScreens="true"
+        android:xlargeScreens="true" />
     <application
         android:label="Football Pad"
         android:name="${applicationName}"
