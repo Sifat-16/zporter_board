@@ -64,6 +64,80 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
     );
   }
 
+  // /// Builds the header of the drawer.
+  // Widget _buildHeader() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(16.0),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         // Back button (only visible in settings view)
+  //         if (_currentView == NotificationDrawerView.settings)
+  //           IconButton(
+  //             icon: const Icon(Icons.arrow_back, color: ColorManager.white),
+  //             onPressed: () => setState(() {
+  //               _currentView = NotificationDrawerView.notifications;
+  //             }),
+  //           )
+  //         else
+  //           const SizedBox(width: 48), // Placeholder to keep title centered
+  //
+  //         Text(
+  //           _currentView == NotificationDrawerView.notifications
+  //               ? 'Notifications'
+  //               : 'Settings',
+  //           style: const TextStyle(
+  //               color: ColorManager.white,
+  //               fontSize: 20,
+  //               fontWeight: FontWeight.bold),
+  //         ),
+  //
+  //         // Action buttons (Delete All / Settings)
+  //         if (_currentView == NotificationDrawerView.notifications)
+  //           Row(
+  //             children: [
+  //               // Delete All Button
+  //               BlocBuilder<NotificationBloc, NotificationState>(
+  //                 builder: (context, state) {
+  //                   if (state is NotificationLoaded &&
+  //                       state.notifications.isNotEmpty) {
+  //                     return IconButton(
+  //                       icon: const Icon(Icons.delete_sweep_outlined,
+  //                           color: ColorManager.white),
+  //                       onPressed: () async {
+  //                         bool? delete = await showConfirmationDialog(
+  //                             context: context,
+  //                             title: "Delete Notification",
+  //                             content:
+  //                                 "Are you sure you want to delete all the notifications?");
+  //                         if (delete == true) {
+  //                           context
+  //                               .read<NotificationBloc>()
+  //                               .add(DeleteAllNotifications());
+  //                         }
+  //                       },
+  //                     );
+  //                   }
+  //                   return const SizedBox.shrink();
+  //                 },
+  //               ),
+  //               // Settings Button
+  //               IconButton(
+  //                 icon: const Icon(Icons.settings_outlined,
+  //                     color: ColorManager.white),
+  //                 onPressed: () => setState(() {
+  //                   _currentView = NotificationDrawerView.settings;
+  //                 }),
+  //               ),
+  //             ],
+  //           )
+  //         else
+  //           const SizedBox(width: 48), // Placeholder
+  //       ],
+  //     ),
+  //   );
+  // }
+
   /// Builds the header of the drawer.
   Widget _buildHeader() {
     return Padding(
@@ -92,7 +166,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                 fontWeight: FontWeight.bold),
           ),
 
-          // Action buttons (Delete All / Settings)
+          // Action buttons (Delete All / Settings / Close)
           if (_currentView == NotificationDrawerView.notifications)
             Row(
               children: [
@@ -129,10 +203,23 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                     _currentView = NotificationDrawerView.settings;
                   }),
                 ),
+                // NEW: Close Drawer Button
+                IconButton(
+                  icon: const Icon(Icons.close, color: ColorManager.white),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Closes the drawer
+                  },
+                ),
               ],
             )
           else
-            const SizedBox(width: 48), // Placeholder
+            // NEW: Close Drawer Button (for settings view)
+            IconButton(
+              icon: const Icon(Icons.close, color: ColorManager.white),
+              onPressed: () {
+                Navigator.of(context).pop(); // Closes the drawer
+              },
+            ),
         ],
       ),
     );

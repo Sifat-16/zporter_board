@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:zporter_board/core/common/screen/page_under_construction_screen.dart';
 import 'package:zporter_board/features/auth/presentation/view/auth_screen.dart';
 import 'package:zporter_board/features/board/presentation/view/board_screen.dart';
+import 'package:zporter_board/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:zporter_board/features/splash/presentation/view/splash_screen.dart';
 
 class Routes {
@@ -12,6 +13,8 @@ class Routes {
   static const String auth = 'auth';
 
   static const String board = 'board';
+
+  static const String onBoarding = 'onBoarding';
 }
 
 class RouteGenerator {
@@ -43,6 +46,12 @@ class RouteGenerator {
           name: Routes.board,
           path: '/board',
           builder: (context, state) => const BoardScreen(),
+        ),
+
+        GoRoute(
+          name: Routes.onBoarding,
+          path: '/onBoarding',
+          builder: (context, state) => const OnboardingScreen(),
         ),
       ],
     );

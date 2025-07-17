@@ -253,38 +253,84 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
               // width: double.infinity,
               color: ColorManager
                   .transparent, // Or another distinct tab bar background
-              child: Center(
-                child: TabBar(
-                  controller: _tabController,
-                  isScrollable:
-                      false, // Fit all tabs if possible, adjust if too many
-                  tabAlignment: TabAlignment.center, // Requires Flutter 3.13+
-                  indicatorColor: ColorManager.yellow,
-                  indicatorWeight: 3.0,
-                  dividerColor: ColorManager.transparent,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: TabBar(
+                      controller: _tabController,
+                      isScrollable:
+                          false, // Fit all tabs if possible, adjust if too many
+                      tabAlignment:
+                          TabAlignment.center, // Requires Flutter 3.13+
+                      indicatorColor: ColorManager.yellow,
+                      indicatorWeight: 3.0,
+                      dividerColor: ColorManager.transparent,
 
-                  labelColor: ColorManager.yellow,
-                  unselectedLabelColor: ColorManager.grey,
-                  labelStyle: Theme.of(
-                    context,
-                  ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: Theme.of(context).textTheme.labelMedium,
-                  tabs: _menuItems.map((item) {
-                    final bool isActive = selectedScreen == item.screen;
-                    final Color iconColor =
-                        isActive ? ColorManager.yellow : ColorManager.grey;
+                      labelColor: ColorManager.yellow,
+                      unselectedLabelColor: ColorManager.grey,
+                      labelStyle: Theme.of(
+                        context,
+                      )
+                          .textTheme
+                          .labelLarge!
+                          .copyWith(fontWeight: FontWeight.bold),
+                      unselectedLabelStyle:
+                          Theme.of(context).textTheme.labelMedium,
+                      tabs: _menuItems.map((item) {
+                        final bool isActive = selectedScreen == item.screen;
+                        final Color iconColor =
+                            isActive ? ColorManager.yellow : ColorManager.grey;
 
-                    return Tab(
-                      height: actualTabBarContentHeight > 0
-                          ? actualTabBarContentHeight
-                          : null, // Ensure tab fits within allocated space
-                      child: Text(
-                        item.label,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
-                  }).toList(),
-                ),
+                        return Tab(
+                          height: actualTabBarContentHeight > 0
+                              ? actualTabBarContentHeight
+                              : null, // Ensure tab fits within allocated space
+                          child: Text(
+                            item.label,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  BlocBuilder<UnreadCountBloc, UnreadCountState>(
+                    builder: (context, unreadState) {
+                      // --- START: DYNAMIC APPEARANCE LOGIC ---
+                      // Determine the icon's appearance based on the notification count.
+                      bool hasNotifications = unreadState.count > 0;
+                      final Color iconColor = hasNotifications
+                          ? ColorManager.white
+                          : ColorManager.grey;
+                      final double iconSize = hasNotifications ? 25.0 : 23.0;
+                      // --- END: DYNAMIC APPEARANCE LOGIC ---
+                      return Container(
+                        // height: tabBarHeight,
+                        // padding: EdgeInsets.only(top: topPadding),
+                        child: badges.Badge(
+                          showBadge: unreadState.count > 0,
+                          badgeContent: Text(
+                            unreadState.count.toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 10),
+                          ),
+                          position: badges.BadgePosition.topEnd(top: 2, end: 4),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.notifications_none_outlined,
+                              color: iconColor,
+                              size: iconSize,
+                              // size: 28,
+                            ),
+                            onPressed: () {
+                              Scaffold.of(context).openEndDrawer();
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
@@ -299,35 +345,35 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
             ),
           ),
 
-          Align(
-            alignment: Alignment.topRight,
-            child: BlocBuilder<UnreadCountBloc, UnreadCountState>(
-              builder: (context, unreadState) {
-                return Container(
-                  height: tabBarHeight,
-                  padding: EdgeInsets.only(top: topPadding),
-                  child: badges.Badge(
-                    showBadge: unreadState.count > 0,
-                    badgeContent: Text(
-                      unreadState.count.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
-                    ),
-                    position: badges.BadgePosition.topEnd(top: 2, end: 4),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.notifications_none_outlined,
-                        color: ColorManager.white,
-                        size: 28,
-                      ),
-                      onPressed: () {
-                        Scaffold.of(context).openEndDrawer();
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+          // Align(
+          //   alignment: Alignment.topRight,
+          //   child: BlocBuilder<UnreadCountBloc, UnreadCountState>(
+          //     builder: (context, unreadState) {
+          //       return Container(
+          //         height: tabBarHeight,
+          //         padding: EdgeInsets.only(top: topPadding),
+          //         child: badges.Badge(
+          //           showBadge: unreadState.count > 0,
+          //           badgeContent: Text(
+          //             unreadState.count.toString(),
+          //             style: const TextStyle(color: Colors.white, fontSize: 10),
+          //           ),
+          //           position: badges.BadgePosition.topEnd(top: 2, end: 4),
+          //           child: IconButton(
+          //             icon: const Icon(
+          //               Icons.notifications_none_outlined,
+          //               color: ColorManager.white,
+          //               size: 28,
+          //             ),
+          //             onPressed: () {
+          //               Scaffold.of(context).openEndDrawer();
+          //             },
+          //           ),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
         ],
       ),
     );
