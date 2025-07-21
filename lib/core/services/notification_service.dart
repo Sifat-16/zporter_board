@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:zporter_board/core/services/injection_container.dart';
 import 'package:zporter_board/core/services/random_service.dart';
@@ -10,6 +11,8 @@ import 'package:zporter_board/features/notification/presentation/view_model/unre
 import 'package:zporter_board/features/notification/presentation/view_model/unread_count_event.dart';
 import 'package:zporter_tactical_board/app/helper/logger.dart';
 
+import 'navigation_service.dart';
+
 /// A service that handles all Firebase Cloud Messaging (FCM) logic.
 ///
 /// This service is responsible for initializing FCM, requesting notification
@@ -17,6 +20,8 @@ import 'package:zporter_tactical_board/app/helper/logger.dart';
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin;
+
+  RemoteMessage? initialMessage;
   // ⭐️ ADD THIS REPOSITORY
   // final NotificationRepository _notificationRepository;
 
@@ -31,6 +36,7 @@ class NotificationService {
   /// This configures FCM listeners and requests permissions. It should be
   /// called on app startup.
   Future<void> initialize() async {
+    initialMessage = await _firebaseMessaging.getInitialMessage();
     await _requestPermissions();
     await _configureForegroundNotifications();
     _configureMessageListeners();
@@ -121,11 +127,14 @@ class NotificationService {
     });
 
     // Handles messages that open the app from a background/terminated state.
+    // THE FIX IS HERE
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print('Message opened from background: ${message.notification?.title}');
-      // Here you would typically navigate to the notification screen.
-      // We will implement navigation later.
-      // _saveNotification(message);
+
+      // Use a short delay to ensure the UI is ready after the app resumes.
+      WidgetsBinding.instance.addPostFrameCallback((t) {
+        NavigationService.instance.scaffoldKey.currentState?.openEndDrawer();
+      });
     });
   }
 
