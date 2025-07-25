@@ -71,7 +71,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
                         ),
                       );
                 },
-                activeColor: ColorManager.yellow,
+                activeColor: ColorManager.blue,
                 inactiveTrackColor: ColorManager.grey,
               );
             }).toList(),

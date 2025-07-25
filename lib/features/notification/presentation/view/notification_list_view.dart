@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -5,14 +6,13 @@ import 'package:zporter_board/core/common/components/slidable/custom_slidable.da
 import 'package:zporter_board/core/common/components/z_loader.dart';
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/features/notification/data/model/notification_model.dart';
+import 'package:zporter_board/features/notification/presentation/view/notification_detail_screen.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/notification_bloc.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/notification_event.dart';
 import 'package:zporter_board/features/notification/presentation/view_model/notification_state.dart';
+import 'package:zporter_tactical_board/app/core/dialogs/confirmation_dialog.dart';
 
 /// A widget that displays the list of notifications within the drawer.
-///
-/// It listens to the [NotificationBloc] and builds the UI based on the
-/// current state.
 class NotificationListView extends StatelessWidget {
   const NotificationListView({super.key});
 
@@ -35,8 +35,8 @@ class NotificationListView extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             itemCount: state.notifications.length,
-            separatorBuilder: (context, index) => const Divider(
-              color: ColorManager.yellowLight,
+            separatorBuilder: (context, index) => Divider(
+              color: ColorManager.white.withOpacity(0.15),
               height: 1,
             ),
             itemBuilder: (context, index) {
@@ -68,28 +68,58 @@ class _NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomSlidable(
-      onDelete: () {
-        context
-            .read<NotificationBloc>()
-            .add(DeleteNotification(notification.id));
+      onDelete: () async {
+        bool? delete = await showConfirmationDialog(
+            context: context,
+            title: "Delete Notification",
+            content: "Are you sure you want to delete this notification?");
+        if (delete == true) {
+          context
+              .read<NotificationBloc>()
+              .add(DeleteNotification(notification.id));
+        }
       },
       child: ListTile(
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
         onTap: () {
           if (!notification.isRead) {
             context
                 .read<NotificationBloc>()
                 .add(MarkNotificationAsRead(notification.id));
           }
-          // In a future update, this could navigate to a specific screen
-          // based on the notification content.
+          // Navigate to the new detail screen instead of showing a dialog
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) =>
+                NotificationDetailScreen(notification: notification),
+          ));
         },
-        leading: Icon(
-          Icons.circle,
-          color: notification.isRead ? Colors.transparent : ColorManager.yellow,
-          size: 12,
+        leading: SizedBox(
+          width: 60,
+          height: 60,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: notification.coverImageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: notification.coverImageUrl!,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) =>
+                        Container(color: ColorManager.grey.withOpacity(0.3)),
+                    errorWidget: (context, url, error) => const Icon(
+                        Icons.image_not_supported,
+                        color: ColorManager.grey),
+                  )
+                : Container(
+                    color: ColorManager.grey.withOpacity(0.3),
+                    child: const Icon(Icons.notifications,
+                        color: ColorManager.grey),
+                  ),
+          ),
         ),
         title: Text(
           notification.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: ColorManager.white,
             fontWeight: FontWeight.bold,
@@ -101,6 +131,8 @@ class _NotificationTile extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               notification.body,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: ColorManager.grey),
             ),
             const SizedBox(height: 8),
@@ -110,10 +142,13 @@ class _NotificationTile extends StatelessWidget {
             ),
           ],
         ),
-        trailing: const Icon(
-          Icons.more_horiz,
-          color: ColorManager.grey,
-        ),
+        trailing: !notification.isRead
+            ? const Icon(
+                Icons.circle,
+                color: ColorManager.yellow,
+                size: 12,
+              )
+            : null,
       ),
     );
   }

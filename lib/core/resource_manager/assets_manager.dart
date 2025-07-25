@@ -6,7 +6,7 @@ class AssetsManager {
   static const pageUnderConstruction =
       '$_baseLottie/page_under_construction.json';
 
-  static const splashLogo = '$_baseImage/splash.svg';
+  static const splashLogo = '$_baseImage/splash.png';
   static const logo = '$_baseImage/logo.png';
   static const football = '$_baseImage/football.png';
   static const line = '$_baseImage/line.png';
@@ -15,4 +15,6 @@ class AssetsManager {
   static const digital_clock = '$_baseImages/digital-clock.png';
 
   static const substitute_player = '$_baseImage/substitute-player.png';
+
+  static const onboardingBackground = '$_baseImage/onboarding-background.png';
 }

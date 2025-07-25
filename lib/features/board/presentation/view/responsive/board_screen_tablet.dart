@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +8,8 @@ import 'package:zporter_board/core/patch/ota_service.dart';
 import 'package:zporter_board/core/resource_manager/assets_manager.dart'; // For AssetsManager
 import 'package:zporter_board/core/resource_manager/color_manager.dart';
 import 'package:zporter_board/core/services/injection_container.dart';
+import 'package:zporter_board/core/services/navigation_service.dart';
+import 'package:zporter_board/core/services/notification_service.dart';
 import 'package:zporter_board/core/services/user_id_service.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_bloc.dart';
 import 'package:zporter_board/features/auth/presentation/view_model/auth_state.dart';
@@ -104,6 +108,18 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
       _updateScreenAndTab(initialBoardState.selectedScreen);
     }
 
+    // THE FIX: Check for an initial message after the UI is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final notificationService = sl<NotificationService>();
+      if (notificationService.initialMessage != null) {
+        print("Handling initial message from terminated state.");
+        // Use the GlobalKey to open the drawer
+        NavigationService.instance.scaffoldKey.currentState?.openEndDrawer();
+        // Clear the message so it's only handled once
+        notificationService.initialMessage = null;
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((t) {
       try {
         OTAService.checkForUpdates();
@@ -194,29 +210,34 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
     final double tabBarHeight = screenHeight * 0.08;
     final double actualTabBarContentHeight = tabBarHeight - topPadding;
 
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            // if (state is AuthStatusSuccess || state is LogoutState) {
-            //   _resetApp();
-            // }
-          },
+    return Scaffold(
+      key: NavigationService.instance.scaffoldKey,
+      backgroundColor: ColorManager.black,
+      endDrawer: const NotificationDrawer(),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              // if (state is AuthStatusSuccess || state is LogoutState) {
+              //   _resetApp();
+              // }
+            },
+          ),
+          BlocListener<BoardBloc, BoardState>(
+            listener: (context, state) {
+              // Update local state and TabController when BoardBloc's selectedScreen changes
+              if (selectedScreen != state.selectedScreen) {
+                _updateScreenAndTab(state.selectedScreen);
+              }
+            },
+          ),
+        ],
+        child: _buildPageContent(
+          context,
+          tabBarHeight,
+          topPadding,
+          actualTabBarContentHeight,
         ),
-        BlocListener<BoardBloc, BoardState>(
-          listener: (context, state) {
-            // Update local state and TabController when BoardBloc's selectedScreen changes
-            if (selectedScreen != state.selectedScreen) {
-              _updateScreenAndTab(state.selectedScreen);
-            }
-          },
-        ),
-      ],
-      child: _buildPageContent(
-        context,
-        tabBarHeight,
-        topPadding,
-        actualTabBarContentHeight,
       ),
     );
   }
@@ -239,97 +260,108 @@ class _BoardScreenTabletState extends State<BoardScreenTablet>
     // }
 
     // Standard layout with TabBar
-    return Scaffold(
-      backgroundColor: ColorManager.black,
-      endDrawer: const NotificationDrawer(),
-      body: Stack(
-        children: [
-          // TabBar Container
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              height: tabBarHeight,
-              padding: EdgeInsets.only(top: topPadding),
-              // width: double.infinity,
-              color: ColorManager
-                  .transparent, // Or another distinct tab bar background
-              child: Center(
-                child: TabBar(
-                  controller: _tabController,
-                  isScrollable:
-                      false, // Fit all tabs if possible, adjust if too many
-                  tabAlignment: TabAlignment.center, // Requires Flutter 3.13+
-                  indicatorColor: ColorManager.yellow,
-                  indicatorWeight: 3.0,
-                  dividerColor: ColorManager.transparent,
+    return Stack(
+      children: [
+        // TabBar Container
+        Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            height: tabBarHeight,
+            padding: EdgeInsets.only(top: topPadding),
+            // width: double.infinity,
+            color: ColorManager
+                .transparent, // Or another distinct tab bar background
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: TabBar(
+                    controller: _tabController,
+                    isScrollable:
+                        false, // Fit all tabs if possible, adjust if too many
+                    tabAlignment: TabAlignment.center, // Requires Flutter 3.13+
+                    indicatorColor: ColorManager.yellow,
+                    indicatorWeight: 3.0,
+                    dividerColor: ColorManager.transparent,
 
-                  labelColor: ColorManager.yellow,
-                  unselectedLabelColor: ColorManager.grey,
-                  labelStyle: Theme.of(
-                    context,
-                  ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: Theme.of(context).textTheme.labelMedium,
-                  tabs: _menuItems.map((item) {
-                    final bool isActive = selectedScreen == item.screen;
-                    final Color iconColor =
-                        isActive ? ColorManager.yellow : ColorManager.grey;
+                    labelColor: ColorManager.yellow,
+                    unselectedLabelColor: ColorManager.grey,
+                    labelStyle: Theme.of(
+                      context,
+                    )
+                        .textTheme
+                        .labelLarge!
+                        .copyWith(fontWeight: FontWeight.bold),
+                    unselectedLabelStyle:
+                        Theme.of(context).textTheme.labelMedium,
+                    tabs: _menuItems.map((item) {
+                      final bool isActive = selectedScreen == item.screen;
+                      final Color iconColor =
+                          isActive ? ColorManager.yellow : ColorManager.grey;
 
-                    return Tab(
-                      height: actualTabBarContentHeight > 0
-                          ? actualTabBarContentHeight
-                          : null, // Ensure tab fits within allocated space
-                      child: Text(
-                        item.label,
-                        overflow: TextOverflow.ellipsis,
+                      return Tab(
+                        height: actualTabBarContentHeight > 0
+                            ? actualTabBarContentHeight
+                            : null, // Ensure tab fits within allocated space
+                        child: Text(
+                          item.label,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                BlocBuilder<UnreadCountBloc, UnreadCountState>(
+                  builder: (context, unreadState) {
+                    // --- START: DYNAMIC APPEARANCE LOGIC ---
+                    // Determine the icon's appearance based on the notification count.
+                    bool hasNotifications = unreadState.count > 0;
+                    final Color iconColor = hasNotifications
+                        ? ColorManager.white
+                        : ColorManager.grey;
+                    final double iconSize = hasNotifications ? 25.0 : 23.0;
+                    // --- END: DYNAMIC APPEARANCE LOGIC ---
+                    return Container(
+                      // height: tabBarHeight,
+                      // padding: EdgeInsets.only(top: topPadding),
+                      child: badges.Badge(
+                        showBadge: unreadState.count > 0,
+                        badgeContent: Text(
+                          unreadState.count.toString(),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 10),
+                        ),
+                        position: badges.BadgePosition.topEnd(top: 2, end: 4),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.notifications_none_outlined,
+                            color: iconColor,
+                            size: iconSize,
+                            // size: 28,
+                          ),
+                          onPressed: () {
+                            Scaffold.of(context).openEndDrawer();
+                          },
+                        ),
                       ),
                     );
-                  }).toList(),
+                  },
                 ),
-              ),
+              ],
             ),
           ),
-          // Content Area
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: SizedBox(
-              height: screenDisplayWidget is! TacticboardScreen
-                  ? context.screenHeight * .92
-                  : null,
-              child: screenDisplayWidget,
-            ),
+        ),
+        // Content Area
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: SizedBox(
+            height: screenDisplayWidget is! TacticboardScreen
+                ? context.screenHeight * .92
+                : null,
+            child: screenDisplayWidget,
           ),
-
-          Align(
-            alignment: Alignment.topRight,
-            child: BlocBuilder<UnreadCountBloc, UnreadCountState>(
-              builder: (context, unreadState) {
-                return Container(
-                  height: tabBarHeight,
-                  padding: EdgeInsets.only(top: topPadding),
-                  child: badges.Badge(
-                    showBadge: unreadState.count > 0,
-                    badgeContent: Text(
-                      unreadState.count.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
-                    ),
-                    position: badges.BadgePosition.topEnd(top: 2, end: -4),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.notifications_none_outlined,
-                        color: ColorManager.white,
-                        size: 28,
-                      ),
-                      onPressed: () {
-                        Scaffold.of(context).openEndDrawer();
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

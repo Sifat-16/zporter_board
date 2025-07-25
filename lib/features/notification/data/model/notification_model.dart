@@ -1,9 +1,4 @@
 /// Represents the data model for a notification.
-///
-/// This class defines the structure of a notification object, including its
-/// content, metadata, and state (e.g., whether it has been read). It includes
-/// methods for converting to and from a map, which is necessary for storing
-/// the notification data in the local Sembast database.
 class NotificationModel {
   final String id;
   final String title;
@@ -11,6 +6,8 @@ class NotificationModel {
   final String category;
   final DateTime sentTime;
   final bool isRead;
+  final String? coverImageUrl; // New field for the teaser image
+  final List<String>? mediaUrls; // New field for the full media gallery
 
   NotificationModel({
     required this.id,
@@ -19,6 +16,8 @@ class NotificationModel {
     required this.category,
     required this.sentTime,
     this.isRead = false,
+    this.coverImageUrl,
+    this.mediaUrls,
   });
 
   /// Creates a [NotificationModel] from a map (e.g., from Sembast).
@@ -30,6 +29,8 @@ class NotificationModel {
       category: map['category'] as String,
       sentTime: DateTime.parse(map['sentTime'] as String),
       isRead: map['isRead'] as bool,
+      coverImageUrl: map['coverImageUrl'] as String?,
+      mediaUrls: (map['mediaUrls'] as List<dynamic>?)?.cast<String>(),
     );
   }
 
@@ -42,6 +43,8 @@ class NotificationModel {
       'category': category,
       'sentTime': sentTime.toIso8601String(),
       'isRead': isRead,
+      'coverImageUrl': coverImageUrl,
+      'mediaUrls': mediaUrls,
     };
   }
 
@@ -53,6 +56,8 @@ class NotificationModel {
     String? category,
     DateTime? sentTime,
     bool? isRead,
+    String? coverImageUrl,
+    List<String>? mediaUrls,
   }) {
     return NotificationModel(
       id: id ?? this.id,
@@ -61,6 +66,8 @@ class NotificationModel {
       category: category ?? this.category,
       sentTime: sentTime ?? this.sentTime,
       isRead: isRead ?? this.isRead,
+      coverImageUrl: coverImageUrl ?? this.coverImageUrl,
+      mediaUrls: mediaUrls ?? this.mediaUrls,
     );
   }
 }
