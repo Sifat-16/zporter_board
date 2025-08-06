@@ -79,4 +79,4 @@ echo ""
 echo "🎉 Build process complete!"
 
 #shorebird patch --platforms=ios --release-version=1.0.1+9
-#shorebird patch --platforms=android --release-version=1.0.0+7
+#shorebird patch --platforms=android --release-version=1.0.1+9

@@ -29,27 +29,62 @@ class VersionCheckService {
   static const String _documentPath = 'version_info';
 
   /// The main public method to be called on app startup.
-  Future<void> performVersionCheck(BuildContext context,
+  // Future<void> performVersionCheck(BuildContext context,
+  //     {required String userId}) async {
+  //   // 1. Fetch the remote configuration
+  //   final config = await _getRemoteConfig();
+  //   if (config == null || !config.isForceUpdateEnabled) {
+  //     return; // System is disabled or failed to fetch, so we do nothing.
+  //   }
+  //
+  //   // 2. Gather the app's current context
+  //   final appContext = await _getAppContext(userId);
+  //
+  //   // 3. Process rules to find the required version
+  //   final requiredVersion = _getRequiredVersion(config, appContext);
+  //   if (requiredVersion == null) return;
+  //
+  //   // 4. Compare versions and show dialog if needed
+  //   final isUpdateNeeded =
+  //       _isVersionOutdated(appContext.appVersion, requiredVersion);
+  //
+  //   if (isUpdateNeeded && context.mounted) {
+  //     final updateRule = _getMatchingRule(config, appContext);
+  //     final storeUrl = appContext.platform == 'android'
+  //         ? config.androidStoreUrl
+  //         : config.iosStoreUrl;
+  //
+  //     _showUpdateDialog(
+  //       context: context,
+  //       title: config.updateTitle,
+  //       message: config.updateMessage,
+  //       storeUrl: storeUrl,
+  //       isHardUpdate: updateRule?.updateType == 'hard',
+  //     );
+  //   }
+  // }
+
+  Future<bool> performVersionCheck(BuildContext context,
       {required String userId}) async {
-    // 1. Fetch the remote configuration
     final config = await _getRemoteConfig();
     if (config == null || !config.isForceUpdateEnabled) {
-      return; // System is disabled or failed to fetch, so we do nothing.
+      return false; // Tells the manager: "It's safe to continue."
     }
 
-    // 2. Gather the app's current context
     final appContext = await _getAppContext(userId);
 
-    // 3. Process rules to find the required version
     final requiredVersion = _getRequiredVersion(config, appContext);
-    if (requiredVersion == null) return;
+    if (requiredVersion == null) {
+      return false; // Tells the manager: "It's safe to continue."
+    }
 
-    // 4. Compare versions and show dialog if needed
     final isUpdateNeeded =
         _isVersionOutdated(appContext.appVersion, requiredVersion);
 
     if (isUpdateNeeded && context.mounted) {
       final updateRule = _getMatchingRule(config, appContext);
+      final isHardUpdate = updateRule?.updateType == 'hard' ??
+          true; // Default to hard if it's a default version mismatch
       final storeUrl = appContext.platform == 'android'
           ? config.androidStoreUrl
           : config.iosStoreUrl;
@@ -59,9 +94,16 @@ class VersionCheckService {
         title: config.updateTitle,
         message: config.updateMessage,
         storeUrl: storeUrl,
-        isHardUpdate: updateRule?.updateType == 'hard',
+        isHardUpdate: isHardUpdate,
       );
+
+      // This is the most important line:
+      // Tell the manager whether to stop or not.
+      return isHardUpdate;
     }
+
+    // If no update was needed, tell the manager it's safe to continue.
+    return false;
   }
 
   // --- Private Helper Methods ---

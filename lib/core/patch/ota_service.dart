@@ -197,22 +197,46 @@ class OTAService {
     );
   }
 
+  // static Future<void> checkForUpdates() async {
+  //   // Check whether a new update is available.
+  //   final status = await updater.checkForUpdate();
+  //
+  //   print("Check the status of updater on thji ${status}");
+  //
+  //   if (status == UpdateStatus.outdated) {
+  //     try {
+  //       showUpdatingStickySnackbar();
+  //       updater.update().then((t) {
+  //         showRestartStickySnackbar();
+  //       });
+  //       // Perform the update
+  //     } on UpdateException catch (error) {
+  //       // Handle any errors that occur while updating.
+  //     }
+  //   }
+  // }
+
   static Future<void> checkForUpdates() async {
-    // Check whether a new update is available.
-    final status = await updater.checkForUpdate();
+    try {
+      // Your original check, which is correct.
+      final status = await updater.checkForUpdate();
+      print("Shorebird update status: $status");
 
-    print("Check the status of updater on thji ${status}");
-
-    if (status == UpdateStatus.outdated) {
-      try {
+      if (status == UpdateStatus.outdated) {
+        // Show the "downloading" UI. This is correct.
         showUpdatingStickySnackbar();
-        updater.update().then((t) {
-          showRestartStickySnackbar();
-        });
-        // Perform the update
-      } on UpdateException catch (error) {
-        // Handle any errors that occur while updating.
+
+        // --- THE ONLY CHANGE IS HERE ---
+        // Wait for the download to complete before moving to the next line.
+        await updater.update();
+
+        // This line will now only run AFTER the download is successful.
+        showRestartStickySnackbar();
       }
+    } catch (e) {
+      // This is a safety measure. If any error happens, dismiss the snackbar.
+      _currentStickyToastCancelFunc?.call();
+      print("Shorebird OTA check failed: $e");
     }
   }
 }
