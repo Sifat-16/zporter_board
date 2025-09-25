@@ -78,5 +78,5 @@ esac
 echo ""
 echo "🎉 Build process complete!"
 
-#shorebird patch --platforms=ios --release-version=1.0.2+12
-#shorebird patch --platforms=android --release-version=1.0.2+12
+#shorebird patch --platforms=ios --release-version=1.0.3+16
+#shorebird patch --platforms=android --release-version=1.0.3+16
