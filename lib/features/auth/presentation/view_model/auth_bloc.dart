@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zporter_board/core/services/navigation_service.dart';
 import 'package:zporter_board/core/services/notification_service.dart';
@@ -28,6 +30,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final FirebaseFirestore _firestore;
   final SharedPreferences _prefs;
   final NotificationService _notificationService;
+
+  static const _guestIdFileName = 'zporter_guest.id';
 
   StreamSubscription<auth.User?>? _userSubscription;
 
@@ -124,13 +128,78 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   /// Gets the existing guest user profile or creates a new one.
+  // Future<UserEntity> _getOrCreateGuestUser() async {
+  //   String? guestId = _prefs.getString(_localUserIdKey);
+  //   if (guestId == null) {
+  //     guestId = RandomGenerator.generateId();
+  //     await _prefs.setString(_localUserIdKey, guestId);
+  //   }
+  //
+  //   final userDoc = _firestore.collection('users').doc(guestId);
+  //   final snapshot = await userDoc.get();
+  //
+  //   if (snapshot.exists) {
+  //     final user = UserModel.fromJson(snapshot.data() as Map<String, dynamic>);
+  //     return await _updateTokenIfChanged(user);
+  //   } else {
+  //     final fcmToken = await _notificationService.getFCMToken();
+  //     final newUser = UserEntity(
+  //       uid: guestId,
+  //       userType: 'guest',
+  //       accountType: AccountType.free,
+  //       fcmToken: fcmToken,
+  //       creationTime: DateTime.now(),
+  //     );
+  //     await userDoc.set(UserModel.fromEntity(newUser).toJson());
+  //     return newUser;
+  //   }
+  // }
+
+  /// Gets the existing guest user profile or creates a new one with a durable fallback.
   Future<UserEntity> _getOrCreateGuestUser() async {
     String? guestId = _prefs.getString(_localUserIdKey);
-    if (guestId == null) {
-      guestId = RandomGenerator.generateId();
-      await _prefs.setString(_localUserIdKey, guestId);
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/$_guestIdFileName');
+
+    // SCENARIO 1: User is healthy. Proactively back up their ID to the file system.
+    if (guestId != null && guestId.isNotEmpty) {
+      if (!await file.exists()) {
+        print("Proactively backing up existing guest ID to file system.");
+        try {
+          await file.writeAsString(guestId);
+        } catch (e) {
+          print("Failed to create proactive backup file: $e");
+        }
+      }
+    }
+    // SCENARIO 2: SharedPreferences is empty. Try to recover the ID from the backup file.
+    else if (await file.exists()) {
+      try {
+        guestId = await file.readAsString();
+        // Self-heal: If we found it in the file, restore it to SharedPreferences
+        if (guestId != null && guestId.isNotEmpty) {
+          await _prefs.setString(_localUserIdKey, guestId);
+          print("Guest ID recovered from file system.");
+        }
+      } catch (e) {
+        print("Error reading guest ID from file: $e");
+      }
     }
 
+    // SCENARIO 3: Both SharedPreferences and the file are empty. It's a true new user.
+    // Generate a new ID and save it to BOTH places for future durability.
+    if (guestId == null || guestId.isEmpty) {
+      guestId = RandomGenerator.generateId();
+      print("Generating a new guest ID and saving to both locations.");
+      await _prefs.setString(_localUserIdKey, guestId);
+      try {
+        await file.writeAsString(guestId);
+      } catch (e) {
+        print("Error saving new guest ID to file: $e");
+      }
+    }
+
+    // The rest of the logic remains identical, using the now-guaranteed guestId
     final userDoc = _firestore.collection('users').doc(guestId);
     final snapshot = await userDoc.get();
 
