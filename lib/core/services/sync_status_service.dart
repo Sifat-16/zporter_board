@@ -57,14 +57,14 @@ class SyncStatusService {
     if (status.isSyncing && status.pendingCount > 0) {
       print(
           '[SyncStatus] 🔄 Syncing ${status.pendingCount + status.processingCount} changes...');
-      _showSyncingNotification(status);
+      // Sync happens silently — no toast notification shown to the user
     } else if (!status.isSyncing &&
         _lastIsSyncing &&
         status.pendingCount == 0) {
-      // Just finished syncing successfully
-      _debouncedShowSuccess();
+      // Just finished syncing successfully — silent, no toast
+      _dismissNotification();
     } else if (status.lastError != null && status.lastError != _lastError) {
-      // New error occurred
+      // New error occurred — show failure notification (user needs to know)
       _showFailureNotification(status);
     } else if (!status.isSyncing && status.pendingCount == 0) {
       // Idle state - dismiss any notification
@@ -95,7 +95,7 @@ class SyncStatusService {
       duration: null, // Keep visible until dismissed
       animationDuration: const Duration(milliseconds: 200),
       animationReverseDuration: const Duration(milliseconds: 200),
-      align: Alignment.bottomCenter, // Position at bottom
+      align: Alignment.topCenter, // FIX 4A: Position above tab menu per boss request
       toastBuilder: (cancel) => SyncingSnackbar(
         pendingCount: totalCount,
         progress: progress,
@@ -113,7 +113,7 @@ class SyncStatusService {
         duration: const Duration(seconds: 2),
         animationDuration: const Duration(milliseconds: 200),
         animationReverseDuration: const Duration(milliseconds: 200),
-        align: Alignment.bottomCenter, // Position at bottom
+        align: Alignment.topCenter, // FIX 4A: Position above tab menu per boss request
         toastBuilder: (cancel) => const SuccessSnackbar(),
         onClose: () => _currentNotification = null,
       );
@@ -131,7 +131,7 @@ class SyncStatusService {
       duration: const Duration(seconds: 5),
       animationDuration: const Duration(milliseconds: 200),
       animationReverseDuration: const Duration(milliseconds: 200),
-      align: Alignment.bottomCenter, // Position at bottom
+      align: Alignment.topCenter, // FIX 4A: Position above tab menu per boss request
       toastBuilder: (cancel) => FailureSnackbar(
         error: errorMessage,
         onRetry: () {

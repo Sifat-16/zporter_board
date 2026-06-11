@@ -30,7 +30,7 @@ class OTAService {
       crossPage: true,
       // align: Alignment.bottomCenter places the toast at the bottom, similar to a Snackbar.
       // You can adjust this as needed (e.g., Alignment.topCenter).
-      align: Alignment.bottomCenter,
+      align: Alignment.topCenter,
       // The toastBuilder provides a CancelFunc that can be used to dismiss this specific toast.
       toastBuilder: (cancelFunc) {
         // This is the widget that will be displayed as the toast.
@@ -113,7 +113,7 @@ class OTAService {
       crossPage: true,
       // align: Alignment.bottomCenter places the toast at the bottom, similar to a Snackbar.
       // You can adjust this as needed (e.g., Alignment.topCenter).
-      align: Alignment.bottomCenter,
+      align: Alignment.topCenter,
       // The toastBuilder provides a CancelFunc that can be used to dismiss this specific toast.
       toastBuilder: (cancelFunc) {
         // This is the widget that will be displayed as the toast.

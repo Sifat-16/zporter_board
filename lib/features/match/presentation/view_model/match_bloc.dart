@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bot_toast/bot_toast.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zporter_board/core/common/components/timer/timer_contol_buttons.dart';
 import 'package:zporter_board/core/common/components/z_loader.dart';
@@ -231,6 +232,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
                 // await Future.delayed(const Duration(milliseconds: 50));
               } catch (e) {
                 BotToast.showText(
+                  align: Alignment.topCenter,
                   text:
                       "Error stopping timer for Period ${periodToStop.periodNumber + 1}.",
                 );
@@ -320,7 +322,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
         ),
       );
     } catch (e) {
-      BotToast.showText(text: "Something went wrong $e");
+      BotToast.showText(align: Alignment.topCenter, text: "Something went wrong $e");
     }
     BotToast.cleanAll();
   }
@@ -335,10 +337,10 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
       if (isDeleted) {
         add(MatchLoadEvent());
       } else {
-        BotToast.showText(text: "Something went wrong!");
+        BotToast.showText(align: Alignment.topCenter, text: "Something went wrong!");
       }
     } catch (e) {
-      BotToast.showText(text: "Something went wrong! $e");
+      BotToast.showText(align: Alignment.topCenter, text: "Something went wrong! $e");
     }
 
     BotToast.cleanAll();
@@ -380,7 +382,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
       // Catch potential errors from use case/repository
       zlog(data: "Bloc Error: Failed to update substitutions: $e\n$stackTrace");
       // Show error feedback to the user
-      BotToast.showText(text: "Error updating substitutions: ${e.toString()}");
+      BotToast.showText(align: Alignment.topCenter, text: "Error updating substitutions: ${e.toString()}");
       // Optionally emit a state indicating failure
       // emit(state.copyWith(failureMessage: e.toString(), isLoading: false)); // Need isLoading if using loading state
     } finally {

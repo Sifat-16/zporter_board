@@ -159,11 +159,11 @@ class FetchAndSyncLocalMatchesUseCase
   }
 
   Future<bool> syncRemote(FootballMatch match) async {
-    BotToast.showText(text: "Syncing data...");
+    BotToast.showText(align: Alignment.topCenter, text: "Syncing data...");
     await _remoteMatchDataSource.createMatch(footballMatch: match);
     // After syncing, clear the local database to prevent the dialog from showing again.
     await _clearMatchDbUseCase.call(null);
-    BotToast.showText(text: "Sync completed!");
+    BotToast.showText(align: Alignment.topCenter, text: "Sync completed!");
     return true;
   }
 }
