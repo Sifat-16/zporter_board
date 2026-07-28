@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_preview/device_preview.dart';
@@ -13,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zporter_board/app.dart';
 import 'package:zporter_board/core/services/injection_container.dart';
-import 'package:zporter_board/core/services/random_service.dart';
+import 'package:zporter_board/core/services/sync_status_service.dart';
 import 'package:zporter_tactical_board/app/services/injection_container.dart'
     hide sl;
 
@@ -111,26 +110,33 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // Set the background messaging handler.
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: true,
-    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED, // Or a specific limit
-  );
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
-  await initializeTacticBoardDependencies();
-  await init();
-  await sl<NotificationService>().initialize();
 
-  //Force landscape
+  // ============================================================
+  // OPTIMIZED INITIALIZATION: Fast startup with controlled Firebase init
+  // ============================================================
+
+  // Initialize Firebase first (required for AuthBloc)
+  // This is fast enough (~500ms-1s) and necessary before app can start
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('[zporter_board] Firebase initialized successfully');
+
+  // Configure Firebase services
+  _configureFirebaseServices();
+
+  // Initialize tactical board dependencies (now that Firebase is ready)
+  await initializeTacticBoardDependencies();
+
+  // Initialize board local services (fast: SharedPreferences + Sembast)
+  await init();
+  print('[zporter_board] Local services initialized - app ready to start');
+
+  // Initialize sync status service for offline notifications
+  _initializeSyncStatusService();
+
+  // Initialize notification service in background (non-blocking)
+  _initializeNotificationServiceInBackground();
+
+  //Force landscape and start app immediately
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
@@ -143,5 +149,66 @@ void main() async {
         },
       ),
     );
+  });
+}
+
+// ============================================================
+// BACKGROUND FIREBASE INITIALIZATION (LOCAL-FIRST)
+// ============================================================
+
+/// Configure Firebase services after initialization.
+void _configureFirebaseServices() {
+  try {
+    // Set the background messaging handler
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // Configure Firestore settings
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+
+    // Configure Crashlytics
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
+    print('[zporter_board] Firebase services configured');
+  } catch (e) {
+    print('[zporter_board] Firebase services configuration failed: $e');
+  }
+}
+
+// ============================================================
+// BACKGROUND SERVICE INITIALIZATION
+// ============================================================
+
+/// Initialize sync status service to show offline sync notifications.
+void _initializeSyncStatusService() {
+  try {
+    sl<SyncStatusService>().initialize();
+    print('[zporter_board] Sync status service initialized');
+  } catch (e) {
+    print('[zporter_board] Sync status service initialization failed: $e');
+    print('[zporter_board] App will continue without sync notifications');
+  }
+}
+
+/// Initialize notification service in background without blocking app startup.
+void _initializeNotificationServiceInBackground() {
+  // Wait a brief moment for GetIt to register the service
+  Future.delayed(const Duration(milliseconds: 100), () async {
+    try {
+      await sl<NotificationService>().initialize();
+      print('[zporter_board] Notification service initialized');
+    } catch (e) {
+      print('[zporter_board] Notification service initialization failed: $e');
+      print('[zporter_board] App will continue without push notifications');
+    }
   });
 }

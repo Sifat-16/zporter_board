@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -41,19 +42,19 @@ class LinkText extends StatelessWidget {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } catch (e) {
         // It's good practice to show feedback to the user if launching fails.
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not launch $url. Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+        BotToast.showText(
+          align: Alignment.topCenter,
+          text: 'Could not launch $url',
+          contentColor: Colors.red,
+          textStyle: const TextStyle(color: Colors.white),
         );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not launch $url'),
-          backgroundColor: Colors.red,
-        ),
+      BotToast.showText(
+        align: Alignment.topCenter,
+        text: 'Could not launch $url',
+        contentColor: Colors.red,
+        textStyle: const TextStyle(color: Colors.white),
       );
     }
   }

@@ -12,6 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_core
   firebase_storage
   flutter_inappwebview_windows
+  restart_app
   share_plus
   url_launcher_windows
   widget_capture_x_plus

@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   devicelocale
   file_saver
   file_selector_linux
+  restart_app
   url_launcher_linux
   widget_capture_x_plus
   window_to_front

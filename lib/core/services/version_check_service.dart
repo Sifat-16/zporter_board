@@ -83,8 +83,8 @@ class VersionCheckService {
 
     if (isUpdateNeeded && context.mounted) {
       final updateRule = _getMatchingRule(config, appContext);
-      final isHardUpdate = updateRule?.updateType == 'hard' ??
-          true; // Default to hard if it's a default version mismatch
+      // Default to hard update if no rule matches or updateType is not 'soft'
+      final isHardUpdate = updateRule?.updateType != 'soft';
       final storeUrl = appContext.platform == 'android'
           ? config.androidStoreUrl
           : config.iosStoreUrl;
@@ -229,9 +229,8 @@ class VersionCheckService {
       barrierDismissible:
           !isHardUpdate, // Dialog is dismissible only for "soft" updates
       builder: (BuildContext dialogContext) {
-        return WillPopScope(
-          onWillPop: () async =>
-              !isHardUpdate, // Prevent back button for "hard" updates
+        return PopScope(
+          canPop: !isHardUpdate, // Prevent back button for "hard" updates
           child: AlertDialog(
             title: Text(title),
             content: Text(message),
